@@ -97,5 +97,6 @@ object Tokens {
         "native" to TokenType.KeyWordNative,
         "super" to TokenType.KeyWordSuper,
         "while" to TokenType.KeyWordWhile,
+        "String" to TokenType.KeyWordString,
     )
 }

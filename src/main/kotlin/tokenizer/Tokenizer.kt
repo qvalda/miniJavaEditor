@@ -1,43 +1,5 @@
 package tokenizer
 
-fun main() {
-    val q = 1f
-    val t = Tokenizer()
-    //var tokens = t.Tokenize("1 123.45f 3 \t {45f")
-    //var tokens2 = t.getTokens2("('we')")
-    //val bigInput = File("""D:\Kotlin\bigInput.txt""").readText()
-
-    //val bt = t.getTokens2(bigInput)
-    //println(bt.size)
-    //readln()
-    var tokens = t.getTokens(
-        """class Factorial{
-    public static void main(String[] a){
-	System.out.println(new Fac().ComputeFac(10));
-    }
-}
-
-class Fac {
-
-    public int ComputeFac(int num){
-	int num_aux ;
-	if (num < 1)
-	    num_aux = 1 ;
-	else 
-	    num_aux = num * (this.ComputeFac(num-1)) ;
-	return num_aux ;
-    }
-
-}"""
-    )
-
-    for (token in tokens){
-        if (token.type!= TokenType.Whitespace) {
-            println(token)
-        }
-    }
-}
-
 class Tokenizer {
 
     private val numbers = '0'..'9'
@@ -240,6 +202,8 @@ class Tokenizer {
 
             tokens.add(token)
         }
+
+        tokens.add(Token.EOF)
 
         return tokens.toTypedArray()
     }

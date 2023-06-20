@@ -2,7 +2,9 @@ package tokenizer
 
 enum class TokenType {
     NotDefined,
+    EOF,
     InvalidSyntax,
+
     Whitespace,
     Comment,
     NameIdentifier,
@@ -97,4 +99,5 @@ enum class TokenType {
     KeyWordNative,
     KeyWordSuper,
     KeyWordWhile,
+    KeyWordString,
 }
