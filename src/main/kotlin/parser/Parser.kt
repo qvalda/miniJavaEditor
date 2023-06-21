@@ -194,13 +194,14 @@ class Parser {
                             }
                         }
 
-                        Grammar.ExpressionList -> {
-                            //expression ( ',' expression-list )?
-                            if (ts.nextToken.type == TokenType.SymbolComma) {
-                                expectedTokens.push(Grammar.ExpressionList)
+                        Grammar.FormalList -> {
+                            //type identifier ( ',' formal-list )?
+                            if (ts.nextToken2.type == TokenType.SymbolComma) {
+                                expectedTokens.push(Grammar.FormalList)
                                 expectedTokens.push(TokenType.SymbolComma)
                             }
-                            expectedTokens.push(Grammar.Expression)
+                            expectedTokens.push(TokenType.NameIdentifier)
+                            expectedTokens.push(Grammar.Type)
                         }
 
                         Grammar.FormalListOptional -> {
@@ -276,6 +277,15 @@ class Parser {
                             }
                         }
 
+                        Grammar.ExpressionList -> {
+                            //expression ( ',' expression-list )?
+                            if (ts.nextToken.type == TokenType.SymbolComma) {
+                                expectedTokens.push(Grammar.ExpressionList)
+                                expectedTokens.push(TokenType.SymbolComma)
+                            }
+                            expectedTokens.push(Grammar.Expression)
+                        }
+
                         Grammar.Expression -> {
                             when (ts.nextToken.type) {
                                 //expression ('&&' | '<' | '+' | '-' | '*') expression
@@ -343,16 +353,6 @@ class Parser {
 
                                 else -> println("Unexpected token for Expression ${actual.type}")
                             }
-                        }
-
-                        Grammar.FormalList -> {
-                            //type identifier ( ',' formal-list )?
-                            if (ts.nextToken2.type == TokenType.SymbolComma) {
-                                expectedTokens.push(Grammar.FormalList)
-                                expectedTokens.push(TokenType.SymbolComma)
-                            }
-                            expectedTokens.push(TokenType.NameIdentifier)
-                            expectedTokens.push(Grammar.Type)
                         }
 
                         Grammar.ExpressionListOptional -> {

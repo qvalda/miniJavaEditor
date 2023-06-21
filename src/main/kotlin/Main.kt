@@ -1,11 +1,18 @@
+import parser.BinaryExpression
+import parser.Grammar
 import parser.Parser
+import parser.RecursiveParser
 import tokenizer.Token
 import tokenizer.TokenType
 import tokenizer.Tokenizer
 import java.io.File
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
+@OptIn(ExperimentalTime::class)
 fun main(args: Array<String>) {
-    val p = Parser()
+    val p1 = Parser()
+    val p2 = RecursiveParser()
     val tokenizer = Tokenizer()
     val s = """
 class Factorial{
@@ -29,9 +36,59 @@ class Fac {
 }
     """.trimIndent()
     val q = File("""D:\Kotlin\bigInput.txt""").readText()
-    val tokens = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
-    p.parse(TokensSource(tokens))
+//    var time =measureTimedValue{
+//        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+//        println(tokens1)
+//    }
+//    println(time)
+//    time =measureTimedValue{
+//        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+//        println(tokens1)
+//    }
+//    println(time)
+//    time =measureTimedValue{
+//        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+//        p1.parse(TokensSource(tokens1), Grammar.Program)
+//        println(tokens1)
+//    }
+//    println(time)
+//    time =measureTimedValue{
+//        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+//        p1.parse(TokensSource(tokens1), Grammar.Program)
+//        println(tokens1)
+//    }
+//    println(time)
+    var time =measureTimedValue{
+        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+        val parseExpression = p2.parse(TokensSource(tokens1))
+        println(parseExpression)
+    }
+    println(time)
+    time =measureTimedValue{
+        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+        val parseExpression = p2.parse(TokensSource(tokens1))
+        println(parseExpression)
+    }
+    println(time)
+    time =measureTimedValue{
+        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+        val parseExpression = p2.parse(TokensSource(tokens1))
+        println(parseExpression)
+    }
+    println(time)
+    time =measureTimedValue{
+        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+        val parseExpression = p2.parse(TokensSource(tokens1))
+        println(parseExpression)
+    }
+    println(time)
 
+    //val q = "public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} }"
+//    val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+//    val tokens2 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
+//    p1.parse(TokensSource(tokens1), Grammar.Program)
+//    val parseExpression = p2.parse(TokensSource(tokens2))
+//    println(parseExpression)
 //    for (token in tokens){
 //        if (token.type!= TokenType.Whitespace) {
 //            println(token)
@@ -47,7 +104,7 @@ class TokensSource(private val tokens : Array<Token>) {
     }
 
     fun isEOF(): Boolean {
-        return index >= tokens.size //|| tokens[index] == Token.EOF
+        return index >= tokens.size || tokens[index] == Token.EOF
     }
 
     val currentToken: Token
