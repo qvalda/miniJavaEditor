@@ -15,27 +15,28 @@ fun main(args: Array<String>) {
     val p2 = RecursiveParser()
     val tokenizer = Tokenizer()
     val s = """
-class Factorial{
-    public static void main(String[] a){
-    Fac f;
-    int r;
-	 f = new Fac();
-    r= f.ComputeFac(10);
-    }
-}
-
-class Fac {
-    public int ComputeFac(int num){
-	int num_aux ;
-	if (num < 1)
-	    num_aux = 1 ;
-	else 
-	    num_aux = num * (this.ComputeFac(num-1)) ;
-	return num_aux ;
-    }
-}
+//class Factorial{
+//    public static void main(String[] a){
+//    Fac f;
+//    int r;
+//	 f = new Fac();
+//    r= f.ComputeFac(10);
+//    }
+//}
+//
+//class Fac {
+//    public int ComputeFac(int num){
+//	int num_aux ;
+//	if (num < 1)
+//	    num_aux = 1 ;
+//	else 
+//	    num_aux = num * (this.ComputeFac(num-1)) ;
+//	return num_aux ;
+//    }
+//}
+(true) && (true) 
     """.trimIndent()
-    val q = File("""D:\Kotlin\bigInput.txt""").readText()
+    val q = File("""D:\Kotlin\binarytree_fixed.java""").readText()
 //    var time =measureTimedValue{
 //        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
 //        println(tokens1)
@@ -59,29 +60,10 @@ class Fac {
 //    }
 //    println(time)
     var time =measureTimedValue{
-        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
-        val parseExpression = p2.parse(TokensSource(tokens1))
+        val tokens1 = tokenizer.getTokens(s).filter { t->t.type!= TokenType.Whitespace && t.type!=TokenType.Comment }.toTypedArray()
+        val parseExpression = p2.parseExpression(TokensSource(tokens1))
         println(parseExpression)
     }
-    println(time)
-    time =measureTimedValue{
-        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
-        val parseExpression = p2.parse(TokensSource(tokens1))
-        println(parseExpression)
-    }
-    println(time)
-    time =measureTimedValue{
-        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
-        val parseExpression = p2.parse(TokensSource(tokens1))
-        println(parseExpression)
-    }
-    println(time)
-    time =measureTimedValue{
-        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
-        val parseExpression = p2.parse(TokensSource(tokens1))
-        println(parseExpression)
-    }
-    println(time)
 
     //val q = "public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} }"
 //    val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()

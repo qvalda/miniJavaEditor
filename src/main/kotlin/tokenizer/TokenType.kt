@@ -99,5 +99,9 @@ enum class TokenType {
     KeyWordNative,
     KeyWordSuper,
     KeyWordWhile,
+
     KeyWordString,
+    KeyWordSystem,
+    KeyWordOut,
+    KeyWordPrintln,
 }

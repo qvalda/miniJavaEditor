@@ -98,5 +98,9 @@ object Tokens {
         "super" to TokenType.KeyWordSuper,
         "while" to TokenType.KeyWordWhile,
         "String" to TokenType.KeyWordString,
+
+        "System" to TokenType.KeyWordSystem,
+        "out" to TokenType.KeyWordOut,
+        "println" to TokenType.KeyWordPrintln,
     )
 }

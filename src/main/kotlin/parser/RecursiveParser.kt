@@ -153,7 +153,7 @@ class RecursiveParser {
 
     fun parseVarDeclarationMultiple(ts: TokensSource): Array<VarDeclaration> {
         val vars = ArrayList<VarDeclaration>()
-        while (ts.nextToken.type == TokenType.NameIdentifier && ts.nextToken2.type == TokenType.SymbolSemicolon) { //todo: support array
+        while (ts.currentToken.type != TokenType.KeyWordReturn && ts.nextToken.type == TokenType.NameIdentifier && ts.nextToken2.type == TokenType.SymbolSemicolon) { //todo: support array
             vars.add(parseVarDeclaration(ts))
         }
         return vars.toTypedArray()
@@ -360,6 +360,19 @@ class RecursiveParser {
                 expected(TokenType.BracketRoundClose, ts)
                 val bodyStatement = parseStatement(ts)
                 return WhileStatement(condition, bodyStatement)
+            }
+            //'System''.''out''.''println' '(' expression ')' ';'
+            TokenType.KeyWordSystem -> {
+                ts.accept()
+                expected(TokenType.SymbolDot, ts)
+                expected(TokenType.KeyWordOut, ts)
+                expected(TokenType.SymbolDot, ts)
+                expected(TokenType.KeyWordPrintln, ts)
+                expected(TokenType.BracketRoundOpen, ts)
+                val exp = parseExpression(ts)
+                expected(TokenType.BracketRoundClose, ts)
+                expected(TokenType.SymbolSemicolon, ts)
+                return PrintStatement(exp)
             }
             //identifier '=' expression ';'
             //identifier '[' expression ']' '=' expression ';'

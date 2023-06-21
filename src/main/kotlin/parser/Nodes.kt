@@ -10,19 +10,22 @@ class MainClass(val name: String?,val  variables: Array<VarDeclaration>,val  sta
 
 class ClassDeclaration(val name:String?,val variables : Array<VarDeclaration>,val  methods : Array<MethodDeclaration>): Node(){}
 
+class VarDeclaration(val name: String?, val type: Type): Node() {}
+
+class MethodDeclaration(val name: String?, val type: Type,val  arguments: Array<FormalList>, val variables: Array<VarDeclaration>, val statements: Array<Statement>, val returnExp: Expression): Node(){}
+
+class FormalList(val type: Type, val name: String?): Node() {}
+
 open class Type(): Node(){}
 class BooleanType() : Type(){}
 class IntType() : Type(){}
 class IntArrayType() : Type(){}
 class NameIdentifierType(val name: String?) : Type(){}
 
-class VarDeclaration(val name: String?, val type: Type): Node() {}
-
-class MethodDeclaration(val name: String?, val type: Type,val  arguments: Array<FormalList>, val variables: Array<VarDeclaration>, val statements: Array<Statement>, val returnExp: Expression): Node(){}
-
 open class Statement(): Node(){}
 class IfElseStatement(val condition:Expression, val ifStatement:Statement, val elseStatement:Statement) : Statement(){}
 class BlockStatement(val statements: Array<Statement>) : Statement(){}
+class PrintStatement(val statement: Expression) : Statement(){}
 class WhileStatement(val condition: Expression, val bodyStatement: Statement) : Statement(){}
 class AssignStatement(val name: String?, val value: Expression) : Statement(){}
 class AssignIndexerStatement(val name: String?, val indexer: Expression, val value: Expression) : Statement(){}
@@ -40,5 +43,3 @@ class ThisExpression() : Expression() {}
 class TrueExpression() : Expression() {}
 class FalseExpression() : Expression() {}
 class MethodCallExpression(val obj: Expression, val method: String?, val args: Array<Expression>) : Expression() {}
-
-class FormalList(val type: Type, val name: String?): Node() {}
