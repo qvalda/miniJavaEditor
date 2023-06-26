@@ -3,7 +3,8 @@ package tokenizer
 class Tokenizer {
 
     private val numbers = '0'..'9'
-    private val whiteSpaces = arrayOf('\r', '\n', ' ', '\t')
+    //private val whiteSpaces = arrayOf('\r', '\n', ' ', '\t')
+    private val whiteSpaces = arrayOf(' ', '\t')
     private val numberEndings = arrayOf('f', 'd', 'L')
     private val letters = ('a'..'z').union(('A'..'Z')).union(charArrayOf('_').asIterable()).toSet()
     private val lettersWithNumbers = letters.union(numbers).toSet()
@@ -21,6 +22,13 @@ class Tokenizer {
         }
 
         return Token(TokenType.Whitespace, reader.substring(begin, reader.pointer))
+        //return Token(TokenType.Whitespace, begin, reader.pointer)
+    }
+
+    private fun tryReadNewLineToken(reader: CharArraySafeReader): Token? {
+        if (reader.currentChar != '\n') return null
+        reader.moveNext()
+        return Token(TokenType.NewLine)
     }
 
     private fun tryReadBracketToken(reader: CharArraySafeReader): Token? {
@@ -189,6 +197,7 @@ class Tokenizer {
 
         while (!reader.isEOF()) {
             val token =
+                tryReadNewLineToken(reader) ?:
                 tryReadWhiteSpaceToken(reader) ?:
                 tryReadBracketToken(reader) ?:
                 tryReadSymbolToken(reader) ?:
@@ -203,7 +212,7 @@ class Tokenizer {
             tokens.add(token)
         }
 
-        tokens.add(Token.EOF)
+        //tokens.add(Token.EOF)
 
         return tokens.toTypedArray()
     }

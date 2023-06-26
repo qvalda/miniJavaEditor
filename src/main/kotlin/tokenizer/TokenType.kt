@@ -6,6 +6,7 @@ enum class TokenType {
     InvalidSyntax,
 
     Whitespace,
+    NewLine,
     Comment,
     NameIdentifier,
 

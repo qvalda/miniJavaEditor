@@ -46,120 +46,129 @@ expression ::= expression ('&&' | '<' | '+' | '-' | '*') expression
 expression-list ::= expression ( ',' expression-list )?
  */
 
-class RecursiveParser {
-    fun parse(ts: TokensSource, entryPoint: Grammar = Grammar.Program): Program {
-        return parseProgram(ts)
+class RecursiveParser(private val ts: TokensSource) {
+
+    fun parse(entryPoint: Grammar = Grammar.Program): Program {
+        return parseProgram()
     }
 
-    fun parseProgram(ts: TokensSource): Program {
+    fun parseProgram(): Program {
         //main-class class-declaration*
-        val mainClass = parseMainClass(ts)
-        val classes = parseClassDeclarationMultiple(ts)
+        val mainClass = parseMainClass()
+        val classes = parseClassDeclarationMultiple()
         return Program(mainClass, classes)
     }
 
-    fun parseMainClass(ts: TokensSource): MainClass {
+    fun parseMainClass(): MainClass {
         //    'class' identifier '{'
         //        'public' 'static' 'void' 'main' '(' 'String' '[' ']' identifier ')' '{'
         //            var-declaration*
         //            statement*
         //        '}'
         //    '}'
-        expected(TokenType.KeyWordClass, ts)
+        expected(TokenType.KeyWordClass)
         val name = ts.currentToken.value
-        expected(TokenType.NameIdentifier, ts)
-        expected(TokenType.BracketCurlyOpen, ts)
-        expected(TokenType.KeyWordPublic, ts)
-        expected(TokenType.KeyWordStatic, ts)
-        expected(TokenType.KeyWordVoid, ts)
-        expected(TokenType.NameIdentifier, ts)
-        expected(TokenType.BracketRoundOpen, ts)
-        expected(TokenType.KeyWordString, ts)
-        expected(TokenType.BracketSquareOpen, ts)
-        expected(TokenType.BracketSquareClose, ts)
-        expected(TokenType.NameIdentifier, ts)
-        expected(TokenType.BracketRoundClose, ts)
-        expected(TokenType.BracketCurlyOpen, ts)
-        val variables = parseVarDeclarationMultiple(ts)
-        val statements = parseStatementMultiple(ts)
-        expected(TokenType.BracketCurlyClose, ts)
-        expected(TokenType.BracketCurlyClose, ts)
+        expected(TokenType.NameIdentifier)
+        expected(TokenType.BracketCurlyOpen)
+        expected(TokenType.KeyWordPublic)
+        expected(TokenType.KeyWordStatic)
+        expected(TokenType.KeyWordVoid)
+        expected(TokenType.NameIdentifier)
+        expected(TokenType.BracketRoundOpen)
+        expected(TokenType.KeyWordString)
+        expected(TokenType.BracketSquareOpen)
+        expected(TokenType.BracketSquareClose)
+        expected(TokenType.NameIdentifier)
+        expected(TokenType.BracketRoundClose)
+        expected(TokenType.BracketCurlyOpen)
+        val variables = parseVarDeclarationMultiple()
+        val statements = parseStatementMultiple()
+        expected(TokenType.BracketCurlyClose)
+        expected(TokenType.BracketCurlyClose)
 
         return MainClass(name, variables, statements)
     }
 
-    fun parseClassDeclarationMultiple(ts: TokensSource): Array<ClassDeclaration> {
+    fun parseClassDeclarationMultiple(): Array<ClassDeclaration> {
         val classes = ArrayList<ClassDeclaration>()
         while (ts.currentToken.type != TokenType.EOF) {
-            classes.add(parseClassDeclaration(ts))
+            classes.add(parseClassDeclaration())
         }
         return classes.toTypedArray()
     }
 
-    fun parseClassDeclaration(ts: TokensSource): ClassDeclaration {
+    fun parseClassDeclaration(): ClassDeclaration {
         //    'class' identifier ( 'extends' identifier )? '{'
         //        var-declaration*
         //        method-declaration*
         //    '}'
-        expected(TokenType.KeyWordClass, ts) //todo support 'extends'
+        expected(TokenType.KeyWordClass) //todo support 'extends'
         val name = ts.currentToken.value
-        expected(TokenType.NameIdentifier, ts)
-        expected(TokenType.BracketCurlyOpen, ts)
-        val variables = parseVarDeclarationMultiple(ts)
-        val methods = parseMethodDeclarationMultiple(ts)
-        expected(TokenType.BracketCurlyClose, ts)
+        expected(TokenType.NameIdentifier)
+        expected(TokenType.BracketCurlyOpen)
+        val variables = parseVarClassDeclarationMultiple()
+        val methods = parseMethodDeclarationMultiple()
+        expected(TokenType.BracketCurlyClose)
         return ClassDeclaration(name, variables, methods)
     }
 
-    fun parseMethodDeclaration(ts: TokensSource): MethodDeclaration {
+    fun parseMethodDeclaration(): MethodDeclaration {
         //    'public' type identifier '(' formal-list? ')' '{'
         //        var-declaration*
         //        statement*
         //        'return' expression ';'
         //    '}'
-        expected(TokenType.KeyWordPublic, ts)
-        val type = parseType(ts)
+        expected(TokenType.KeyWordPublic)
+        val type = parseType()
         val name = ts.currentToken.value
-        expected(TokenType.NameIdentifier, ts)
-        expected(TokenType.BracketRoundOpen, ts)
-        val list = parseFormalListOptional(ts)
-        expected(TokenType.BracketRoundClose, ts)
-        expected(TokenType.BracketCurlyOpen, ts)
-        val variables = parseVarDeclarationMultiple(ts)
-        val statements = parseStatementMultiple(ts)
-        expected(TokenType.KeyWordReturn, ts)
-        val returnExp = parseExpression(ts)
-        expected(TokenType.SymbolSemicolon, ts)
-        expected(TokenType.BracketCurlyClose, ts)
+        expected(TokenType.NameIdentifier)
+        expected(TokenType.BracketRoundOpen)
+        val list = parseFormalListOptional()
+        expected(TokenType.BracketRoundClose)
+        expected(TokenType.BracketCurlyOpen)
+        val variables = parseVarDeclarationMultiple()
+        val statements = parseStatementMultiple()
+        expected(TokenType.KeyWordReturn)
+        val returnExp = parseExpression()
+        expected(TokenType.SymbolSemicolon)
+        expected(TokenType.BracketCurlyClose)
         return MethodDeclaration(name, type, list, variables, statements, returnExp)
     }
 
-    fun parseMethodDeclarationMultiple(ts: TokensSource): Array<MethodDeclaration> {
+    fun parseMethodDeclarationMultiple(): Array<MethodDeclaration> {
         val methods = ArrayList<MethodDeclaration>()
         while (ts.currentToken.type != TokenType.BracketCurlyClose) {
-            methods.add(parseMethodDeclaration(ts))
+            methods.add(parseMethodDeclaration())
         }
         return methods.toTypedArray()
     }
 
-    fun parseVarDeclaration(ts: TokensSource): VarDeclaration {
+    fun parseVarDeclaration(): VarDeclaration {
         //type identifier ';'
-        val type = parseType(ts)
+        val type = parseType()
         val name = ts.currentToken.value
-        expected(TokenType.NameIdentifier, ts)
-        expected(TokenType.SymbolSemicolon, ts)
+        expected(TokenType.NameIdentifier)
+        expected(TokenType.SymbolSemicolon)
         return VarDeclaration(name, type)
     }
 
-    fun parseVarDeclarationMultiple(ts: TokensSource): Array<VarDeclaration> {
+    fun parseVarDeclarationMultiple(): Array<VarDeclaration> {
         val vars = ArrayList<VarDeclaration>()
         while (ts.currentToken.type != TokenType.KeyWordReturn && ts.nextToken.type == TokenType.NameIdentifier && ts.nextToken2.type == TokenType.SymbolSemicolon) { //todo: support array
-            vars.add(parseVarDeclaration(ts))
+            vars.add(parseVarDeclaration())
         }
         return vars.toTypedArray()
     }
 
-    fun parseType(ts: TokensSource): Type {
+    fun parseVarClassDeclarationMultiple(): Array<VarDeclaration> {
+        val vars = ArrayList<VarDeclaration>()
+        while (ts.currentToken.type != TokenType.KeyWordPublic) {
+            vars.add(parseVarDeclaration())
+        }
+        return vars.toTypedArray()
+    }
+
+    fun parseType(): Type {
         when (ts.currentToken.type) {
             //'boolean'
             TokenType.KeyWordBoolean -> {
@@ -171,7 +180,7 @@ class RecursiveParser {
                 ts.accept()
                 if (ts.currentToken.type == TokenType.BracketSquareOpen) {
                     ts.accept()
-                    expected(TokenType.BracketSquareOpen, ts)
+                    expected(TokenType.BracketSquareClose)
                     return IntArrayType()
                 } else {
                     return IntType()
@@ -189,33 +198,33 @@ class RecursiveParser {
         throw Exception("unexpected parseType")
     }
 
-    fun parseFormalList(ts: TokensSource): FormalList {
+    fun parseFormalList(): FormalList {
         //type identifier ( ',' formal-list )?
-        val type = parseType(ts)
+        val type = parseType()
         val name = ts.currentToken.value
-        expected(TokenType.NameIdentifier, ts)
+        expected(TokenType.NameIdentifier)
         return FormalList(type, name)
     }
 
-    fun parseFormalListOptional(ts: TokensSource): Array<FormalList> {
+    fun parseFormalListOptional(): Array<FormalList> {
         if (ts.currentToken.type == TokenType.BracketRoundClose) {
             return emptyArray()
         } else {
             val list = ArrayList<FormalList>()
-            list.add(parseFormalList(ts))
+            list.add(parseFormalList())
             while (ts.currentToken.type == TokenType.SymbolComma) {
                 ts.accept()
-                list.add(parseFormalList(ts))
+                list.add(parseFormalList())
             }
             return list.toTypedArray()
         }
     }
 
-    fun parseExpressionList(ts: TokensSource): Array<Expression> {
+    fun parseExpressionList(): Array<Expression> {
         val exprs = ArrayList<Expression>()
         if (ts.currentToken.type != TokenType.BracketRoundClose) {
             while (true) {
-                exprs.add(parseExpression(ts))
+                exprs.add(parseExpression())
                 if (ts.currentToken.type == TokenType.SymbolComma) {
                     ts.accept()
                     continue
@@ -227,52 +236,60 @@ class RecursiveParser {
         return exprs.toTypedArray()
     }
 
-    fun parseExpression(ts: TokensSource, lookForward: Boolean = true): Expression {
-        if (lookForward) {
-            when (ts.nextToken.type) {
-                //expression ('&&' | '<' | '+' | '-' | '*') expression
-                TokenType.OperatorAnd, TokenType.OperatorLess, TokenType.OperatorPlus, TokenType.OperatorMinus, TokenType.OperatorMult -> {
-                    val operation = ts.nextToken.type
-                    val a = parseExpression(ts, false)
-                    expected(operation, ts)
-                    val b = parseExpression(ts)
-                    return BinaryExpression(a, b, operation)
-                }
-                //expression '[' expression ']'
-                TokenType.BracketSquareOpen -> {
-                    val obj = parseExpression(ts, false)
-                    expected(TokenType.BracketSquareOpen, ts)
-                    val indexer = parseExpression(ts)
-                    expected(TokenType.BracketSquareClose, ts)
-                    return IndexerExpression(obj, indexer)
-                }
-                //expression '.' identifier '(' expression-list? ')'
-                TokenType.SymbolDot -> {
-                    val obj = parseExpression(ts, false)
-                    expected(TokenType.SymbolDot, ts)
-                    val name = ts.currentToken.value
-                    expected(TokenType.NameIdentifier, ts)
-                    expected(TokenType.BracketRoundOpen, ts)
-                    val args = parseExpressionList(ts)
-                    expected(TokenType.BracketRoundClose, ts)
-                    return MethodCallExpression(obj, name, args)
-                }
+    fun parseExpression(): Expression {
 
-                else -> {} // just fine
+        val exp = parseSimpleExpression();
+
+        when (ts.currentToken.type) {
+            //expression ('&&' | '<' | '+' | '-' | '*') expression
+            TokenType.OperatorAnd, TokenType.OperatorLess, TokenType.OperatorPlus, TokenType.OperatorMinus, TokenType.OperatorMult -> {
+                val operation = ts.currentToken.type
+                ts.accept()
+                val b = parseExpression()
+                return BinaryExpression(exp, b, operation)
             }
+            //expression '[' expression ']'
+            TokenType.BracketSquareOpen -> {
+                ts.accept()
+                val indexer = parseExpression()
+                expected(TokenType.BracketSquareClose)
+                return IndexerExpression(exp, indexer)
+            }
+            //expression '.' identifier '(' expression-list? ')'
+            //expression '.' 'length'
+            TokenType.SymbolDot -> {
+                ts.accept()
+                val name = ts.currentToken.value
+                if(name == "length"){
+                    ts.accept()
+                    return LengthExpression(exp)
+                }
+                else {
+                    expected(TokenType.NameIdentifier)
+                    expected(TokenType.BracketRoundOpen)
+                    val args = parseExpressionList()
+                    expected(TokenType.BracketRoundClose)
+                    return MethodCallExpression(exp, name, args)
+                }
+            }
+
+            else -> return exp
         }
+    }
+
+    fun parseSimpleExpression(): Expression {
         when (ts.currentToken.type) {
             //'(' expression ')'
             TokenType.BracketRoundOpen -> {
                 ts.accept()
-                val obj = parseExpression(ts)
-                expected(TokenType.BracketRoundClose, ts)
+                val obj = parseExpression()
+                expected(TokenType.BracketRoundClose)
                 return BracketExpression(obj)
             }
             //'!' expression
             TokenType.OperatorNot -> {
                 ts.accept()
-                val obj = parseExpression(ts)
+                val obj = parseExpression()
                 return NotExpression(obj)
             }
             //'new' 'int' '[' expression ']'
@@ -282,17 +299,17 @@ class RecursiveParser {
                 when (ts.currentToken.type) {
                     TokenType.KeyWordInt -> {
                         ts.accept()
-                        expected(TokenType.BracketSquareOpen, ts)
-                        val indexer = parseExpression(ts)
-                        expected(TokenType.BracketSquareClose, ts)
+                        expected(TokenType.BracketSquareOpen)
+                        val indexer = parseExpression()
+                        expected(TokenType.BracketSquareClose)
                         return NewIntArrayExpression(indexer)
                     }
 
                     TokenType.NameIdentifier -> {
                         val name = ts.currentToken.value
                         ts.accept()
-                        expected(TokenType.BracketRoundOpen, ts)
-                        expected(TokenType.BracketRoundClose, ts)
+                        expected(TokenType.BracketRoundOpen)
+                        expected(TokenType.BracketRoundClose)
                         return NewExpression(name)
                     }
 
@@ -327,51 +344,53 @@ class RecursiveParser {
                 return ThisExpression()
             }
 
-            else -> println("Unexpected token for Expression ${ts.currentToken.type}")
+            else -> {
+                println("Unexpected token for Expression ${ts.currentToken.type}")
+            }
         }
-        throw Exception("unepected")
+        throw Exception("unexpected")
     }
 
-    fun parseStatement(ts: TokensSource): Statement {
+    fun parseStatement(): Statement {
         when (ts.currentToken.type) {
             //'{' statement* '}'
             TokenType.BracketCurlyOpen -> {
                 ts.accept()
-                val statements = parseStatementMultiple(ts)
-                expected(TokenType.BracketCurlyClose, ts)
+                val statements = parseStatementMultiple()
+                expected(TokenType.BracketCurlyClose)
                 return BlockStatement(statements)
             }
             //'if' '(' expression ')' statement 'else' statement
             TokenType.KeyWordIf -> {
                 ts.accept()
-                expected(TokenType.BracketRoundOpen, ts)
-                val condition = parseExpression(ts)
-                expected(TokenType.BracketRoundClose, ts)
-                val ifStatement = parseStatement(ts)
-                expected(TokenType.KeyWordElse, ts)
-                val elseStatement = parseStatement(ts)
+                expected(TokenType.BracketRoundOpen)
+                val condition = parseExpression()
+                expected(TokenType.BracketRoundClose)
+                val ifStatement = parseStatement()
+                expected(TokenType.KeyWordElse)
+                val elseStatement = parseStatement()
                 return IfElseStatement(condition, ifStatement, elseStatement)
             }
             //'while' '(' expression ')' statement
             TokenType.KeyWordWhile -> {
                 ts.accept()
-                expected(TokenType.BracketRoundOpen, ts)
-                val condition = parseExpression(ts)
-                expected(TokenType.BracketRoundClose, ts)
-                val bodyStatement = parseStatement(ts)
+                expected(TokenType.BracketRoundOpen)
+                val condition = parseExpression()
+                expected(TokenType.BracketRoundClose)
+                val bodyStatement = parseStatement()
                 return WhileStatement(condition, bodyStatement)
             }
             //'System''.''out''.''println' '(' expression ')' ';'
             TokenType.KeyWordSystem -> {
                 ts.accept()
-                expected(TokenType.SymbolDot, ts)
-                expected(TokenType.KeyWordOut, ts)
-                expected(TokenType.SymbolDot, ts)
-                expected(TokenType.KeyWordPrintln, ts)
-                expected(TokenType.BracketRoundOpen, ts)
-                val exp = parseExpression(ts)
-                expected(TokenType.BracketRoundClose, ts)
-                expected(TokenType.SymbolSemicolon, ts)
+                expected(TokenType.SymbolDot)
+                expected(TokenType.KeyWordOut)
+                expected(TokenType.SymbolDot)
+                expected(TokenType.KeyWordPrintln)
+                expected(TokenType.BracketRoundOpen)
+                val exp = parseExpression()
+                expected(TokenType.BracketRoundClose)
+                expected(TokenType.SymbolSemicolon)
                 return PrintStatement(exp)
             }
             //identifier '=' expression ';'
@@ -382,18 +401,18 @@ class RecursiveParser {
                 when (ts.currentToken.type) {
                     TokenType.OperatorAssign -> {
                         ts.accept()
-                        val value = parseExpression(ts)
-                        expected(TokenType.SymbolSemicolon, ts)
+                        val value = parseExpression()
+                        expected(TokenType.SymbolSemicolon)
                         return AssignStatement(name, value)
                     }
 
                     TokenType.BracketSquareOpen -> {
                         ts.accept()
-                        val indexer = parseExpression(ts)
-                        expected(TokenType.BracketSquareClose, ts)
-                        expected(TokenType.OperatorAssign, ts)
-                        val value = parseExpression(ts)
-                        expected(TokenType.SymbolSemicolon, ts)
+                        val indexer = parseExpression()
+                        expected(TokenType.BracketSquareClose)
+                        expected(TokenType.OperatorAssign)
+                        val value = parseExpression()
+                        expected(TokenType.SymbolSemicolon)
                         return AssignIndexerStatement(name, indexer, value)
                     }
 
@@ -411,15 +430,15 @@ class RecursiveParser {
         throw Exception("unexpected")
     }
 
-    fun parseStatementMultiple(ts: TokensSource): Array<Statement> {
+    fun parseStatementMultiple(): Array<Statement> {
         val statements = ArrayList<Statement>()
         while (ts.currentToken.type != TokenType.BracketCurlyClose && ts.currentToken.type != TokenType.KeyWordReturn) {
-            statements.add(parseStatement(ts))
+            statements.add(parseStatement())
         }
         return statements.toTypedArray()
     }
 
-    fun expected(tokenType: TokenType, ts: TokensSource): Boolean {
+    fun expected(tokenType: TokenType): Boolean {
         if (ts.currentToken.type == tokenType) {
             ts.accept()
             return true

@@ -1,6 +1,6 @@
 import parser.BinaryExpression
 import parser.Grammar
-import parser.Parser
+//import parser.Parser
 import parser.RecursiveParser
 import tokenizer.Token
 import tokenizer.TokenType
@@ -11,8 +11,7 @@ import kotlin.time.measureTimedValue
 
 @OptIn(ExperimentalTime::class)
 fun main(args: Array<String>) {
-    val p1 = Parser()
-    val p2 = RecursiveParser()
+    //val p1 = Parser()
     val tokenizer = Tokenizer()
     val s = """
 //class Factorial{
@@ -36,7 +35,7 @@ fun main(args: Array<String>) {
 //}
 (true) && (true) 
     """.trimIndent()
-    val q = File("""D:\Kotlin\binarytree_fixed.java""").readText()
+    val q = File("""D:\Kotlin\factorial.java""").readText()
 //    var time =measureTimedValue{
 //        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
 //        println(tokens1)
@@ -60,10 +59,13 @@ fun main(args: Array<String>) {
 //    }
 //    println(time)
     var time =measureTimedValue{
-        val tokens1 = tokenizer.getTokens(s).filter { t->t.type!= TokenType.Whitespace && t.type!=TokenType.Comment }.toTypedArray()
-        val parseExpression = p2.parseExpression(TokensSource(tokens1))
+        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace && t.type!=TokenType.Comment }.toTypedArray()
+        val ts = TokensSource(tokens1)
+        val p2 = RecursiveParser(ts)
+        val parseExpression = p2.parse()
         println(parseExpression)
     }
+
 
     //val q = "public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} }"
 //    val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
@@ -77,6 +79,11 @@ fun main(args: Array<String>) {
 //        }
 //    }
 }
+
+//inline fun <T> trywr(selector: () -> T, block: (T) -> Unit) {
+//    val selector1 = selector()
+//    selector() = 2
+//}
 
 class TokensSource(private val tokens : Array<Token>) {
     private var index = 0;

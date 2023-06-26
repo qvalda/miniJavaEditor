@@ -42,4 +42,5 @@ class NameIdentifierExpression(val name: String?) : Expression() {}
 class ThisExpression() : Expression() {}
 class TrueExpression() : Expression() {}
 class FalseExpression() : Expression() {}
+class LengthExpression(val obj: Expression) : Expression() {}
 class MethodCallExpression(val obj: Expression, val method: String?, val args: Array<Expression>) : Expression() {}
