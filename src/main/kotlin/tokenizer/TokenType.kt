@@ -1,5 +1,7 @@
 package tokenizer
 
+import java.awt.Color
+
 enum class TokenType {
     NotDefined,
     EOF,
@@ -104,5 +106,65 @@ enum class TokenType {
     KeyWordString,
     KeyWordSystem,
     KeyWordOut,
-    KeyWordPrintln,
+    KeyWordPrintln,;
+
+    fun isKeyWord() : Boolean {
+        return when(this){
+            TokenType.KeyWordAbstract,
+            TokenType.KeyWordContinue,
+            TokenType.KeyWordFor,
+            TokenType.KeyWordNew,
+            TokenType.KeyWordSwitch,
+            TokenType.KeyWordAssert,
+            TokenType.KeyWordDefault,
+            TokenType.KeyWordGoto,
+            TokenType.KeyWordPackage,
+            TokenType.KeyWordSynchronized,
+            TokenType.KeyWordBoolean,
+            TokenType.KeyWordDo,
+            TokenType.KeyWordIf,
+            TokenType.KeyWordPrivate,
+            TokenType.KeyWordThis,
+            TokenType.KeyWordBreak,
+            TokenType.KeyWordDouble,
+            TokenType.KeyWordImplements,
+            TokenType.KeyWordProtected,
+            TokenType.KeyWordThrow,
+            TokenType.KeyWordByte,
+            TokenType.KeyWordElse,
+            TokenType.KeyWordImport,
+            TokenType.KeyWordPublic,
+            TokenType.KeyWordThrows,
+            TokenType.KeyWordCase,
+            TokenType.KeyWordEnum,
+            TokenType.KeyWordInstanceof,
+            TokenType.KeyWordReturn,
+            TokenType.KeyWordTransient,
+            TokenType.KeyWordCatch,
+            TokenType.KeyWordExtends,
+            TokenType.KeyWordInt,
+            TokenType.KeyWordShort,
+            TokenType.KeyWordTry,
+            TokenType.KeyWordChar,
+            TokenType.KeyWordFinal,
+            TokenType.KeyWordInterface,
+            TokenType.KeyWordStatic,
+            TokenType.KeyWordVoid,
+            TokenType.KeyWordClass,
+            TokenType.KeyWordFinally,
+            TokenType.KeyWordLong,
+            TokenType.KeyWordStrictfp,
+            TokenType.KeyWordVolatile,
+            TokenType.KeyWordConst,
+            TokenType.KeyWordFloat,
+            TokenType.KeyWordNative,
+            TokenType.KeyWordSuper,
+            TokenType.KeyWordWhile,
+            TokenType.KeyWordString,
+            TokenType.KeyWordSystem,
+            TokenType.KeyWordOut,
+            TokenType.KeyWordPrintln -> true
+            else -> false
+        }
+    }
 }

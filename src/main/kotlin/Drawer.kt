@@ -1,11 +1,11 @@
 import tokenizer.Token
 import tokenizer.TokenType
 import tokenizer.Tokenizer
-import java.awt.Color
-import java.awt.Dimension
-import java.awt.Font
-import java.awt.Graphics
-import java.awt.event.*
+import java.awt.*
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.JFrame
 import javax.swing.JPanel
@@ -59,22 +59,23 @@ class CGTemplate : JFrame() {
 	System.out.println(new Fac().ComputeFac(10));
     }
 }
-
+//todo
 class Fac {
 
     public int ComputeFac(int num){
-	int num_aux ;
+	int num_aux ; // abc
+    l = 'AB'
 	if (num < 1)
 	    num_aux = 1 ;
-	else 
+	else
 	    num_aux = num * (this.ComputeFac(num-1)) ;
 	return num_aux ;
     }
 
 }
-""".replace("\r", "").replace("\t","    ");
+""".replace("\r", "").replace("\t","    ")
 
-            //canvas.text = File("""D:\Kotlin\bigInput.txt""").readText().replace("\r", "")
+            //canvas.text = File("""D:\Kotlin\bigInput.txt""").readText().replace("\r", "").replace("\t","    ")
 
 //            // Run the GUI codes on the Event-Dispatching thread for thread safety
 //            SwingUtilities.invokeLater {
@@ -84,206 +85,69 @@ class Fac {
     }
 }
 
-class EditorTextAttribute{
-
-}
-
-open class DefaultFormattingRule(val start: Int, val end:Int, val color:Color){}
-//class KeyWordFormattingRule(line: Int, length: Int) : DefaultFormattingRule(line, length) {}
-
-class FormattedSubstring(val value:String, val color:Color){}
-
-class EditorLine (var text:String, var tokens:Array<Token>){
-    //val length = 0;
-    public var rules = ArrayList<DefaultFormattingRule>()
-
-    fun getFormattingRules(): ArrayList<FormattedSubstring> {
-
-        //todo yield
-
-        val res =ArrayList<FormattedSubstring>()
-
-        for (rule in rules.sortedBy { r->r.start }){
-            res.add(FormattedSubstring(text.substring(rule.start, rule.end), rule.color))
-        }
-        return res
+class EditorLine (var text:String){
+    fun removeRange(startIndex: Int, endIndex: Int){
+        text = text.removeRange(startIndex, endIndex)
     }
-
 }
 
-class EditorTextCaret{
-
-
-    var line = 0;
-    var column = 0;
+interface IFormattingRuleProvider{
+    fun getFormattingRule(lineIndex: Int): Array<FormattingRule>
 }
 
-class EditorTextModel (text:String){
+class AggregateFormattingRuleProvider(private val providers: Array<IFormattingRuleProvider>) : IFormattingRuleProvider{
 
-    var lines = ArrayList<EditorLine>()
+    override fun getFormattingRule(lineIndex: Int): Array<FormattingRule> {
+        return providers.flatMap { p -> p.getFormattingRule(lineIndex).asIterable() }.toTypedArray()
+    }
+}
+
+class TokenizerFormattingRuleProvider(textModel: EditorTextModel) : IFormattingRuleProvider{
+
+    var lines : Array<Array<Token>>
     val tokenizer = Tokenizer()
-    var caret = EditorTextCaret()
 
     init {
-        val input = text.replace("\r", "").replace("\t", "    ");
-        //val tokens = Tokenizer().getTokens(text)
-        for (s in input.split('\n')) {
-            val line = EditorLine(s, tokenizer.getTokens(s))
-            lines.add(line)
-        }
-//        var lineIndex = 0;
-//        for (t in tokens) {
-//            if (t.type == TokenType.NewLine) {
-//                lineIndex++;
-//            } else {
-//                var rule = if (t.type >= TokenType.KeyWordAbstract && t.type <= TokenType.KeyWordPrintln) {
-//                    DefaultFormattingRule(t.beginIndex, t.endIndex, Color.ORANGE)
-//                } else {
-//                    null
-//                }
-//                if (rule != null) {
-//                    lines[lineIndex].rules.add(rule)
-//                }
-//            }
-//        }
+        lines = textModel.lines.map { l-> tokenizer.getTokens(l.text) }.toTypedArray()
     }
 
-    fun updateCaret(lineIndex:Int, columnIndex:Int) {
-        var line = if (lineIndex < 0) 0
-                else if (lineIndex >= lines.size) lines.size
-                else lineIndex
-        var column = if(columnIndex<0) 0
-        else if(columnIndex>lines[line].text.length) lines[line].text.length
-        else columnIndex
-        caret = EditorTextCaret()
-        caret.line = line
-        caret.column = column
-    }
+    override fun getFormattingRule(lineIndex: Int):Array<FormattingRule> {
+        val rules = ArrayList<FormattingRule>()
 
-    fun backSpaceAction() {
-        if(caret.column == 0 &&caret.line!=0){
-            val appendix = lines[caret.line].text
-            lines.removeAt(caret.line)
-            val row = lines[caret.line-1].text + appendix
-            lines[caret.line-1].text = row
-            lines[caret.line-1].tokens= tokenizer.getTokens(row)
-        }else{
-            val row = lines[caret.line].text.removeRange(caret.column-1,caret.column)
-            lines[caret.line].text = row
-            lines[caret.line].tokens= tokenizer.getTokens(row)
-        }
-        moveCaretLeft()
-    }
-
-    fun moveCaretLeft() {
-        if (caret.column > 0) {
-            caret.column--
-        } else {
-            if (caret.line > 0) {
-                caret.line--
-                caret.column = lines[caret.line].text.length
+        for (token in lines[lineIndex]){
+            if (token.type.isKeyWord()) {
+                rules.add(FormattingRule(token.beginIndex, token.endIndex, Style.KeyWord))
             }
-            else{
-                caret.line = 0
-                caret.column = 0
+            else if(token.type == TokenType.Comment){
+                rules.add(FormattingRule(token.beginIndex, token.endIndex, Style.Comment))
+            }
+            else if(token.type == TokenType.InvalidSyntax){
+                rules.add(FormattingRule(token.beginIndex, token.endIndex, Style.Error))
             }
         }
+
+        return rules.toTypedArray()
     }
+}
 
-    fun deleteAction() {
-
+data class EditorTextCaret(var line : Int = 0, var column: Int = 0) : Comparable<EditorTextCaret>{
+    override fun compareTo(other: EditorTextCaret): Int {
+        if (this == other) return 0;
+        if (this.line < other.line) return -1
+        if (this.line > other.line) return 1
+        return this.column.compareTo(other.column)
     }
-
-    fun addChar(keyChar: Char) {
-        val row = lines[caret.line].text
-        lines[caret.line].text = StringBuilder(row).insert(caret.column, keyChar).toString()
-        lines[caret.line].tokens = tokenizer.getTokens(lines[caret.line].text)
-        moveCaretRight()
-    }
-
-    fun moveCaretRight() {
-        if (caret.column < lines[caret.line].text.length) {
-            caret.column++
-        }
-        else{
-            if(caret.line < lines.size-1){
-                caret.column = 0
-                caret.line++
-            }
-            else{
-
-            }
-        }
-    }
-
-    fun moveCaretDown() {
-
-    }
-
-    fun moveCaretUp() {
-
-    }
-
-
 }
 
 private class DrawCanvas : JPanel() {
 
     var initialized = false
 
-    var model: EditorTextModel? = null
+    lateinit var model: EditorTextModel
+    var lineHeight = 0
+    var letterWidth = 0
 
-    init {
-        val listener =  object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent) {
-                onMouseClick(e)
-            }
-        }
-
-        val kbListener = object : KeyAdapter(){
-            override fun keyPressed(e: KeyEvent?) {
-                onKeyPressed(e)
-            }
-        }
-
-        addMouseListener(listener)
-        addKeyListener(kbListener)
-    }
-
-    private fun onKeyPressed(e: KeyEvent?) {
-        e?.consume()
-        when(e?.keyCode)
-        {
-            KeyEvent.VK_BACK_SPACE -> {
-                model!!.backSpaceAction()
-                repaint()
-            }
-            KeyEvent.VK_DELETE -> {
-                model!!.deleteAction()
-                repaint()
-            }
-            KeyEvent.VK_UP -> {
-                model!!.moveCaretUp()
-                repaint()
-            }
-            KeyEvent.VK_DOWN -> {
-                model!!.moveCaretDown()
-                repaint()
-            }
-            KeyEvent.VK_LEFT -> {
-                model!!.moveCaretLeft()
-                repaint()
-            }
-            KeyEvent.VK_RIGHT -> {
-                model!!.moveCaretRight()
-                repaint()
-            }
-            else ->{
-                model!!.addChar(e!!.keyChar)
-                repaint()
-            }
-        }
-    }
+    lateinit var formattingRuleProvider:IFormattingRuleProvider
 
     var text: String = ""
         get() {
@@ -292,149 +156,177 @@ private class DrawCanvas : JPanel() {
         set(value) {
             field = value
             model = EditorTextModel(value)
+            val r1 = TokenizerFormattingRuleProvider(model)
+            val r2 = SelectionFormattingRuleProvider(model)
+            formattingRuleProvider = AggregateFormattingRuleProvider(arrayOf(r1,r2))
             repaint()
         }
 
-    var lineHeight = 0
-    var letterWidth = 0
+    init {
+        val mouseListener =  object : MouseAdapter() {
+            override fun mousePressed(e: MouseEvent?) {
+                onMousePressed(e)
+            }
 
-    //var caretPositionX = 0
-    //var caretPositionY = 0
+            override fun mouseDragged(e: MouseEvent?) {
+                onMouseDragged(e)
+            }
 
-   // var caretLine = 0
-    //var caretColumn = 0
+            override fun mouseReleased(e: MouseEvent?) {
+                onMouseReleased(e)
+            }
+        }
 
-    fun onMouseClick(e: MouseEvent) {
-        //caretLine = e.y / lineHeight
-        //caretColumn = e.x / letterWidth
+        val keyListener = object : KeyAdapter(){
+            override fun keyPressed(e: KeyEvent?) {
+                onKeyPressed(e)
+            }
+        }
 
-        model?.updateCaret( e.y / lineHeight, (e.x.toFloat() / letterWidth).roundToInt())
-
-        //caretPositionX = caretColumn
-        //caretPositionY = caretLine
-        this.repaint()
-
-        //println(clickedLine)
+        addMouseListener(mouseListener)
+        addMouseMotionListener(mouseListener)
+        addKeyListener(keyListener)
     }
 
-    fun getColor(tokenType: TokenType) : Color{
-        return when(tokenType){
-            TokenType.KeyWordAbstract,
-            TokenType.KeyWordContinue,
-            TokenType.KeyWordFor,
-            TokenType.KeyWordNew,
-            TokenType.KeyWordSwitch,
-            TokenType.KeyWordAssert,
-            TokenType.KeyWordDefault,
-            TokenType.KeyWordGoto,
-            TokenType.KeyWordPackage,
-            TokenType.KeyWordSynchronized,
-            TokenType.KeyWordBoolean,
-            TokenType.KeyWordDo,
-            TokenType.KeyWordIf,
-            TokenType.KeyWordPrivate,
-            TokenType.KeyWordThis,
-            TokenType.KeyWordBreak,
-            TokenType.KeyWordDouble,
-            TokenType.KeyWordImplements,
-            TokenType.KeyWordProtected,
-            TokenType.KeyWordThrow,
-            TokenType.KeyWordByte,
-            TokenType.KeyWordElse,
-            TokenType.KeyWordImport,
-            TokenType.KeyWordPublic,
-            TokenType.KeyWordThrows,
-            TokenType.KeyWordCase,
-            TokenType.KeyWordEnum,
-            TokenType.KeyWordInstanceof,
-            TokenType.KeyWordReturn,
-            TokenType.KeyWordTransient,
-            TokenType.KeyWordCatch,
-            TokenType.KeyWordExtends,
-            TokenType.KeyWordInt,
-            TokenType.KeyWordShort,
-            TokenType.KeyWordTry,
-            TokenType.KeyWordChar,
-            TokenType.KeyWordFinal,
-            TokenType.KeyWordInterface,
-            TokenType.KeyWordStatic,
-            TokenType.KeyWordVoid,
-            TokenType.KeyWordClass,
-            TokenType.KeyWordFinally,
-            TokenType.KeyWordLong,
-            TokenType.KeyWordStrictfp,
-            TokenType.KeyWordVolatile,
-            TokenType.KeyWordConst,
-            TokenType.KeyWordFloat,
-            TokenType.KeyWordNative,
-            TokenType.KeyWordSuper,
-            TokenType.KeyWordWhile,
-            TokenType.KeyWordString,
-            TokenType.KeyWordSystem,
-            TokenType.KeyWordOut,
-            TokenType.KeyWordPrintln -> Color.ORANGE
-            else -> Color.WHITE
+    private fun onKeyPressed(e: KeyEvent?) {
+        e?.consume()
+        if (e ==null) return
+        when(e.keyCode)
+        {
+            KeyEvent.VK_BACK_SPACE -> {
+                model.backSpaceAction()
+                repaint()
+            }
+            KeyEvent.VK_DELETE -> {
+                model.deleteAction()
+                repaint()
+            }
+            KeyEvent.VK_UP -> {
+                if (hasShiftModifier(e)) {
+                    model.moveEndCaretUp()
+                }
+                else{
+                    model.moveBeginCaretUp()
+                }
+                repaint()
+            }
+            KeyEvent.VK_DOWN -> {
+                if (hasShiftModifier(e)) {
+                    model.moveEndCaretDown()
+                }
+                else{
+                    model.moveBeginCaretDown()
+                }
+                repaint()
+            }
+            KeyEvent.VK_LEFT -> {
+                if (hasShiftModifier(e)) {
+                    model.moveEndCaretLeft()
+                }
+                else{
+                    model.moveBeginCaretLeft()
+                }
+                repaint()
+            }
+            KeyEvent.VK_RIGHT -> {
+                if (hasShiftModifier(e)) {
+                    model.moveEndCaretRight()
+                }
+                else{
+                    model.moveBeginCaretRight()
+                }
+                repaint()
+            }
+            else -> {
+                if (e.keyChar.isDefined() && e.keyCode != KeyEvent.VK_ESCAPE) {
+                    model.addChar(e.keyChar)
+                    repaint()
+                }
+            }
         }
+    }
+
+    fun onMousePressed(e: MouseEvent?) {
+        if (e == null) return
+        if (!hasShiftModifier(e)) {
+            model.updateBeginCaret(e.y / lineHeight, (e.x.toFloat() / letterWidth).roundToInt())
+        }
+        model.updateEndCaret(e.y / lineHeight, (e.x.toFloat() / letterWidth).roundToInt())
+        this.repaint()
+    }
+
+    private fun hasShiftModifier(e: MouseEvent) = (e.modifiersEx and KeyEvent.SHIFT_DOWN_MASK) != 0
+    private fun hasShiftModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.SHIFT_DOWN_MASK) != 0
+
+    fun onMouseReleased(e: MouseEvent?) {
+
+    }
+
+    fun onMouseDragged(e: MouseEvent?) {
+        if (e == null) return
+        model.updateEndCaret(e.y / lineHeight, (e.x.toFloat() / letterWidth).roundToInt())
+        this.repaint()
     }
 
     public override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
 
-        if(model==null) return
+        if (!this::model.isInitialized) return
 
         setDefaultStyle(g)
         initValues(g)
         drawCaret(g)
 
-//        for ( (index, line) in model!!.lines.withIndex()){
-//            val lineY = lineHeight + index * lineHeight
-//            for (w in line.getFormattingRules()){
-//
-//            }
-//        }
+        for ((lineIndex, line) in model.lines.withIndex()) {
+            val lineY = lineHeight + lineIndex * lineHeight
+            if (!isLineVisible(lineY, g)) continue
 
+            val rules = formattingRuleProvider.getFormattingRule(lineIndex)
 
-        //val tokens = Tokenizer().getTokens(text)
-
-        var lineIndex = 0;
-        var columnIndex = 0;
-        for (line in model!!.lines) {
-            for (token in line.tokens){
-                val lineY = lineHeight + lineIndex * lineHeight
-                if (lineY >= g.clipBounds.y && lineY - lineHeight <= g.clipBounds.y + g.clipBounds.height) {
-                    val dp = token.getDisplayValue()
-                    val color = getColor(token.type)
-                    usingColor(g, color){
-                        g.drawString(dp, columnIndex, lineY)
-                        columnIndex += dp.length * letterWidth
-                    }
-                    //println("draw line '${line}'")
-                } else {
-                    //println("hidden line")
+            for (rule in rules.filter { r -> r.style.background != null }) {
+                usingColor(g, rule.style.background!!) {
+                    g.fillRect(
+                        rule.start * letterWidth,
+                        lineIndex * lineHeight + 9,
+                        (rule.end - rule.start) * letterWidth,
+                        lineHeight - 6
+                    )
                 }
             }
-            lineIndex++;
-            columnIndex = 0;
+
+            g.drawString(line.text, 0, lineY)
+
+            for (rule in rules.filter { r -> r.style.color != null }) {
+                val sub = line.text.substring(rule.start, rule.end)
+                usingColor(g, rule.style.color!!) {
+                    g.drawString(sub, rule.start * letterWidth, lineY)
+                }
+            }
+
+            for (rule in rules.filter { r -> r.style.underline != null }) {
+                usingColor(g, rule.style.underline!!) {
+                    usingStroke(g, 2) {
+                        g.drawLine(
+                            rule.start * letterWidth,
+                            lineIndex * lineHeight + lineHeight + 3,
+                            rule.end * letterWidth,
+                            lineIndex * lineHeight + lineHeight + 3
+                        )
+                    }
+                }
+            }
         }
 
-        val delim = '\n'
+        updatePreferredSize()
+    }
 
-        val list = text.split(delim)
-//
-//        for ((index, line) in list.withIndex()) {
-//            val lineY = lineHeight + index * lineHeight
-//            if (lineY >= g.clipBounds.y && lineY - lineHeight <= g.clipBounds.y + g.clipBounds.height) {
-//                line.value?.let {
-//                    g.drawString(it, 0, lineY)
-//                }
-//                //println("draw line '${line}'")
-//            } else {
-//                //println("hidden line")
-//            }
-//        }
 
-        var longest = list.maxBy { l -> l.length }.length
-        var count = list.size
+    private fun isLineVisible(lineY: Int, g: Graphics) =
+        lineY >= g.clipBounds.y && lineY - lineHeight <= g.clipBounds.y + g.clipBounds.height
+
+    private fun updatePreferredSize() {
+        val longest = model.lines.maxBy { l -> l.text.length }.text.length
+        val count = model.lines.size
         preferredSize = Dimension(longest * letterWidth, count * lineHeight)
     }
 
@@ -445,13 +337,13 @@ private class DrawCanvas : JPanel() {
     }
 
     private fun drawCaret(g: Graphics) {
-        if (model!=null) {
-            usingColor(g, Color.GREEN) {
+        usingColor(g, Style.Caret.color!!) {
+            usingStroke(g, 2) {
                 g.drawLine(
-                    model!!.caret.column * letterWidth,
-                    model!!.caret.line * lineHeight + 10,
-                    model!!.caret.column * letterWidth,
-                    (model!!.caret.line + 1) * lineHeight + 2
+                    model.beginCaret.column * letterWidth,
+                    model.beginCaret.line * lineHeight + 10,
+                    model.beginCaret.column * letterWidth,
+                    (model.beginCaret.line + 1) * lineHeight + 2
                 )
             }
         }
@@ -462,6 +354,17 @@ private class DrawCanvas : JPanel() {
         g.color = color
         statement()
         g.color = prevColor
+    }
+
+    private fun usingStroke(g: Graphics, stroke: Int, statement: () -> Unit) {
+        if (g is Graphics2D) {
+            val prevStroke = g.stroke
+            g.stroke = BasicStroke(stroke.toFloat())
+            statement()
+            g.stroke = prevStroke
+        } else {
+            statement()
+        }
     }
 
     private fun initValues(g: Graphics) {
