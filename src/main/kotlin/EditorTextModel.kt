@@ -1,72 +1,115 @@
-import tokenizer.Tokenizer
+import helpers.Event
 import kotlin.math.max
 import kotlin.math.min
 
+class EditorLine (var text:String){
+
+}
+
 class EditorTextModel (text:String) {
+    val onLineDelete = Event<Int>()
+    val onLineModified = Event<Int>()
+    val onLineAdd = Event<Int>()
 
     var lines = ArrayList<EditorLine>()
-    val tokenizer = Tokenizer()
     var beginCaret = EditorTextCaret()
     var endCaret = EditorTextCaret()
 
     init {
         val input = text.replace("\r", "").replace("\t", "    ");
-        //val tokens = Tokenizer().getTokens(text)
         for (s in input.split('\n')) {
             val line = EditorLine(s)
             lines.add(line)
         }
     }
 
+    private fun deleteLine(lineIndex: Int) {
+        onLineDelete(lineIndex)
+        lines.removeAt(lineIndex)
+    }
+
+    private fun addLine(lineIndex: Int, editorLine: EditorLine) {
+        lines.add(lineIndex, editorLine)
+        onLineAdd(lineIndex)
+    }
+
+    fun removeRangeInLine(lineIndex: Int, startIndex: Int, endIndex: Int) {
+        lines[lineIndex].text = lines[lineIndex].text.removeRange(startIndex, endIndex)
+        onLineModified(lineIndex)
+    }
+
+    fun appendToLine(lineIndex: Int, appendix: String) {
+        lines[lineIndex].text += appendix
+        onLineModified(lineIndex)
+    }
+
+    fun insertCharInLine(lineIndex: Int, columnIndex: Int, char: Char) {
+        lines[lineIndex].text = StringBuilder(lines[lineIndex].text).insert(columnIndex, char).toString()
+        onLineModified(lineIndex)
+    }
+
+    fun getPrefix(lineIndex: Int, columnIndex: Int): String {
+        return lines[lineIndex].text.substring(0, columnIndex)
+    }
+
+    fun getSuffix(lineIndex: Int, columnIndex: Int): String {
+        return lines[lineIndex].text.substring(columnIndex, lines[lineIndex].text.length)
+    }
+
     fun backSpaceAction() {
-        if(deleteSelection()) return
+        if (deleteSelection()) return
         if (beginCaret.column == 0 && beginCaret.line != 0) {
-            val appendix = lines[beginCaret.line].text
-            lines.removeAt(beginCaret.line)
-            val row = lines[beginCaret.line - 1].text + appendix
-            lines[beginCaret.line - 1].text = row
+            val suffix = getSuffix(beginCaret.line, 0)
+            deleteLine(beginCaret.line)
+            moveBeginCaretLeft()
+            appendToLine(beginCaret.line, suffix)
         } else {
-            val row = lines[beginCaret.line].text.removeRange(beginCaret.column - 1, beginCaret.column)
-            lines[beginCaret.line].text = row
+            removeRangeInLine(beginCaret.line, beginCaret.column - 1, beginCaret.column)
+            moveBeginCaretLeft()
         }
-        moveBeginCaretLeft()
     }
 
     fun deleteAction() {
-        if(deleteSelection()) return
-        //todo
+        if (deleteSelection()) return
+        moveBeginCaretRight()
+        backSpaceAction()
     }
 
     fun addChar(keyChar: Char) {
         deleteSelection()
-        val row = lines[beginCaret.line].text
-        lines[beginCaret.line].text = StringBuilder(row).insert(beginCaret.column, keyChar).toString()
+        insertCharInLine(beginCaret.line, beginCaret.column, keyChar)
         moveBeginCaretRight()
     }
 
-    private fun deleteSelection() : Boolean {
+    private fun deleteSelection(): Boolean {
         if (beginCaret == endCaret) return false
 
         val minCaret = minOf(beginCaret, endCaret)
         val maxCaret = maxOf(beginCaret, endCaret)
 
-        if(minCaret.line == maxCaret.line){
-            lines[minCaret.line].removeRange(minCaret.column, maxCaret.column)
-        }
-        else {
-            lines[minCaret.line].removeRange(minCaret.column, lines[minCaret.line].text.length)
-            val appendix = lines[maxCaret.line].text.substring(maxCaret.column, lines[maxCaret.line].text.length)
-            lines[minCaret.line].text += appendix
-
+        if (minCaret.line == maxCaret.line) {
+            removeRangeInLine(minCaret.line, minCaret.column, maxCaret.column)
+        } else {
+            removeRangeInLine(minCaret.line, minCaret.column, lines[minCaret.line].text.length)
+            val suffix = getSuffix(maxCaret.line, maxCaret.column)
+            appendToLine(minCaret.line, suffix)
             val range = maxCaret.line - minCaret.line
             repeat(range) {
-                lines.removeAt(minCaret.line + 1)
+                deleteLine(minCaret.line + 1)
             }
         }
 
         beginCaret = minCaret
         endCaret = minCaret
         return true
+    }
+
+    fun enterAction() {
+        deleteSelection()
+        val suffix = getSuffix(beginCaret.line, beginCaret.column)
+        removeRangeInLine(beginCaret.line, beginCaret.column, lines[beginCaret.line].text.length)
+        addLine(beginCaret.line + 1, EditorLine(suffix))
+        moveBeginCaretRight()
     }
 
     fun moveBeginCaretLeft() {

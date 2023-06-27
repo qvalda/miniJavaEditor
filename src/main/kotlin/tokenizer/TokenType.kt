@@ -106,10 +106,10 @@ enum class TokenType {
     KeyWordString,
     KeyWordSystem,
     KeyWordOut,
-    KeyWordPrintln,;
+    KeyWordPrintln, ;
 
-    fun isKeyWord() : Boolean {
-        return when(this){
+    fun isKeyWord(): Boolean {
+        return when (this) {
             TokenType.KeyWordAbstract,
             TokenType.KeyWordContinue,
             TokenType.KeyWordFor,
@@ -164,6 +164,20 @@ enum class TokenType {
             TokenType.KeyWordSystem,
             TokenType.KeyWordOut,
             TokenType.KeyWordPrintln -> true
+
+            else -> false
+        }
+    }
+
+    fun isBracket(): Boolean {
+        return when (this) {
+            BracketRoundOpen,
+            BracketRoundClose,
+            BracketSquareOpen,
+            BracketSquareClose,
+            BracketCurlyOpen,
+            BracketCurlyClose -> true
+
             else -> false
         }
     }

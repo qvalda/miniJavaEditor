@@ -21,7 +21,9 @@ class Tokenizer {
             }
         }
 
-        return Token(TokenType.Whitespace, begin, reader.pointer, reader.substring(begin, reader.pointer))
+        //return null
+        return Token(TokenType.Whitespace, begin, reader.pointer)
+        //return Token(TokenType.Whitespace, begin, reader.pointer, reader.substring(begin, reader.pointer))
         //return Token(TokenType.Whitespace, begin, reader.pointer)
     }
 
@@ -58,13 +60,14 @@ class Tokenizer {
             when (reader.currentChar) {
                 '"' -> {
                     reader.moveNext()
-                    break
+                    return Token(TokenType.LiteralString, begin, reader.pointer, reader.substring(begin, reader.pointer))
                 }
                 else -> continue
             }
         }
 
-        return Token(TokenType.LiteralString, begin, reader.pointer, reader.substring(begin, reader.pointer))
+        return Token(TokenType.InvalidSyntax, begin, reader.pointer+1, reader.substring(begin, reader.pointer))
+
     }
 
     private fun tryReadLiteralCharToken(reader: CharArraySafeReader): Token? {
@@ -80,7 +83,7 @@ class Tokenizer {
                         state = LiteralCharParserStates.CloseBracket
                     }
                     else{
-                        return Token(TokenType.InvalidSyntax, begin, reader.pointer, reader.substring(begin, reader.pointer))
+                        return Token(TokenType.InvalidSyntax, begin, reader.pointer+1, reader.substring(begin, reader.pointer))
                     }
                 }
                 LiteralCharParserStates.CloseBracket -> break
@@ -102,14 +105,15 @@ class Tokenizer {
                         in numbers -> state = LiteralNumberParserStates.IntegerPart
                         in numberEndings -> state = LiteralNumberParserStates.LetterEnding
                         '.' -> state = LiteralNumberParserStates.FloatDelimiter
-                        else -> break
+                        ',', ' ', ';', ')' -> break
+                        else -> return Token(TokenType.InvalidSyntax, begin, reader.pointer+1, reader.substring(begin, reader.pointer))
                     }
                 }
 
                 LiteralNumberParserStates.FloatDelimiter -> {
                     when (reader.currentChar) {
                         in numbers -> state = LiteralNumberParserStates.FloatPart
-                        else -> return Token(TokenType.InvalidSyntax, begin, reader.pointer, reader.substring(begin, reader.pointer))
+                        else -> return Token(TokenType.InvalidSyntax, begin, reader.pointer+1, reader.substring(begin, reader.pointer))
                     }
                 }
 
@@ -117,11 +121,17 @@ class Tokenizer {
                     when (reader.currentChar) {
                         in numbers -> state = LiteralNumberParserStates.FloatPart
                         in numberEndings -> state = LiteralNumberParserStates.LetterEnding
-                        else -> break
+                        ',', ' ', ';', ')' -> break
+                        else -> return Token(TokenType.InvalidSyntax, begin, reader.pointer+1, reader.substring(begin, reader.pointer))
                     }
                 }
 
-                LiteralNumberParserStates.LetterEnding -> break
+                LiteralNumberParserStates.LetterEnding -> {
+                    when (reader.currentChar) {
+                        ',', ' ', ';', ')' -> break
+                        else -> return Token(TokenType.InvalidSyntax, begin, reader.pointer+1, reader.substring(begin, reader.pointer))
+                    }
+                }
             }
         }
         return Token(TokenType.LiteralNumber, begin, reader.pointer, reader.substring(begin, reader.pointer))

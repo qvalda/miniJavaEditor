@@ -1,6 +1,3 @@
-import tokenizer.Token
-import tokenizer.TokenType
-import tokenizer.Tokenizer
 import java.awt.*
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
@@ -65,6 +62,7 @@ class Fac {
     public int ComputeFac(int num){
 	int num_aux ; // abc
     l = 'AB'
+    q = "dwq"
 	if (num < 1)
 	    num_aux = 1 ;
 	else
@@ -73,11 +71,11 @@ class Fac {
     }
 
 }
-""".replace("\r", "").replace("\t","    ")
+"""
 
-            //canvas.text = File("""D:\Kotlin\bigInput.txt""").readText().replace("\r", "").replace("\t","    ")
+            //canvas.text = File("""D:\Kotlin\bigInput2.txt""").readText()
 
-//            // Run the GUI codes on the Event-Dispatching thread for thread safety
+//            // Run the GUI codes on the helpers.Event-Dispatching thread for thread safety
 //            SwingUtilities.invokeLater {
 //                CGTemplate() // Let the constructor do the job
 //            }
@@ -85,11 +83,7 @@ class Fac {
     }
 }
 
-class EditorLine (var text:String){
-    fun removeRange(startIndex: Int, endIndex: Int){
-        text = text.removeRange(startIndex, endIndex)
-    }
-}
+
 
 interface IFormattingRuleProvider{
     fun getFormattingRule(lineIndex: Int): Array<FormattingRule>
@@ -99,43 +93,6 @@ class AggregateFormattingRuleProvider(private val providers: Array<IFormattingRu
 
     override fun getFormattingRule(lineIndex: Int): Array<FormattingRule> {
         return providers.flatMap { p -> p.getFormattingRule(lineIndex).asIterable() }.toTypedArray()
-    }
-}
-
-class TokenizerFormattingRuleProvider(textModel: EditorTextModel) : IFormattingRuleProvider{
-
-    var lines : Array<Array<Token>>
-    val tokenizer = Tokenizer()
-
-    init {
-        lines = textModel.lines.map { l-> tokenizer.getTokens(l.text) }.toTypedArray()
-    }
-
-    override fun getFormattingRule(lineIndex: Int):Array<FormattingRule> {
-        val rules = ArrayList<FormattingRule>()
-
-        for (token in lines[lineIndex]){
-            if (token.type.isKeyWord()) {
-                rules.add(FormattingRule(token.beginIndex, token.endIndex, Style.KeyWord))
-            }
-            else if(token.type == TokenType.Comment){
-                rules.add(FormattingRule(token.beginIndex, token.endIndex, Style.Comment))
-            }
-            else if(token.type == TokenType.InvalidSyntax){
-                rules.add(FormattingRule(token.beginIndex, token.endIndex, Style.Error))
-            }
-        }
-
-        return rules.toTypedArray()
-    }
-}
-
-data class EditorTextCaret(var line : Int = 0, var column: Int = 0) : Comparable<EditorTextCaret>{
-    override fun compareTo(other: EditorTextCaret): Int {
-        if (this == other) return 0;
-        if (this.line < other.line) return -1
-        if (this.line > other.line) return 1
-        return this.column.compareTo(other.column)
     }
 }
 
@@ -237,6 +194,10 @@ private class DrawCanvas : JPanel() {
                 }
                 repaint()
             }
+            KeyEvent.VK_ENTER -> {
+                model.enterAction()
+                repaint()
+            }
             else -> {
                 if (e.keyChar.isDefined() && e.keyCode != KeyEvent.VK_ESCAPE) {
                     model.addChar(e.keyChar)
@@ -287,9 +248,9 @@ private class DrawCanvas : JPanel() {
                 usingColor(g, rule.style.background!!) {
                     g.fillRect(
                         rule.start * letterWidth,
-                        lineIndex * lineHeight + 9,
+                        lineIndex * lineHeight + 8,
                         (rule.end - rule.start) * letterWidth,
-                        lineHeight - 6
+                        lineHeight - 3
                     )
                 }
             }
@@ -299,7 +260,10 @@ private class DrawCanvas : JPanel() {
             for (rule in rules.filter { r -> r.style.color != null }) {
                 val sub = line.text.substring(rule.start, rule.end)
                 usingColor(g, rule.style.color!!) {
-                    g.drawString(sub, rule.start * letterWidth, lineY)
+                    usingBold(g, rule.style.isBold)
+                    {
+                        g.drawString(sub, rule.start * letterWidth, lineY)
+                    }
                 }
             }
 
@@ -331,8 +295,8 @@ private class DrawCanvas : JPanel() {
     }
 
     private fun setDefaultStyle(g: Graphics) {
-        background = Color.DARK_GRAY
-        g.color = Color.WHITE
+        background = Style.Background.background
+        g.color = Style.Background.color
         g.font = Font("Monospaced", Font.PLAIN, 16)
     }
 
@@ -341,9 +305,9 @@ private class DrawCanvas : JPanel() {
             usingStroke(g, 2) {
                 g.drawLine(
                     model.beginCaret.column * letterWidth,
-                    model.beginCaret.line * lineHeight + 10,
+                    model.beginCaret.line * lineHeight + 9,
                     model.beginCaret.column * letterWidth,
-                    (model.beginCaret.line + 1) * lineHeight + 2
+                    (model.beginCaret.line + 1) * lineHeight + 4
                 )
             }
         }
@@ -354,6 +318,18 @@ private class DrawCanvas : JPanel() {
         g.color = color
         statement()
         g.color = prevColor
+    }
+
+    fun usingBold(g: Graphics, isBold:Boolean, statement: () -> Unit) {
+        if(isBold) {
+            val prevFont = g.font
+            g.font = Font(prevFont.name, Font.BOLD, prevFont.size)
+            statement()
+            g.font = prevFont
+        }
+        else{
+            statement()
+        }
     }
 
     private fun usingStroke(g: Graphics, stroke: Int, statement: () -> Unit) {
