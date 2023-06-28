@@ -1,3 +1,5 @@
+package ruleProviders
+
 import java.awt.Color
 
 class Style(val color: Color? = null, val background: Color? = null, val underline: Color? = null, val isBold : Boolean = false){
@@ -25,8 +27,5 @@ class Style(val color: Color? = null, val background: Color? = null, val underli
         val Number = Style(color = PurpleColor)
         val String = Style(color = YellowColor)
         val Bracket = Style(background = OrangeColor)
-
     }
 }
-
-open class FormattingRule(val start: Int, val end:Int, val style: Style)

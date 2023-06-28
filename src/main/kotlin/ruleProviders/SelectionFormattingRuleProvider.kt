@@ -1,3 +1,7 @@
+package ruleProviders
+
+import EditorTextModel
+
 class SelectionFormattingRuleProvider(private val textModel: EditorTextModel) : IFormattingRuleProvider {
     override fun getFormattingRule(lineIndex: Int): Array<FormattingRule> {
         val minCaret = minOf(textModel.beginCaret, textModel.endCaret)
@@ -12,12 +16,12 @@ class SelectionFormattingRuleProvider(private val textModel: EditorTextModel) : 
         }
 
         if (lineIndex == minCaret.line) {
-            return arrayOf(FormattingRule(minCaret.column, textModel.lines[lineIndex].text.length, Style.Selection))
+            return arrayOf(FormattingRule(minCaret.column, textModel.lines[lineIndex].length, Style.Selection))
         }
 
         if (lineIndex == maxCaret.line) {
             return arrayOf(FormattingRule(0, maxCaret.column, Style.Selection))
         }
-        return arrayOf(FormattingRule(0, textModel.lines[lineIndex].text.length, Style.Selection))
+        return arrayOf(FormattingRule(0, textModel.lines[lineIndex].length, Style.Selection))
     }
 }

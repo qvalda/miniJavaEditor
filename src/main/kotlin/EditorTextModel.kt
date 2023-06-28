@@ -2,62 +2,80 @@ import helpers.Event
 import kotlin.math.max
 import kotlin.math.min
 
-class EditorLine (var text:String){
-
-}
-
 class EditorTextModel (text:String) {
     val onLineDelete = Event<Int>()
     val onLineModified = Event<Int>()
     val onLineAdd = Event<Int>()
+    val onCaretMove = Event<EditorTextCaret>()
 
-    var lines = ArrayList<EditorLine>()
-    var beginCaret = EditorTextCaret()
-    var endCaret = EditorTextCaret()
+    var lines = ArrayList<String>()
+    var maxLength = 0;
+    var beginCaret: EditorTextCaret = EditorTextCaret()
+        set(value) {
+            if (field != value) {
+                field = value
+                onCaretMove(field)
+            }
+        }
+    var endCaret: EditorTextCaret
 
     init {
         val input = text.replace("\r", "").replace("\t", "    ");
+        maxLength = 0;
         for (s in input.split('\n')) {
-            val line = EditorLine(s)
-            lines.add(line)
+            lines.add(s)
+            maxLength = max(maxLength, s.length)
         }
+        beginCaret = EditorTextCaret()
+        endCaret = EditorTextCaret()
+    }
+
+    private fun updateMaxLength() {
+        maxLength = lines.maxBy { l -> l.length }.length
     }
 
     private fun deleteLine(lineIndex: Int) {
         onLineDelete(lineIndex)
         lines.removeAt(lineIndex)
+        updateMaxLength()
     }
 
-    private fun addLine(lineIndex: Int, editorLine: EditorLine) {
-        lines.add(lineIndex, editorLine)
+    private fun addLine(lineIndex: Int, line: String) {
+        lines.add(lineIndex, line)
         onLineAdd(lineIndex)
+        updateMaxLength()
     }
 
-    fun removeRangeInLine(lineIndex: Int, startIndex: Int, endIndex: Int) {
-        lines[lineIndex].text = lines[lineIndex].text.removeRange(startIndex, endIndex)
+    private fun removeRangeInLine(lineIndex: Int, startIndex: Int, endIndex: Int) {
+        lines[lineIndex] = lines[lineIndex].removeRange(startIndex, endIndex)
         onLineModified(lineIndex)
+        updateMaxLength()
     }
 
-    fun appendToLine(lineIndex: Int, appendix: String) {
-        lines[lineIndex].text += appendix
+    private fun appendToLine(lineIndex: Int, appendix: String) {
+        lines[lineIndex] += appendix
         onLineModified(lineIndex)
+        updateMaxLength()
     }
 
-    fun insertCharInLine(lineIndex: Int, columnIndex: Int, char: Char) {
-        lines[lineIndex].text = StringBuilder(lines[lineIndex].text).insert(columnIndex, char).toString()
+    private fun insertInLine(lineIndex: Int, columnIndex: Int, value: String) {
+        lines[lineIndex] = StringBuilder(lines[lineIndex]).insert(columnIndex, value).toString()
         onLineModified(lineIndex)
+        updateMaxLength()
     }
 
-    fun getPrefix(lineIndex: Int, columnIndex: Int): String {
-        return lines[lineIndex].text.substring(0, columnIndex)
+    private fun getPrefix(lineIndex: Int, columnIndex: Int): String {
+        return lines[lineIndex].substring(0, columnIndex)
     }
 
-    fun getSuffix(lineIndex: Int, columnIndex: Int): String {
-        return lines[lineIndex].text.substring(columnIndex, lines[lineIndex].text.length)
+    private fun getSuffix(lineIndex: Int, columnIndex: Int): String {
+        return lines[lineIndex].substring(columnIndex, lines[lineIndex].length)
     }
 
     fun backSpaceAction() {
         if (deleteSelection()) return
+        if (beginCaret.column == 0 && beginCaret.line == 0) return
+
         if (beginCaret.column == 0 && beginCaret.line != 0) {
             val suffix = getSuffix(beginCaret.line, 0)
             deleteLine(beginCaret.line)
@@ -71,14 +89,23 @@ class EditorTextModel (text:String) {
 
     fun deleteAction() {
         if (deleteSelection()) return
+        if (beginCaret.column == lines.last().length && beginCaret.line == lines.size - 1) return
         moveBeginCaretRight()
         backSpaceAction()
     }
 
     fun addChar(keyChar: Char) {
         deleteSelection()
-        insertCharInLine(beginCaret.line, beginCaret.column, keyChar)
+        insertInLine(beginCaret.line, beginCaret.column, keyChar.toString())
         moveBeginCaretRight()
+    }
+
+    fun tabAction() {
+        deleteSelection()
+        insertInLine(beginCaret.line, beginCaret.column, "    ")
+        repeat(4){ //todo opt
+            moveBeginCaretRight()
+        }
     }
 
     private fun deleteSelection(): Boolean {
@@ -90,7 +117,7 @@ class EditorTextModel (text:String) {
         if (minCaret.line == maxCaret.line) {
             removeRangeInLine(minCaret.line, minCaret.column, maxCaret.column)
         } else {
-            removeRangeInLine(minCaret.line, minCaret.column, lines[minCaret.line].text.length)
+            removeRangeInLine(minCaret.line, minCaret.column, lines[minCaret.line].length)
             val suffix = getSuffix(maxCaret.line, maxCaret.column)
             appendToLine(minCaret.line, suffix)
             val range = maxCaret.line - minCaret.line
@@ -107,75 +134,76 @@ class EditorTextModel (text:String) {
     fun enterAction() {
         deleteSelection()
         val suffix = getSuffix(beginCaret.line, beginCaret.column)
-        removeRangeInLine(beginCaret.line, beginCaret.column, lines[beginCaret.line].text.length)
-        addLine(beginCaret.line + 1, EditorLine(suffix))
+        removeRangeInLine(beginCaret.line, beginCaret.column, lines[beginCaret.line].length)
+        addLine(beginCaret.line + 1, suffix)
         moveBeginCaretRight()
     }
 
     fun moveBeginCaretLeft() {
-        moveCaretLeft(beginCaret)
+        beginCaret = moveCaretLeft(beginCaret)
         endCaret = beginCaret.copy()
     }
 
     fun moveEndCaretLeft() {
-        moveCaretLeft(endCaret)
+        endCaret = moveCaretLeft(endCaret)
     }
 
-    fun moveCaretLeft(caret: EditorTextCaret) {
-        if (caret.line == 0 && caret.column == 0) return
+    private fun moveCaretLeft(caret: EditorTextCaret): EditorTextCaret {
+        if (caret.line == 0 && caret.column == 0) return caret
         if (caret.column > 0) {
-            caret.column--
+            return EditorTextCaret(caret.line, caret.column - 1)
         } else {
-            caret.line = max(caret.line - 1, 0)
-            caret.column = lines[caret.line].text.length
+            val line = max(caret.line - 1, 0)
+            return EditorTextCaret(line, lines[line].length)
         }
     }
 
     fun moveBeginCaretRight() {
-        moveCaretRight(beginCaret)
+        beginCaret = moveCaretRight(beginCaret)
         endCaret = beginCaret.copy()
     }
 
     fun moveEndCaretRight() {
-        moveCaretRight(endCaret)
+        endCaret = moveCaretRight(endCaret)
     }
 
-    fun moveCaretRight(caret: EditorTextCaret) {
-        if (caret.line == lines.size - 1 && caret.column == lines[lines.size - 1].text.length) return
-        if (caret.column < lines[caret.line].text.length) {
-            caret.column++
+    private fun moveCaretRight(caret: EditorTextCaret): EditorTextCaret {
+        if (caret.line == lines.size - 1 && caret.column == lines[lines.size - 1].length) return caret
+        if (caret.column < lines[caret.line].length) {
+            return EditorTextCaret(caret.line, caret.column + 1)
         } else {
-            caret.line = min(caret.line + 1, lines.size - 1)
-            caret.column = 0
+            return EditorTextCaret(min(caret.line + 1, lines.size - 1), 0)
         }
     }
 
     fun moveBeginCaretDown() {
-        moveCaretDown(beginCaret)
+        beginCaret = moveCaretDown(beginCaret)
         endCaret = beginCaret.copy()
     }
 
     fun moveEndCaretDown() {
-        moveCaretDown(endCaret)
+        endCaret = moveCaretDown(endCaret)
     }
 
-    private fun moveCaretDown(caret: EditorTextCaret) {
-        caret.line = min(caret.line + 1, lines.size - 1)
-        caret.column = min(caret.column, lines[caret.line].text.length)
+    private fun moveCaretDown(caret: EditorTextCaret): EditorTextCaret {
+        val line = min(caret.line + 1, lines.size - 1)
+        val column = min(caret.column, lines[line].length)
+        return EditorTextCaret(line, column)
     }
 
     fun moveBeginCaretUp() {
-        moveCaretUp(beginCaret)
+        beginCaret = moveCaretUp(beginCaret)
         endCaret = beginCaret.copy()
     }
 
     fun moveEndCaretUp() {
-        moveCaretUp(endCaret)
+        endCaret = moveCaretUp(endCaret)
     }
 
-    private fun moveCaretUp(caret: EditorTextCaret) {
-        caret.line = max(caret.line - 1, 0)
-        caret.column = min(caret.column, lines[caret.line].text.length)
+    private fun moveCaretUp(caret: EditorTextCaret): EditorTextCaret {
+        val line = max(caret.line - 1, 0)
+        val column = min(caret.column, lines[line].length)
+        return EditorTextCaret(line, column)
     }
 
     fun updateEndCaret(lineIndex: Int, columnIndex: Int) {
@@ -186,9 +214,9 @@ class EditorTextModel (text:String) {
         beginCaret = getAdjustedCaret(lineIndex, columnIndex)
     }
 
-    fun getAdjustedCaret(lineIndex: Int, columnIndex: Int): EditorTextCaret {
+    private fun getAdjustedCaret(lineIndex: Int, columnIndex: Int): EditorTextCaret {
         val line = lineIndex.coerceIn(0, lines.size - 1)
-        val column = columnIndex.coerceIn(0, lines[line].text.length)
+        val column = columnIndex.coerceIn(0, lines[line].length)
         return EditorTextCaret(line, column)
     }
 }

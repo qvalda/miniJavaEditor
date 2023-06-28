@@ -21,9 +21,7 @@ class Tokenizer {
             }
         }
 
-        //return null
-        return Token(TokenType.Whitespace, begin, reader.pointer)
-        //return Token(TokenType.Whitespace, begin, reader.pointer, reader.substring(begin, reader.pointer))
+        return null
         //return Token(TokenType.Whitespace, begin, reader.pointer)
     }
 
@@ -150,11 +148,10 @@ class Tokenizer {
         val identifier = reader.substring(begin, reader.pointer)
 
         val keyword = Tokens.keyWords[identifier]
-
-        if (keyword != null) return Token(keyword, begin, reader.pointer, identifier)
+        if (keyword != null) return Token(keyword, begin, reader.pointer)
 
         val bool = Tokens.booleans[identifier]
-        if (bool != null) return Token(bool, begin, reader.pointer, identifier)
+        if (bool != null) return Token(bool, begin, reader.pointer)
 
         return Token(TokenType.NameIdentifier, begin, reader.pointer, identifier)
     }
@@ -228,26 +225,16 @@ class Tokenizer {
 
         return tokens.toTypedArray()
     }
+
+    enum class LiteralNumberParserStates{
+        IntegerPart,
+        FloatDelimiter,
+        FloatPart,
+        LetterEnding
+    }
+    enum class LiteralCharParserStates{
+        OpenBracket,
+        Char,
+        CloseBracket,
+    }
 }
-
-enum class LiteralNumberParserStates{
-    IntegerPart,
-    FloatDelimiter,
-    FloatPart,
-    LetterEnding
-}
-enum class LiteralCharParserStates{
-    OpenBracket,
-    Char,
-    CloseBracket,
-}
-
-
-
-
-
-
-
-
-
-

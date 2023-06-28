@@ -1,9 +1,9 @@
+import ruleProviders.*
 import java.awt.*
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.io.File
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.JScrollPane
@@ -39,6 +39,8 @@ class CGTemplate : JFrame() {
 
             var canvas = DrawCanvas()
             canvas.isFocusable = true
+            canvas.focusTraversalKeysEnabled = false;
+
             //canvas.preferredSize = Dimension(CANVAS_WIDTH, CANVAS_HEIGHT)
 
             val jsp = JScrollPane(canvas)
@@ -58,7 +60,8 @@ class CGTemplate : JFrame() {
 }
 //todo
 class Fac {
-
+    { few
+    }
     public int ComputeFac(int num){
 	int num_aux ; // abc
     l = 'AB'
@@ -84,27 +87,15 @@ class Fac {
 }
 
 
-
-interface IFormattingRuleProvider{
-    fun getFormattingRule(lineIndex: Int): Array<FormattingRule>
-}
-
-class AggregateFormattingRuleProvider(private val providers: Array<IFormattingRuleProvider>) : IFormattingRuleProvider{
-
-    override fun getFormattingRule(lineIndex: Int): Array<FormattingRule> {
-        return providers.flatMap { p -> p.getFormattingRule(lineIndex).asIterable() }.toTypedArray()
-    }
-}
-
 private class DrawCanvas : JPanel() {
 
     var initialized = false
 
     lateinit var model: EditorTextModel
-    var lineHeight = 0
+    var letterHeight = 0
     var letterWidth = 0
 
-    lateinit var formattingRuleProvider:IFormattingRuleProvider
+    lateinit var formattingRuleProvider: IFormattingRuleProvider
 
     var text: String = ""
         get() {
@@ -113,9 +104,11 @@ private class DrawCanvas : JPanel() {
         set(value) {
             field = value
             model = EditorTextModel(value)
-            val r1 = TokenizerFormattingRuleProvider(model)
+            val t = TokenizedTextModel(model)
+            val r1 = TokenizerFormattingRuleProvider(t)
             val r2 = SelectionFormattingRuleProvider(model)
-            formattingRuleProvider = AggregateFormattingRuleProvider(arrayOf(r1,r2))
+            val r3 = BracketFormattingRuleProvider(model, t)
+            formattingRuleProvider = AggregateFormattingRuleProvider(arrayOf(r1, r2, r3))
             repaint()
         }
 
@@ -156,6 +149,10 @@ private class DrawCanvas : JPanel() {
             }
             KeyEvent.VK_DELETE -> {
                 model.deleteAction()
+                repaint()
+            }
+            KeyEvent.VK_TAB -> {
+                model.tabAction()
                 repaint()
             }
             KeyEvent.VK_UP -> {
@@ -210,9 +207,9 @@ private class DrawCanvas : JPanel() {
     fun onMousePressed(e: MouseEvent?) {
         if (e == null) return
         if (!hasShiftModifier(e)) {
-            model.updateBeginCaret(e.y / lineHeight, (e.x.toFloat() / letterWidth).roundToInt())
+            model.updateBeginCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
         }
-        model.updateEndCaret(e.y / lineHeight, (e.x.toFloat() / letterWidth).roundToInt())
+        model.updateEndCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
         this.repaint()
     }
 
@@ -225,7 +222,7 @@ private class DrawCanvas : JPanel() {
 
     fun onMouseDragged(e: MouseEvent?) {
         if (e == null) return
-        model.updateEndCaret(e.y / lineHeight, (e.x.toFloat() / letterWidth).roundToInt())
+        model.updateEndCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
         this.repaint()
     }
 
@@ -238,9 +235,12 @@ private class DrawCanvas : JPanel() {
         initValues(g)
         drawCaret(g)
 
-        for ((lineIndex, line) in model.lines.withIndex()) {
-            val lineY = lineHeight + lineIndex * lineHeight
-            if (!isLineVisible(lineY, g)) continue
+        val visibleLineFrom = (g.clipBounds.y  / letterHeight).coerceIn(0, model.lines.size-1)
+        val visibleLineTo =  ((g.clipBounds.y + g.clipBounds.height)/letterHeight).coerceIn(0, model.lines.size-1)
+
+        for (lineIndex in visibleLineFrom..visibleLineTo){
+            val line = model.lines[lineIndex]
+            val lineY = letterHeight + lineIndex * letterHeight
 
             val rules = formattingRuleProvider.getFormattingRule(lineIndex)
 
@@ -248,17 +248,17 @@ private class DrawCanvas : JPanel() {
                 usingColor(g, rule.style.background!!) {
                     g.fillRect(
                         rule.start * letterWidth,
-                        lineIndex * lineHeight + 8,
+                        lineIndex * letterHeight + 8,
                         (rule.end - rule.start) * letterWidth,
-                        lineHeight - 3
+                        letterHeight - 3
                     )
                 }
             }
 
-            g.drawString(line.text, 0, lineY)
+            g.drawString(line, 0, lineY)
 
             for (rule in rules.filter { r -> r.style.color != null }) {
-                val sub = line.text.substring(rule.start, rule.end)
+                val sub = line.substring(rule.start, rule.end)
                 usingColor(g, rule.style.color!!) {
                     usingBold(g, rule.style.isBold)
                     {
@@ -272,9 +272,9 @@ private class DrawCanvas : JPanel() {
                     usingStroke(g, 2) {
                         g.drawLine(
                             rule.start * letterWidth,
-                            lineIndex * lineHeight + lineHeight + 3,
+                            lineIndex * letterHeight + letterHeight + 3,
                             rule.end * letterWidth,
-                            lineIndex * lineHeight + lineHeight + 3
+                            lineIndex * letterHeight + letterHeight + 3
                         )
                     }
                 }
@@ -284,14 +284,11 @@ private class DrawCanvas : JPanel() {
         updatePreferredSize()
     }
 
+//    private fun isLineVisible(lineY: Int, g: Graphics) =
+//        lineY >= g.clipBounds.y && lineY - letterHeight <= g.clipBounds.y + g.clipBounds.height
 
-    private fun isLineVisible(lineY: Int, g: Graphics) =
-        lineY >= g.clipBounds.y && lineY - lineHeight <= g.clipBounds.y + g.clipBounds.height
-
-    private fun updatePreferredSize() {
-        val longest = model.lines.maxBy { l -> l.text.length }.text.length
-        val count = model.lines.size
-        preferredSize = Dimension(longest * letterWidth, count * lineHeight)
+    private fun updatePreferredSize() { //todo optimize
+        preferredSize = Dimension((model.maxLength + 10) * letterWidth, (model.lines.size + 1) * letterHeight)
     }
 
     private fun setDefaultStyle(g: Graphics) {
@@ -301,13 +298,20 @@ private class DrawCanvas : JPanel() {
     }
 
     private fun drawCaret(g: Graphics) {
+        drawCaret(g, model.beginCaret)
+        if (model.endCaret != model.beginCaret) {
+            drawCaret(g, model.endCaret)
+        }
+    }
+
+    private fun drawCaret(g: Graphics, caret: EditorTextCaret) {
         usingColor(g, Style.Caret.color!!) {
             usingStroke(g, 2) {
                 g.drawLine(
-                    model.beginCaret.column * letterWidth,
-                    model.beginCaret.line * lineHeight + 9,
-                    model.beginCaret.column * letterWidth,
-                    (model.beginCaret.line + 1) * lineHeight + 4
+                    caret.column * letterWidth,
+                    caret.line * letterHeight + 9,
+                    caret.column * letterWidth,
+                    (caret.line + 1) * letterHeight + 4
                 )
             }
         }
@@ -345,7 +349,7 @@ private class DrawCanvas : JPanel() {
 
     private fun initValues(g: Graphics) {
         if (!initialized) {
-            lineHeight = g.fontMetrics.height
+            letterHeight = g.fontMetrics.height
             letterWidth = g.fontMetrics.stringWidth("w")
             initialized = true
         }
