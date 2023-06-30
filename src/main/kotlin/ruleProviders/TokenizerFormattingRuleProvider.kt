@@ -1,13 +1,16 @@
 package ruleProviders
 
-import TokenizedTextModel
+import editor.FormattingRule
+import editor.IFormattingRuleProvider
+import editor.Style
+import models.TokenizedTextModel
 import tokenizer.Token
 import tokenizer.TokenType
 
 class TokenizerFormattingRuleProvider(private val tokenizedModel: TokenizedTextModel) : IFormattingRuleProvider {
 
-    override fun getFormattingRule(lineIndex: Int): Array<FormattingRule> {
-        val rules = ArrayList<FormattingRule>()
+    override fun getFormattingRule(lineIndex: Int): List<FormattingRule> {
+        val rules = mutableListOf<FormattingRule>()
 
         fun addRule(token: Token, style: Style) {
             rules.add(FormattingRule(token.beginIndex, token.endIndex, style))
@@ -27,6 +30,6 @@ class TokenizerFormattingRuleProvider(private val tokenizedModel: TokenizedTextM
             }
         }
 
-        return rules.toTypedArray()
+        return rules
     }
 }

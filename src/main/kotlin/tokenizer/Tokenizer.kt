@@ -103,7 +103,7 @@ class Tokenizer {
                         in numbers -> state = LiteralNumberParserStates.IntegerPart
                         in numberEndings -> state = LiteralNumberParserStates.LetterEnding
                         '.' -> state = LiteralNumberParserStates.FloatDelimiter
-                        ',', ' ', ';', ')' -> break
+                        ',', ' ', ';', ')', ']' -> break
                         else -> return Token(TokenType.InvalidSyntax, begin, reader.pointer+1, reader.substring(begin, reader.pointer))
                     }
                 }
@@ -119,14 +119,14 @@ class Tokenizer {
                     when (reader.currentChar) {
                         in numbers -> state = LiteralNumberParserStates.FloatPart
                         in numberEndings -> state = LiteralNumberParserStates.LetterEnding
-                        ',', ' ', ';', ')' -> break
+                        ',', ' ', ';', ')', ']' -> break
                         else -> return Token(TokenType.InvalidSyntax, begin, reader.pointer+1, reader.substring(begin, reader.pointer))
                     }
                 }
 
                 LiteralNumberParserStates.LetterEnding -> {
                     when (reader.currentChar) {
-                        ',', ' ', ';', ')' -> break
+                        ',', ' ', ';', ')', ']' -> break
                         else -> return Token(TokenType.InvalidSyntax, begin, reader.pointer+1, reader.substring(begin, reader.pointer))
                     }
                 }

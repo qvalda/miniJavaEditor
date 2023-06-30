@@ -1,12 +1,11 @@
 package ruleProviders
 
-import EditorTextCaret
-import EditorTextModel
-import TokenizedTextModel
+import editor.*
+import models.TokenizedTextModel
 import tokenizer.Token
 import tokenizer.TokenType
 
-class BracketFormattingRuleProvider(private val textModel: EditorTextModel, private val tokenizedModel: TokenizedTextModel) : IFormattingRuleProvider {
+class BracketFormattingRuleProvider(textModel: TextEditorModel, private val tokenizedModel: TokenizedTextModel) : IFormattingRuleProvider {
 
     private var highlightedBrackets = mutableListOf<Token>()
 
@@ -14,7 +13,7 @@ class BracketFormattingRuleProvider(private val textModel: EditorTextModel, priv
         textModel.onCaretMove += ::onCaretMove
     }
 
-    private fun onCaretMove(caret: EditorTextCaret) {
+    private fun onCaretMove(caret: TextEditorCaret) {
         highlightedBrackets.clear()
         val line = tokenizedModel.lines[caret.line]
         val bracket = line.firstOrNull { t -> t.type.isBracket() && caret.column >= t.beginIndex && caret.column <= t.endIndex }
@@ -23,29 +22,29 @@ class BracketFormattingRuleProvider(private val textModel: EditorTextModel, priv
             val pairBracket = getPairBracket(bracket.type)
             val lookupDirection = getLookupDirection(bracket.type)
 
-            var skipCount = 0;
             val seq = when (lookupDirection) {
                 LookupDirection.Backward -> tokenizedModel.iterateTokensBackward(caret.line, line.indexOf(bracket))
                 LookupDirection.Forward -> tokenizedModel.iterateTokens(caret.line, line.indexOf(bracket))
             }
 
-            for (t in seq) {
-                if (t.first.type == pairBracket) {
+            var skipCount = 0
+            for (token in seq) {
+                if (token.first.type == pairBracket) {
                     if (skipCount == 0) {
-                        highlightedBrackets.add(t.first)
+                        highlightedBrackets.add(token.first)
                         break
                     } else {
                         skipCount--
                     }
-                } else if (t.first.type == bracket.type) {
+                } else if (token.first.type == bracket.type) {
                     skipCount++
                 }
             }
         }
     }
 
-    override fun getFormattingRule(lineIndex: Int): Array<FormattingRule> {
-        val rules = ArrayList<FormattingRule>()
+    override fun getFormattingRule(lineIndex: Int): List<FormattingRule> {
+        val rules = mutableListOf<FormattingRule>()
 
         for (token in tokenizedModel.lines[lineIndex]) {
             if (token in highlightedBrackets) {
@@ -53,7 +52,7 @@ class BracketFormattingRuleProvider(private val textModel: EditorTextModel, priv
             }
         }
 
-        return rules.toTypedArray()
+        return rules
     }
 
     enum class LookupDirection {

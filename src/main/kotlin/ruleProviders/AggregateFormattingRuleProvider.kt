@@ -1,8 +1,11 @@
 package ruleProviders
 
-class AggregateFormattingRuleProvider(private val providers: Array<IFormattingRuleProvider>) : IFormattingRuleProvider {
+import editor.FormattingRule
+import editor.IFormattingRuleProvider
 
-    override fun getFormattingRule(lineIndex: Int): Array<FormattingRule> {
-        return providers.flatMap { p -> p.getFormattingRule(lineIndex).asIterable() }.toTypedArray()
+class AggregateFormattingRuleProvider(private vararg val providers: IFormattingRuleProvider) : IFormattingRuleProvider {
+
+    override fun getFormattingRule(lineIndex: Int): List<FormattingRule> {
+        return providers.flatMap { p -> p.getFormattingRule(lineIndex) }
     }
 }

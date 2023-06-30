@@ -1,4 +1,4 @@
-package ruleProviders
+package editor
 
 import java.awt.Color
 

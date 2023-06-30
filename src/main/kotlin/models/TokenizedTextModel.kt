@@ -1,7 +1,10 @@
+package models
+
+import editor.TextEditorModel
 import tokenizer.Token
 import tokenizer.Tokenizer
 
-class TokenizedTextModel(private val textModel: EditorTextModel) {
+class TokenizedTextModel(private val textModel: TextEditorModel) {
 
     var lines: MutableList<Array<Token>>
     private val tokenizer = Tokenizer()
@@ -46,8 +49,8 @@ class TokenizedTextModel(private val textModel: EditorTextModel) {
                 yield(Pair(lines[startIndex][index], startIndex))
             }
             for (index in startIndex - 1 downTo 0) {
-                for (t in lines[index].reversed()) {
-                    yield(Pair(t, index))
+                for (t in lines[index].size -1 downTo 0) {
+                    yield(Pair(lines[index][t], index))
                 }
             }
         }

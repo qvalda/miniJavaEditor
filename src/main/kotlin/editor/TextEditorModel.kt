@@ -1,23 +1,25 @@
+package editor
+
 import helpers.Event
 import kotlin.math.max
 import kotlin.math.min
 
-class EditorTextModel (text:String) {
+class TextEditorModel (text:String = "") {
     val onLineDelete = Event<Int>()
     val onLineModified = Event<Int>()
     val onLineAdd = Event<Int>()
-    val onCaretMove = Event<EditorTextCaret>()
+    val onCaretMove = Event<TextEditorCaret>()
 
     var lines = ArrayList<String>()
     var maxLength = 0;
-    var beginCaret: EditorTextCaret = EditorTextCaret()
+    var beginCaret: TextEditorCaret = TextEditorCaret()
         set(value) {
             if (field != value) {
                 field = value
                 onCaretMove(field)
             }
         }
-    var endCaret: EditorTextCaret
+    var endCaret: TextEditorCaret
 
     init {
         val input = text.replace("\r", "").replace("\t", "    ");
@@ -26,8 +28,8 @@ class EditorTextModel (text:String) {
             lines.add(s)
             maxLength = max(maxLength, s.length)
         }
-        beginCaret = EditorTextCaret()
-        endCaret = EditorTextCaret()
+        beginCaret = TextEditorCaret()
+        endCaret = TextEditorCaret()
     }
 
     private fun updateMaxLength() {
@@ -103,7 +105,7 @@ class EditorTextModel (text:String) {
     fun tabAction() {
         deleteSelection()
         insertInLine(beginCaret.line, beginCaret.column, "    ")
-        repeat(4){ //todo opt
+        repeat(4) { //todo opt
             moveBeginCaretRight()
         }
     }
@@ -148,13 +150,13 @@ class EditorTextModel (text:String) {
         endCaret = moveCaretLeft(endCaret)
     }
 
-    private fun moveCaretLeft(caret: EditorTextCaret): EditorTextCaret {
+    private fun moveCaretLeft(caret: TextEditorCaret): TextEditorCaret {
         if (caret.line == 0 && caret.column == 0) return caret
         if (caret.column > 0) {
-            return EditorTextCaret(caret.line, caret.column - 1)
+            return TextEditorCaret(caret.line, caret.column - 1)
         } else {
             val line = max(caret.line - 1, 0)
-            return EditorTextCaret(line, lines[line].length)
+            return TextEditorCaret(line, lines[line].length)
         }
     }
 
@@ -167,12 +169,12 @@ class EditorTextModel (text:String) {
         endCaret = moveCaretRight(endCaret)
     }
 
-    private fun moveCaretRight(caret: EditorTextCaret): EditorTextCaret {
+    private fun moveCaretRight(caret: TextEditorCaret): TextEditorCaret {
         if (caret.line == lines.size - 1 && caret.column == lines[lines.size - 1].length) return caret
         if (caret.column < lines[caret.line].length) {
-            return EditorTextCaret(caret.line, caret.column + 1)
+            return TextEditorCaret(caret.line, caret.column + 1)
         } else {
-            return EditorTextCaret(min(caret.line + 1, lines.size - 1), 0)
+            return TextEditorCaret(min(caret.line + 1, lines.size - 1), 0)
         }
     }
 
@@ -185,10 +187,10 @@ class EditorTextModel (text:String) {
         endCaret = moveCaretDown(endCaret)
     }
 
-    private fun moveCaretDown(caret: EditorTextCaret): EditorTextCaret {
+    private fun moveCaretDown(caret: TextEditorCaret): TextEditorCaret {
         val line = min(caret.line + 1, lines.size - 1)
         val column = min(caret.column, lines[line].length)
-        return EditorTextCaret(line, column)
+        return TextEditorCaret(line, column)
     }
 
     fun moveBeginCaretUp() {
@@ -200,10 +202,10 @@ class EditorTextModel (text:String) {
         endCaret = moveCaretUp(endCaret)
     }
 
-    private fun moveCaretUp(caret: EditorTextCaret): EditorTextCaret {
+    private fun moveCaretUp(caret: TextEditorCaret): TextEditorCaret {
         val line = max(caret.line - 1, 0)
         val column = min(caret.column, lines[line].length)
-        return EditorTextCaret(line, column)
+        return TextEditorCaret(line, column)
     }
 
     fun updateEndCaret(lineIndex: Int, columnIndex: Int) {
@@ -214,9 +216,9 @@ class EditorTextModel (text:String) {
         beginCaret = getAdjustedCaret(lineIndex, columnIndex)
     }
 
-    private fun getAdjustedCaret(lineIndex: Int, columnIndex: Int): EditorTextCaret {
+    private fun getAdjustedCaret(lineIndex: Int, columnIndex: Int): TextEditorCaret {
         val line = lineIndex.coerceIn(0, lines.size - 1)
         val column = columnIndex.coerceIn(0, lines[line].length)
-        return EditorTextCaret(line, column)
+        return TextEditorCaret(line, column)
     }
 }

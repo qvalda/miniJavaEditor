@@ -1,6 +1,6 @@
 package parser
 
-import TokensSource
+import tokenizer.TokensSource
 import tokenizer.TokenType
 import java.lang.Exception
 

@@ -1,10 +1,8 @@
-import parser.BinaryExpression
-import parser.Grammar
-//import parser.Parser
+package toDelete//import parser.Parser
 import parser.RecursiveParser
-import tokenizer.Token
 import tokenizer.TokenType
 import tokenizer.Tokenizer
+import tokenizer.TokensSource
 import java.io.File
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
@@ -48,13 +46,13 @@ fun main(args: Array<String>) {
 //    println(time)
 //    time =measureTimedValue{
 //        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
-//        p1.parse(TokensSource(tokens1), Grammar.Program)
+//        p1.parse(tokenizer.TokensSource(tokens1), Grammar.Program)
 //        println(tokens1)
 //    }
 //    println(time)
 //    time =measureTimedValue{
 //        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
-//        p1.parse(TokensSource(tokens1), Grammar.Program)
+//        p1.parse(tokenizer.TokensSource(tokens1), Grammar.Program)
 //        println(tokens1)
 //    }
 //    println(time)
@@ -70,8 +68,8 @@ fun main(args: Array<String>) {
     //val q = "public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} }"
 //    val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
 //    val tokens2 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace }.toTypedArray()
-//    p1.parse(TokensSource(tokens1), Grammar.Program)
-//    val parseExpression = p2.parse(TokensSource(tokens2))
+//    p1.parse(tokenizer.TokensSource(tokens1), Grammar.Program)
+//    val parseExpression = p2.parse(tokenizer.TokensSource(tokens2))
 //    println(parseExpression)
 //    for (token in tokens){
 //        if (token.type!= TokenType.Whitespace) {
@@ -84,32 +82,6 @@ fun main(args: Array<String>) {
 //    val selector1 = selector()
 //    selector() = 2
 //}
-
-class TokensSource(private val tokens : Array<Token>) {
-    private var index = 0;
-
-    fun accept() {
-        index++
-    }
-
-    fun isEOF(): Boolean {
-        return index >= tokens.size || tokens[index] == Token.EOF
-    }
-
-    val currentToken: Token
-        get() {
-            return tokens[index]
-        }
-    val nextToken: Token
-        get() {
-            return tokens[index + 1]
-        }
-    val nextToken2: Token
-        get() {
-            return tokens[index + 2]
-        }
-}
-
 
 
 /*

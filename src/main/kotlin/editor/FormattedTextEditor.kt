@@ -1,118 +1,48 @@
-import ruleProviders.*
+package editor
+
 import java.awt.*
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.JFrame
+import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 import kotlin.math.roundToInt
 
-
-class CGTemplate : JFrame() {
-    private val canvas: DrawCanvas
+class FormattedTextEditor(var model: TextEditorModel, var formattingRuleProvider: IFormattingRuleProvider) : JPanel(BorderLayout()) {
+    var canvas = FormattedTextPane(model, formattingRuleProvider)
+    val jsp = JScrollPane(canvas)
 
     init {
-        canvas = DrawCanvas() // Construct the drawing canvas
-        canvas.preferredSize = Dimension(CANVAS_WIDTH, CANVAS_HEIGHT)
+        jsp.verticalScrollBar.unitIncrement = 22;
+        jsp.horizontalScrollBar.unitIncrement = 22;
 
-        // Set the Drawing JPanel as the JFrame's content-pane
-        val cp = contentPane
-        cp.add(canvas)
-        // or "setContentPane(canvas);"
-        defaultCloseOperation = EXIT_ON_CLOSE // Handle the CLOSE button
-        pack() // Either pack() the components; or setSize()
-        title = "......" // "super" JFrame sets the title
-        isVisible = true // "super" JFrame show
-    }
-
-
-    companion object {
-        // Define constants
-        const val CANVAS_WIDTH = 500
-        const val CANVAS_HEIGHT = 500
-
-        // The entry main method
-        @JvmStatic
-        fun main(args: Array<String>) {
-
-            var canvas = DrawCanvas()
-            canvas.isFocusable = true
-            canvas.focusTraversalKeysEnabled = false;
-
-            //canvas.preferredSize = Dimension(CANVAS_WIDTH, CANVAS_HEIGHT)
-
-            val jsp = JScrollPane(canvas)
-
-            val frame = JFrame("Test")
-            frame.contentPane.add(jsp)
-            frame.pack()
-            frame.setSize(500, 500)
-            frame.setLocationRelativeTo(null)
-            frame.isVisible = true
-            frame.defaultCloseOperation = EXIT_ON_CLOSE
-            jsp.verticalScrollBar.unitIncrement = 22;
-            canvas.text = """class Factorial{
-    public static void main(String[] a){
-	System.out.println(new Fac().ComputeFac(10));
-    }
-}
-//todo
-class Fac {
-    { few
-    }
-    public int ComputeFac(int num){
-	int num_aux ; // abc
-    l = 'AB'
-    q = "dwq"
-	if (num < 1)
-	    num_aux = 1 ;
-	else
-	    num_aux = num * (this.ComputeFac(num-1)) ;
-	return num_aux ;
-    }
-
-}
-"""
-
-            //canvas.text = File("""D:\Kotlin\bigInput2.txt""").readText()
-
-//            // Run the GUI codes on the helpers.Event-Dispatching thread for thread safety
-//            SwingUtilities.invokeLater {
-//                CGTemplate() // Let the constructor do the job
-//            }
-        }
+        add(jsp)
     }
 }
 
-
-private class DrawCanvas : JPanel() {
+class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormattingRuleProvider) : JComponent() {
 
     var initialized = false
-
-    lateinit var model: EditorTextModel
     var letterHeight = 0
     var letterWidth = 0
 
-    lateinit var formattingRuleProvider: IFormattingRuleProvider
-
-    var text: String = ""
-        get() {
-            return field
-        }
+    var model = model
         set(value) {
             field = value
-            model = EditorTextModel(value)
-            val t = TokenizedTextModel(model)
-            val r1 = TokenizerFormattingRuleProvider(t)
-            val r2 = SelectionFormattingRuleProvider(model)
-            val r3 = BracketFormattingRuleProvider(model, t)
-            formattingRuleProvider = AggregateFormattingRuleProvider(arrayOf(r1, r2, r3))
+            repaint()
+        }
+    var formattingRuleProvider = formattingRuleProvider
+        set(value) {
+            field = value
             repaint()
         }
 
     init {
+        isFocusable = true
+        focusTraversalKeysEnabled = false;
+
         val mouseListener =  object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) {
                 onMousePressed(e)
@@ -206,6 +136,7 @@ private class DrawCanvas : JPanel() {
 
     fun onMousePressed(e: MouseEvent?) {
         if (e == null) return
+        requestFocus()
         if (!hasShiftModifier(e)) {
             model.updateBeginCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
         }
@@ -229,7 +160,9 @@ private class DrawCanvas : JPanel() {
     public override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
 
-        if (!this::model.isInitialized) return
+        //if (!this::model.isInitialized) return
+
+        drawBackground(g)
 
         setDefaultStyle(g)
         initValues(g)
@@ -284,27 +217,37 @@ private class DrawCanvas : JPanel() {
         updatePreferredSize()
     }
 
+    private fun drawBackground(g: Graphics) {
+        usingColor(g, Style.Background.background!!) {
+            val b = g.clipBounds
+            g.fillRect(
+                b.x,b.y, b.width, b.height
+            )
+        }
+    }
+
 //    private fun isLineVisible(lineY: Int, g: Graphics) =
 //        lineY >= g.clipBounds.y && lineY - letterHeight <= g.clipBounds.y + g.clipBounds.height
 
     private fun updatePreferredSize() { //todo optimize
         preferredSize = Dimension((model.maxLength + 10) * letterWidth, (model.lines.size + 1) * letterHeight)
+        revalidate()
     }
 
     private fun setDefaultStyle(g: Graphics) {
-        background = Style.Background.background
         g.color = Style.Background.color
         g.font = Font("Monospaced", Font.PLAIN, 16)
     }
 
     private fun drawCaret(g: Graphics) {
+        if(!hasFocus()) return //todo fix
         drawCaret(g, model.beginCaret)
         if (model.endCaret != model.beginCaret) {
             drawCaret(g, model.endCaret)
         }
     }
 
-    private fun drawCaret(g: Graphics, caret: EditorTextCaret) {
+    private fun drawCaret(g: Graphics, caret: TextEditorCaret) {
         usingColor(g, Style.Caret.color!!) {
             usingStroke(g, 2) {
                 g.drawLine(
@@ -317,14 +260,14 @@ private class DrawCanvas : JPanel() {
         }
     }
 
-    fun usingColor(g: Graphics, color: Color, statement: () -> Unit) {
+    private fun usingColor(g: Graphics, color: Color, statement: () -> Unit) {
         val prevColor = g.color
         g.color = color
         statement()
         g.color = prevColor
     }
 
-    fun usingBold(g: Graphics, isBold:Boolean, statement: () -> Unit) {
+    private fun usingBold(g: Graphics, isBold:Boolean, statement: () -> Unit) {
         if(isBold) {
             val prevFont = g.font
             g.font = Font(prevFont.name, Font.BOLD, prevFont.size)

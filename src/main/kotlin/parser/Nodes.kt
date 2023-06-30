@@ -2,7 +2,7 @@ package parser
 
 import tokenizer.TokenType
 
-open class Node()
+open class Node
 
 class Program(val mainClass: MainClass, val classes : Array<ClassDeclaration>) : Node()
 
@@ -16,13 +16,13 @@ class MethodDeclaration(val name: String?, val type: Type,val  arguments: Array<
 
 class FormalList(val type: Type, val name: String?): Node()
 
-open class Type(): Node()
-class BooleanType() : Type()
-class IntType() : Type()
-class IntArrayType() : Type()
+open class Type : Node()
+class BooleanType : Type()
+class IntType : Type()
+class IntArrayType : Type()
 class NameIdentifierType(val name: String?) : Type()
 
-open class Statement(): Node()
+open class Statement : Node()
 class IfElseStatement(val condition:Expression, val ifStatement:Statement, val elseStatement:Statement) : Statement()
 class BlockStatement(val statements: Array<Statement>) : Statement()
 class PrintStatement(val statement: Expression) : Statement()
@@ -39,8 +39,8 @@ class NewIntArrayExpression(val indexer: Expression) : Expression()
 class BracketExpression(val obj: Expression) : Expression()
 class LiteralExpression(val value: String?) : Expression()
 class NameIdentifierExpression(val name: String?) : Expression()
-class ThisExpression() : Expression()
-class TrueExpression() : Expression()
-class FalseExpression() : Expression()
+class ThisExpression : Expression()
+class TrueExpression : Expression()
+class FalseExpression : Expression()
 class LengthExpression(val obj: Expression) : Expression()
 class MethodCallExpression(val obj: Expression, val method: String?, val args: Array<Expression>) : Expression()
