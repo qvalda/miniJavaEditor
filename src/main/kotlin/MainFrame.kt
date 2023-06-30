@@ -71,9 +71,9 @@ class Fac {
         defaultCloseOperation = EXIT_ON_CLOSE
 
         mainModel.onTextModelChanged +=  {
-            editor.canvas.formattingRuleProvider =  EmptyFormattingRuleProvider() //todo remove hack
-            editor.canvas.model = mainModel.textModel
-            editor.canvas.formattingRuleProvider =   mainModel.formattingRuleProvider
+            editor.formattingRuleProvider =  EmptyFormattingRuleProvider() //todo remove hack
+            editor.model = mainModel.textModel
+            editor.formattingRuleProvider =   mainModel.formattingRuleProvider
         }
     }
 

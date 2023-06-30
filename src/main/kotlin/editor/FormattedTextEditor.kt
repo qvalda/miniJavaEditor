@@ -10,29 +10,50 @@ import javax.swing.JPanel
 import javax.swing.JScrollPane
 import kotlin.math.roundToInt
 
-class FormattedTextEditor(var model: TextEditorModel, var formattingRuleProvider: IFormattingRuleProvider) : JPanel(BorderLayout()) {
-    var canvas = FormattedTextPane(model, formattingRuleProvider)
-    val jsp = JScrollPane(canvas)
+class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IFormattingRuleProvider) : JPanel(BorderLayout()) {
+
+    private var textPane = FormattedTextPane(model, formattingRuleProvider)
+    private val scrollPane = JScrollPane(textPane)
+
+    var model: TextEditorModel
+        get() = textPane.model
+        set(value) {
+            textPane.model = value
+        }
+
+    var formattingRuleProvider: IFormattingRuleProvider
+        get() = textPane.formattingRuleProvider
+        set(value) {
+            textPane.formattingRuleProvider = value
+        }
 
     init {
-        jsp.verticalScrollBar.unitIncrement = 22;
-        jsp.horizontalScrollBar.unitIncrement = 22;
+        scrollPane.verticalScrollBar.unitIncrement = 22;
+        scrollPane.horizontalScrollBar.unitIncrement = 22;
 
-        add(jsp)
+        model.onCaretMove += ::onCaretMove
+
+        add(scrollPane)
+    }
+
+    private fun onCaretMove(textEditorCaret: TextEditorCaret) {
+        val horizontalScrollBar = scrollPane.horizontalScrollBar
+        println(horizontalScrollBar.value)
     }
 }
 
 class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormattingRuleProvider) : JComponent() {
 
-    var initialized = false
-    var letterHeight = 0
-    var letterWidth = 0
+    private var initialized = false
+    private var letterHeight = 0
+    private var letterWidth = 0
 
     var model = model
         set(value) {
             field = value
             repaint()
         }
+
     var formattingRuleProvider = formattingRuleProvider
         set(value) {
             field = value
@@ -132,6 +153,8 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
                 }
             }
         }
+
+        scrollRectToVisible(Rectangle(model.endCaret.column * letterWidth,(model.endCaret.line-1) * letterHeight,  letterWidth, letterHeight * 3))
     }
 
     fun onMousePressed(e: MouseEvent?) {
@@ -160,13 +183,12 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
     public override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
 
-        //if (!this::model.isInitialized) return
-
         drawBackground(g)
-
         setDefaultStyle(g)
         initValues(g)
         drawCaret(g)
+
+        //g.drawLine( 0, letterHeight, 100,letterHeight)
 
         val visibleLineFrom = (g.clipBounds.y  / letterHeight).coerceIn(0, model.lines.size-1)
         val visibleLineTo =  ((g.clipBounds.y + g.clipBounds.height)/letterHeight).coerceIn(0, model.lines.size-1)
