@@ -4,14 +4,16 @@ import helpers.Event
 import kotlin.math.max
 import kotlin.math.min
 
+class LineChangeArgs(val startIndex: Int, val count: Int)
+
 class TextEditorModel (text:String = "") {
-    val onLineDelete = Event<Int>()
+    val onLineDelete = Event<LineChangeArgs>()
     val onLineModified = Event<Int>()
     val onLineAdd = Event<Int>()
     val onCaretMove = Event<TextEditorCaret>()
 
-    var lines = ArrayList<String>()
-    var maxLength = 0;
+    var lines = mutableListOf<String>()
+    var maxLength = 0
     var beginCaret: TextEditorCaret = TextEditorCaret()
         set(value) {
             if (field != value) {
@@ -22,8 +24,8 @@ class TextEditorModel (text:String = "") {
     var endCaret: TextEditorCaret
 
     init {
-        val input = text.replace("\r", "").replace("\t", "    ");
-        maxLength = 0;
+        val input = text.replace("\r", "").replace("\t", "    ")
+        maxLength = 0
         for (s in input.split('\n')) {
             lines.add(s)
             maxLength = max(maxLength, s.length)
@@ -36,9 +38,9 @@ class TextEditorModel (text:String = "") {
         maxLength = lines.maxBy { l -> l.length }.length
     }
 
-    private fun deleteLine(lineIndex: Int) {
-        onLineDelete(lineIndex)
-        lines.removeAt(lineIndex)
+    private fun deleteLine(lineIndex: Int, count: Int = 1) {
+        onLineDelete(LineChangeArgs(lineIndex, count))
+        lines.subList(lineIndex, lineIndex + count).clear()
         updateMaxLength()
     }
 
@@ -123,9 +125,9 @@ class TextEditorModel (text:String = "") {
             val suffix = getSuffix(maxCaret.line, maxCaret.column)
             appendToLine(minCaret.line, suffix)
             val range = maxCaret.line - minCaret.line
-            repeat(range) {
-                deleteLine(minCaret.line + 1)
-            }
+            //repeat(range) {
+                deleteLine(minCaret.line + 1, range)
+            //}
         }
 
         beginCaret = minCaret

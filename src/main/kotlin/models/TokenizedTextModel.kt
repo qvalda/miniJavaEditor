@@ -1,5 +1,6 @@
 package models
 
+import editor.LineChangeArgs
 import editor.TextEditorModel
 import tokenizer.Token
 import tokenizer.Tokenizer
@@ -17,8 +18,8 @@ class TokenizedTextModel(private val textModel: TextEditorModel) {
         textModel.onLineAdd += ::onLineAdd
     }
 
-    private fun onLineDelete(lineIndex: Int) {
-        lines.removeAt(lineIndex)
+    private fun onLineDelete(lineChangeArgs: LineChangeArgs) {
+        lines.subList(lineChangeArgs.startIndex, lineChangeArgs.startIndex + lineChangeArgs.count).clear()
     }
 
     private fun onLineModified(lineIndex: Int) {

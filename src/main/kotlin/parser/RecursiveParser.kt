@@ -238,7 +238,7 @@ class RecursiveParser(private val ts: TokensSource) {
 
     fun parseExpression(): Expression {
 
-        val exp = parseSimpleExpression();
+        val exp = parseSimpleExpression()
 
         when (ts.currentToken.type) {
             //expression ('&&' | '<' | '+' | '-' | '*') expression

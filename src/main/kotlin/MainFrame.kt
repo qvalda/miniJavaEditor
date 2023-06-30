@@ -3,10 +3,7 @@ import models.FileBrowserCodeSource
 import models.MainModel
 import ruleProviders.EmptyFormattingRuleProvider
 import java.awt.BorderLayout
-import javax.swing.JButton
-import javax.swing.JFrame
-import javax.swing.JToolBar
-import javax.swing.SwingUtilities
+import javax.swing.*
 
 class MainFrame : JFrame() {
 
@@ -60,9 +57,10 @@ class Fac {
         toolbar.add(pasteButton)
 
         val editor = FormattedTextEditor(mainModel.textModel, mainModel.formattingRuleProvider)
+        val scrollPane = JScrollPane(editor)
 
-        contentPane.add(toolbar, BorderLayout.NORTH);
-        contentPane.add(editor, BorderLayout.CENTER);
+        contentPane.add(toolbar, BorderLayout.NORTH)
+        contentPane.add(scrollPane, BorderLayout.CENTER)
 
         pack()
         setSize(800, 600)

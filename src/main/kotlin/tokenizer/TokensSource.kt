@@ -1,7 +1,7 @@
 package tokenizer
 
 class TokensSource(private val tokens : Array<Token>) {
-    private var index = 0;
+    private var index = 0
 
     fun accept() {
         index++

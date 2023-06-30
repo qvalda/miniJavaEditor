@@ -1,9 +1,12 @@
 package editor
 
 import java.awt.Color
+import java.awt.Font
 
 class Style(val color: Color? = null, val background: Color? = null, val underline: Color? = null, val isBold : Boolean = false){
     companion object {
+
+        val Font = Font("Courier New", java.awt.Font.PLAIN, 16)
 
         val BackgroundColor = Color(40, 42, 54)
         val CurrentLineColor = Color(68, 71, 90)

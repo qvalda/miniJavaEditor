@@ -13,7 +13,7 @@ class Tokenizer {
     private fun tryReadWhiteSpaceToken(reader: CharArraySafeReader): Token? {
         if (reader.currentChar !in whiteSpaces) return null
 
-        val begin = reader.pointer;
+        val begin = reader.pointer
         while (reader.moveNext()) {
             when (reader.currentChar) {
                 in whiteSpaces -> continue
@@ -27,14 +27,14 @@ class Tokenizer {
 
     private fun tryReadNewLineToken(reader: CharArraySafeReader): Token? {
         if (reader.currentChar != '\n') return null
-        val begin = reader.pointer;
+        val begin = reader.pointer
         reader.moveNext()
         return Token(TokenType.NewLine, begin, begin+1)
     }
 
     private fun tryReadBracketToken(reader: CharArraySafeReader): Token? {
         if(reader.currentChar !in Tokens.brackets) return null
-        val begin = reader.pointer;
+        val begin = reader.pointer
         val type = Tokens.brackets[reader.currentChar]
         reader.moveNext()
 
@@ -43,7 +43,7 @@ class Tokenizer {
 
     private fun tryReadSymbolToken(reader: CharArraySafeReader): Token? {
         if(reader.currentChar !in Tokens.symbols) return null
-        val begin = reader.pointer;
+        val begin = reader.pointer
         val type = Tokens.symbols[reader.currentChar]
         reader.moveNext()
 
@@ -53,7 +53,7 @@ class Tokenizer {
     private fun tryReadLiteralStringToken(reader: CharArraySafeReader): Token? {
         if(reader.currentChar != '"') return null
 
-        val begin = reader.pointer;
+        val begin = reader.pointer
         while (reader.moveNext()) {
             when (reader.currentChar) {
                 '"' -> {
@@ -71,7 +71,7 @@ class Tokenizer {
     private fun tryReadLiteralCharToken(reader: CharArraySafeReader): Token? {
         if(reader.currentChar != '\'') return null
 
-        val begin = reader.pointer;
+        val begin = reader.pointer
         var state = LiteralCharParserStates.OpenBracket
         while (reader.moveNext()) {
             when (state){
@@ -94,7 +94,7 @@ class Tokenizer {
     private fun tryReadLiteralNumericToken(reader: CharArraySafeReader): Token? {
         if (reader.currentChar !in numbers) return null
 
-        val begin = reader.pointer;
+        val begin = reader.pointer
         var state = LiteralNumberParserStates.IntegerPart
         while (reader.moveNext()) {
             when (state) {
@@ -138,7 +138,7 @@ class Tokenizer {
     private fun tryReadIdentifierToken(reader: CharArraySafeReader): Token? {
         if (reader.currentChar !in letters) return null
 
-        val begin = reader.pointer;
+        val begin = reader.pointer
         while (reader.moveNext()) {
             when (reader.currentChar) {
                 in lettersWithNumbers -> continue
@@ -159,7 +159,7 @@ class Tokenizer {
     private fun tryReadCommentToken(reader: CharArraySafeReader): Token? {
         if (reader.currentChar != '/' || reader.getNextChar() != '/') return null
 
-        val begin = reader.pointer;
+        val begin = reader.pointer
         while (reader.moveNext()) {
             when (reader.currentChar) {
                 '\r', '\n' -> break
@@ -172,7 +172,7 @@ class Tokenizer {
 
     private fun tryReadOperatorToken(reader: CharArraySafeReader): Token? {
         if (reader.currentChar !in operatorChars) return null
-        val begin = reader.pointer;
+        val begin = reader.pointer
         if (reader.getNextChar() in operatorChars) {
             val doubleCharOperator = String(charArrayOf(reader.currentChar, reader.getNextChar()))
             val operator = Tokens.operators[doubleCharOperator]
@@ -194,7 +194,7 @@ class Tokenizer {
     }
 
     private fun createUndefinedToken(reader: CharArraySafeReader): Token {
-        val begin = reader.pointer;
+        val begin = reader.pointer
         reader.moveNext()
         return Token(TokenType.NotDefined,begin,begin+1)
     }

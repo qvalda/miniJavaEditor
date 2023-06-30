@@ -20,15 +20,14 @@ class BracketFormattingRuleProvider(textModel: TextEditorModel, private val toke
         if (bracket != null) {
             highlightedBrackets.add(bracket)
             val pairBracket = getPairBracket(bracket.type)
-            val lookupDirection = getLookupDirection(bracket.type)
 
-            val seq = when (lookupDirection) {
+            val tokens = when (getLookupDirection(bracket.type)) {
                 LookupDirection.Backward -> tokenizedModel.iterateTokensBackward(caret.line, line.indexOf(bracket))
                 LookupDirection.Forward -> tokenizedModel.iterateTokens(caret.line, line.indexOf(bracket))
             }
 
             var skipCount = 0
-            for (token in seq) {
+            for (token in tokens) {
                 if (token.first.type == pairBracket) {
                     if (skipCount == 0) {
                         highlightedBrackets.add(token.first)

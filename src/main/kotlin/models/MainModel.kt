@@ -11,7 +11,7 @@ import tokenizer.Tokenizer
 class MainModel (private val codeSource: ICodeSource, defaultText:String) {
     var textModel = TextEditorModel(defaultText)
     val tokenizer = Tokenizer()
-    var tokenizedTextModel = TokenizedTextModel(textModel)
+    private var tokenizedTextModel = TokenizedTextModel(textModel)
     var formattingRuleProvider = createFormattingRuleProvider()
 
     val onTextModelChanged = Event<Int>()

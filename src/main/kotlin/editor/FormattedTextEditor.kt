@@ -5,48 +5,16 @@ import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.JComponent
-import javax.swing.JPanel
-import javax.swing.JScrollPane
+import javax.swing.*
 import kotlin.math.roundToInt
 
-class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IFormattingRuleProvider) : JPanel(BorderLayout()) {
-
-    private var textPane = FormattedTextPane(model, formattingRuleProvider)
-    private val scrollPane = JScrollPane(textPane)
-
-    var model: TextEditorModel
-        get() = textPane.model
-        set(value) {
-            textPane.model = value
-        }
-
-    var formattingRuleProvider: IFormattingRuleProvider
-        get() = textPane.formattingRuleProvider
-        set(value) {
-            textPane.formattingRuleProvider = value
-        }
-
-    init {
-        scrollPane.verticalScrollBar.unitIncrement = 22;
-        scrollPane.horizontalScrollBar.unitIncrement = 22;
-
-        model.onCaretMove += ::onCaretMove
-
-        add(scrollPane)
-    }
-
-    private fun onCaretMove(textEditorCaret: TextEditorCaret) {
-        val horizontalScrollBar = scrollPane.horizontalScrollBar
-        println(horizontalScrollBar.value)
-    }
-}
-
-class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormattingRuleProvider) : JComponent() {
+class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IFormattingRuleProvider) : JComponent(), Scrollable {
 
     private var initialized = false
     private var letterHeight = 0
+    private var letterShift = 0
     private var letterWidth = 0
+    private var prevPreferredSize = Dimension(0, 0)
 
     var model = model
         set(value) {
@@ -62,9 +30,9 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
 
     init {
         isFocusable = true
-        focusTraversalKeysEnabled = false;
+        focusTraversalKeysEnabled = false
 
-        val mouseListener =  object : MouseAdapter() {
+        val mouseListener = object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) {
                 onMousePressed(e)
             }
@@ -78,7 +46,7 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
             }
         }
 
-        val keyListener = object : KeyAdapter(){
+        val keyListener = object : KeyAdapter() {
             override fun keyPressed(e: KeyEvent?) {
                 onKeyPressed(e)
             }
@@ -91,70 +59,77 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
 
     private fun onKeyPressed(e: KeyEvent?) {
         e?.consume()
-        if (e ==null) return
-        when(e.keyCode)
-        {
+        if (e == null) return
+        when (e.keyCode) {
             KeyEvent.VK_BACK_SPACE -> {
                 model.backSpaceAction()
-                repaint()
+                afterInput()
             }
+
             KeyEvent.VK_DELETE -> {
                 model.deleteAction()
-                repaint()
+                afterInput()
             }
+
             KeyEvent.VK_TAB -> {
                 model.tabAction()
-                repaint()
+                afterInput()
             }
+
             KeyEvent.VK_UP -> {
                 if (hasShiftModifier(e)) {
                     model.moveEndCaretUp()
-                }
-                else{
+                } else {
                     model.moveBeginCaretUp()
                 }
-                repaint()
+                afterInput()
             }
+
             KeyEvent.VK_DOWN -> {
                 if (hasShiftModifier(e)) {
                     model.moveEndCaretDown()
-                }
-                else{
+                } else {
                     model.moveBeginCaretDown()
                 }
-                repaint()
+                afterInput()
             }
+
             KeyEvent.VK_LEFT -> {
                 if (hasShiftModifier(e)) {
                     model.moveEndCaretLeft()
-                }
-                else{
+                } else {
                     model.moveBeginCaretLeft()
                 }
-                repaint()
+                afterInput()
             }
+
             KeyEvent.VK_RIGHT -> {
                 if (hasShiftModifier(e)) {
                     model.moveEndCaretRight()
-                }
-                else{
+                } else {
                     model.moveBeginCaretRight()
                 }
-                repaint()
+                afterInput()
             }
+
             KeyEvent.VK_ENTER -> {
                 model.enterAction()
-                repaint()
+                afterInput()
             }
+
             else -> {
                 if (e.keyChar.isDefined() && e.keyCode != KeyEvent.VK_ESCAPE) {
                     model.addChar(e.keyChar)
-                    repaint()
+                    afterInput()
                 }
             }
         }
+    }
 
-        scrollRectToVisible(Rectangle(model.endCaret.column * letterWidth,(model.endCaret.line-1) * letterHeight,  letterWidth, letterHeight * 3))
+    private fun afterInput() {
+        repaint()
+        updatePreferredSize()
+        scrollRectToVisible(Rectangle(model.endCaret.column * letterWidth, (model.endCaret.line - 1) * letterHeight, letterWidth, letterHeight * 3))
     }
 
     fun onMousePressed(e: MouseEvent?) {
@@ -164,7 +139,7 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
             model.updateBeginCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
         }
         model.updateEndCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
-        this.repaint()
+        repaint()
     }
 
     private fun hasShiftModifier(e: MouseEvent) = (e.modifiersEx and KeyEvent.SHIFT_DOWN_MASK) != 0
@@ -177,7 +152,8 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
     fun onMouseDragged(e: MouseEvent?) {
         if (e == null) return
         model.updateEndCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
-        this.repaint()
+        //repaint()
+        afterInput()
     }
 
     public override fun paintComponent(g: Graphics) {
@@ -188,14 +164,12 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
         initValues(g)
         drawCaret(g)
 
-        //g.drawLine( 0, letterHeight, 100,letterHeight)
+        val visibleLineFrom = (g.clipBounds.y / letterHeight).coerceIn(0, model.lines.size - 1)
+        val visibleLineTo = ((g.clipBounds.y + g.clipBounds.height) / letterHeight).coerceIn(0, model.lines.size - 1)
 
-        val visibleLineFrom = (g.clipBounds.y  / letterHeight).coerceIn(0, model.lines.size-1)
-        val visibleLineTo =  ((g.clipBounds.y + g.clipBounds.height)/letterHeight).coerceIn(0, model.lines.size-1)
-
-        for (lineIndex in visibleLineFrom..visibleLineTo){
+        for (lineIndex in visibleLineFrom..visibleLineTo) {
             val line = model.lines[lineIndex]
-            val lineY = letterHeight + lineIndex * letterHeight
+            val lineY = letterHeight + lineIndex * letterHeight - letterShift
 
             val rules = formattingRuleProvider.getFormattingRule(lineIndex)
 
@@ -203,9 +177,9 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
                 usingColor(g, rule.style.background!!) {
                     g.fillRect(
                         rule.start * letterWidth,
-                        lineIndex * letterHeight + 8,
+                        lineIndex * letterHeight,
                         (rule.end - rule.start) * letterWidth,
-                        letterHeight - 3
+                        letterHeight
                     )
                 }
             }
@@ -227,9 +201,9 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
                     usingStroke(g, 2) {
                         g.drawLine(
                             rule.start * letterWidth,
-                            lineIndex * letterHeight + letterHeight + 3,
+                            lineIndex * letterHeight + letterHeight,
                             rule.end * letterWidth,
-                            lineIndex * letterHeight + letterHeight + 3
+                            lineIndex * letterHeight + letterHeight
                         )
                     }
                 }
@@ -242,27 +216,26 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
     private fun drawBackground(g: Graphics) {
         usingColor(g, Style.Background.background!!) {
             val b = g.clipBounds
-            g.fillRect(
-                b.x,b.y, b.width, b.height
-            )
+            g.fillRect(b.x, b.y, b.width, b.height)
         }
     }
 
-//    private fun isLineVisible(lineY: Int, g: Graphics) =
-//        lineY >= g.clipBounds.y && lineY - letterHeight <= g.clipBounds.y + g.clipBounds.height
-
-    private fun updatePreferredSize() { //todo optimize
-        preferredSize = Dimension((model.maxLength + 10) * letterWidth, (model.lines.size + 1) * letterHeight)
-        revalidate()
+    private fun updatePreferredSize() {
+        val newPreferredSize = Dimension((model.maxLength + 10) * letterWidth, (model.lines.size) * letterHeight)
+        if (prevPreferredSize != newPreferredSize) {
+            preferredSize = newPreferredSize
+            prevPreferredSize = newPreferredSize
+            revalidate()
+        }
     }
 
     private fun setDefaultStyle(g: Graphics) {
         g.color = Style.Background.color
-        g.font = Font("Monospaced", Font.PLAIN, 16)
+        g.font = Style.Font
     }
 
     private fun drawCaret(g: Graphics) {
-        if(!hasFocus()) return //todo fix
+        if (!hasFocus()) return //todo fix
         drawCaret(g, model.beginCaret)
         if (model.endCaret != model.beginCaret) {
             drawCaret(g, model.endCaret)
@@ -274,9 +247,9 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
             usingStroke(g, 2) {
                 g.drawLine(
                     caret.column * letterWidth,
-                    caret.line * letterHeight + 9,
+                    caret.line * letterHeight,
                     caret.column * letterWidth,
-                    (caret.line + 1) * letterHeight + 4
+                    (caret.line + 1) * letterHeight
                 )
             }
         }
@@ -289,14 +262,13 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
         g.color = prevColor
     }
 
-    private fun usingBold(g: Graphics, isBold:Boolean, statement: () -> Unit) {
-        if(isBold) {
+    private fun usingBold(g: Graphics, isBold: Boolean, statement: () -> Unit) {
+        if (isBold) {
             val prevFont = g.font
             g.font = Font(prevFont.name, Font.BOLD, prevFont.size)
             statement()
             g.font = prevFont
-        }
-        else{
+        } else {
             statement()
         }
     }
@@ -315,8 +287,31 @@ class FormattedTextPane(model: TextEditorModel, formattingRuleProvider: IFormatt
     private fun initValues(g: Graphics) {
         if (!initialized) {
             letterHeight = g.fontMetrics.height
+            letterShift = g.fontMetrics.descent
             letterWidth = g.fontMetrics.stringWidth("w")
             initialized = true
         }
     }
+
+    //region Scrollable
+    override fun getPreferredScrollableViewportSize(): Dimension {
+        return preferredSize
+    }
+
+    override fun getScrollableUnitIncrement(visibleRect: Rectangle?, orientation: Int, direction: Int): Int {
+        return letterHeight
+    }
+
+    override fun getScrollableBlockIncrement(visibleRect: Rectangle?, orientation: Int, direction: Int): Int {
+        return letterHeight * 3
+    }
+
+    override fun getScrollableTracksViewportWidth(): Boolean {
+        return parent.size.width > preferredSize.width
+    }
+
+    override fun getScrollableTracksViewportHeight(): Boolean {
+        return parent.size.height > preferredSize.height
+    }
+    //endregion
 }
