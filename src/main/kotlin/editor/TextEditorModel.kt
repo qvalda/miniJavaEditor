@@ -34,6 +34,10 @@ class TextEditorModel (text:String = "") {
         endCaret = TextEditorCaret()
     }
 
+    fun getText():String {
+        return lines.joinToString("\r\n")
+    }
+
     private fun updateMaxLength() {
         maxLength = lines.maxBy { l -> l.length }.length
     }

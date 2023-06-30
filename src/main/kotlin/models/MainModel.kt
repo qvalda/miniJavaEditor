@@ -14,7 +14,7 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
     private var tokenizedTextModel = TokenizedTextModel(textModel)
     var formattingRuleProvider = createFormattingRuleProvider()
 
-    val onTextModelChanged = Event<Int>()
+    val onTextModelChanged = Event<Unit>()
 
     private fun createFormattingRuleProvider(): AggregateFormattingRuleProvider {
         val r1 = TokenizerFormattingRuleProvider(tokenizedTextModel)
@@ -25,12 +25,23 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
 
     fun openFile() {
         val code = codeSource.openCode()
-        if(code!=null) {
+        if (code != null) {
             textModel = TextEditorModel(code)
             tokenizedTextModel = TokenizedTextModel(textModel)
             formattingRuleProvider = createFormattingRuleProvider()
-
-            onTextModelChanged(0)
+            onTextModelChanged(Unit)
         }
+    }
+
+    fun newFile() {
+        textModel = TextEditorModel("")
+        tokenizedTextModel = TokenizedTextModel(textModel)
+        formattingRuleProvider = createFormattingRuleProvider()
+        onTextModelChanged(Unit)
+    }
+
+    fun saveFile() {
+        val text = textModel.getText()
+        codeSource.saveCode(text)
     }
 }

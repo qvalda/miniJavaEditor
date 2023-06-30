@@ -5,7 +5,7 @@ import ruleProviders.EmptyFormattingRuleProvider
 import java.awt.BorderLayout
 import javax.swing.*
 
-class MainFrame : JFrame() {
+class MainFrame : JFrame("Mini java editor") {
 
     init {
         //editor.canvas.text = File("""D:\Kotlin\bigInput2.txt""").readText()
@@ -34,15 +34,15 @@ class Fac {
 
         val mainModel = MainModel(FileBrowserCodeSource(this), text)
 
-        title = "Mini java editor"
-
         val toolbar = JToolBar()
         toolbar.isFloatable = false
 
         val newButton = JButton("new")
+        newButton.addActionListener { mainModel.newFile() }
         val openButton = JButton("open")
         openButton.addActionListener { mainModel.openFile() }
         val saveButton = JButton("save")
+        saveButton.addActionListener { mainModel.saveFile() }
 
         val cutButton = JButton("cut")
         val copyButton = JButton("copy")
