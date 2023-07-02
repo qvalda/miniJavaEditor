@@ -7,7 +7,20 @@ import org.junit.jupiter.params.provider.ValueSource
 import tokenizer.TokenType
 import tokenizer.Tokenizer
 
-class RecursiveParserTest {
+open class CodeTestBase {
+    protected fun getFileContent(name : String): String {
+        return RecursiveParserTest::class.java.classLoader.getResource(name)!!.readText()
+    }
+
+    fun <T> assertCollectionEquals(expected: Collection<T>, actual: Collection<T>) {
+        Assertions.assertEquals(expected.size, actual.size)
+        for (i in expected.indices) {
+            Assertions.assertEquals(expected.elementAt(i), actual.elementAt(i))
+        }
+    }
+}
+
+class RecursiveParserTest : CodeTestBase() {
 
     @ParameterizedTest
     @ValueSource(strings = arrayOf("binarysearch.javam","binarytree.javam","bubblesort.javam","factorial.javam","linearsearch.javam","linkedlist.javam","quicksort.javam","treevisitor.javam"))
@@ -18,14 +31,12 @@ class RecursiveParserTest {
     private fun parseFile(name : String) {
         val code = getFileContent(name)
         val t =
-            Tokenizer().getTokens(code).filter { t -> t.type != TokenType.Whitespace && t.type != TokenType.Comment }
+            Tokenizer().getTokens(code).filter { t -> t.type != TokenType.Comment }
                 .toTypedArray()
         val ts = TokensSource(t)
         val p = RecursiveParser(ts).parse()
-        Assertions.assertEquals(TokenType.EOF, ts.currentToken.type)
+        assert(ts.isEOF())
+        //Assertions.assertEquals(TokenType.EOF, ts.currentToken.type)
     }
 
-    private fun getFileContent(name : String): String {
-        return RecursiveParserTest::class.java.classLoader.getResource(name)!!.readText()
-    }
 }

@@ -1,26 +1,29 @@
 package tokenizer
 
-class TokensSource(private val tokens : Array<Token>) {
+interface ITokenSource {
+    val currentToken: Token
+    val nextToken: Token
+    fun accept()
+    fun isEOF(): Boolean
+}
+
+class TokensSource(private val tokens : Array<Token>) : ITokenSource {
     private var index = 0
 
-    fun accept() {
+    override fun accept() {
         index++
     }
 
-    fun isEOF(): Boolean {
-        return index >= tokens.size || tokens[index] == Token.EOF
+    override fun isEOF(): Boolean {
+        return index >= tokens.size
     }
 
-    val currentToken: Token
+    override val currentToken: Token
         get() {
             return tokens[index]
         }
-    val nextToken: Token
+    override val nextToken: Token
         get() {
             return tokens[index + 1]
-        }
-    val nextToken2: Token
-        get() {
-            return tokens[index + 2]
         }
 }

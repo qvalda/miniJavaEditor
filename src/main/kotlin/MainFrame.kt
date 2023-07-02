@@ -45,8 +45,11 @@ class Fac {
         saveButton.addActionListener { mainModel.saveFile() }
 
         val cutButton = JButton("cut")
+        cutButton.addActionListener { mainModel.cutAction() }
         val copyButton = JButton("copy")
+        copyButton.addActionListener { mainModel.copyAction() }
         val pasteButton = JButton("paste")
+        pasteButton.addActionListener { mainModel.pasteAction() }
 
         toolbar.add(newButton)
         toolbar.add(openButton)

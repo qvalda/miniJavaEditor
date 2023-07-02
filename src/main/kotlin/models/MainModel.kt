@@ -44,4 +44,16 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
         val text = textModel.getText()
         codeSource.saveCode(text)
     }
+
+    fun cutAction() {
+        textModel.cutAction()
+    }
+
+    fun copyAction() {
+        textModel.copyAction()
+    }
+
+    fun pasteAction() {
+        textModel.pasteAction()
+    }
 }

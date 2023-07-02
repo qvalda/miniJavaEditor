@@ -56,13 +56,13 @@ fun main(args: Array<String>) {
 //        println(tokens1)
 //    }
 //    println(time)
-    var time =measureTimedValue{
-        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace && t.type!=TokenType.Comment }.toTypedArray()
-        val ts = TokensSource(tokens1)
-        val p2 = RecursiveParser(ts)
-        val parseExpression = p2.parse()
-        println(parseExpression)
-    }
+//    var time =measureTimedValue{
+//        val tokens1 = tokenizer.getTokens(q).filter { t->t.type!= TokenType.Whitespace && t.type!=TokenType.Comment }.toTypedArray()
+//        val ts = TokensSource(tokens1)
+//        val p2 = RecursiveParser(ts)
+//        val parseExpression = p2.parse()
+//        println(parseExpression)
+//    }
 
 
     //val q = "public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} public int inc(int c){ if(c<1){c=c+1;}else{c=c-1;} return c+1;} }"

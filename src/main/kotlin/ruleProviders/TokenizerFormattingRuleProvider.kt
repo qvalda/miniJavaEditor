@@ -27,6 +27,8 @@ class TokenizerFormattingRuleProvider(private val tokenizedModel: TokenizedTextM
                 addRule(token, Style.Number)
             } else if (token.type == TokenType.LiteralString) {
                 addRule(token, Style.String)
+            } else if (token.type == TokenType.LiteralChar) {
+                addRule(token, Style.Char)
             }
         }
 

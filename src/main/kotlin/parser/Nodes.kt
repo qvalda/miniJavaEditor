@@ -4,15 +4,15 @@ import tokenizer.TokenType
 
 open class Node
 
-class Program(val mainClass: MainClass, val classes : Array<ClassDeclaration>) : Node()
+class Program(val mainClass: MainClass, val classes : List<ClassDeclaration>) : Node()
 
-class MainClass(val name: String?,val  variables: Array<VarDeclaration>,val  statements: Array<Statement>): Node()
+class MainClass(val name: String?,val  variables: List<VarDeclaration>,val  statements: List<Statement>): Node()
 
-class ClassDeclaration(val name:String?,val variables : Array<VarDeclaration>,val  methods : Array<MethodDeclaration>): Node()
+class ClassDeclaration(val name:String?, val baseName:String?, val variables : List<VarDeclaration>,val  methods : List<MethodDeclaration>): Node()
 
 class VarDeclaration(val name: String?, val type: Type): Node()
 
-class MethodDeclaration(val name: String?, val type: Type,val  arguments: Array<FormalList>, val variables: Array<VarDeclaration>, val statements: Array<Statement>, val returnExp: Expression): Node()
+class MethodDeclaration(val name: String?, val type: Type,val  arguments: List<FormalList>, val variables: List<VarDeclaration>, val statements: List<Statement>, val returnExp: Expression): Node()
 
 class FormalList(val type: Type, val name: String?): Node()
 
@@ -24,7 +24,7 @@ class NameIdentifierType(val name: String?) : Type()
 
 open class Statement : Node()
 class IfElseStatement(val condition:Expression, val ifStatement:Statement, val elseStatement:Statement) : Statement()
-class BlockStatement(val statements: Array<Statement>) : Statement()
+class BlockStatement(val statements: List<Statement>) : Statement()
 class PrintStatement(val statement: Expression) : Statement()
 class WhileStatement(val condition: Expression, val bodyStatement: Statement) : Statement()
 class AssignStatement(val name: String?, val value: Expression) : Statement()
@@ -43,4 +43,4 @@ class ThisExpression : Expression()
 class TrueExpression : Expression()
 class FalseExpression : Expression()
 class LengthExpression(val obj: Expression) : Expression()
-class MethodCallExpression(val obj: Expression, val method: String?, val args: Array<Expression>) : Expression()
+class MethodCallExpression(val obj: Expression, val method: String?, val args: List<Expression>) : Expression()

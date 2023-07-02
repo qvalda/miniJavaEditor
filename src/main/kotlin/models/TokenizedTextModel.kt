@@ -7,7 +7,7 @@ import tokenizer.Tokenizer
 
 class TokenizedTextModel(private val textModel: TextEditorModel) {
 
-    var lines: MutableList<Array<Token>>
+    var lines: MutableList<List<Token>>
     private val tokenizer = Tokenizer()
 
     init {

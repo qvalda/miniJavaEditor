@@ -17,7 +17,6 @@ class CharArraySafeReader(private val input: String) {
 
     fun moveNext(): Boolean {
         pointer++;
-        //if(input[pointer])
         return pointer < input.length
     }
 

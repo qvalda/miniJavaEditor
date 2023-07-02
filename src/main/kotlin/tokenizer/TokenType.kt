@@ -2,11 +2,11 @@ package tokenizer
 
 enum class TokenType {
     NotDefined,
-    EOF,
+    //EOF,
     InvalidSyntax,
 
-    Whitespace,
-    NewLine,
+    //Whitespace,
+    //NewLine,
     Comment,
     NameIdentifier,
 

@@ -16,9 +16,14 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
     private var letterWidth = 0
     private var prevPreferredSize = Dimension(0, 0)
 
+    init {
+        model.onViewModified += ::onViewModified
+    }
+
     var model = model
         set(value) {
             field = value
+            value.onViewModified += ::onViewModified
             repaint()
         }
 
@@ -33,21 +38,21 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
         focusTraversalKeysEnabled = false
 
         val mouseListener = object : MouseAdapter() {
-            override fun mousePressed(e: MouseEvent?) {
+            override fun mousePressed(e: MouseEvent) {
                 onMousePressed(e)
             }
 
-            override fun mouseDragged(e: MouseEvent?) {
+            override fun mouseDragged(e: MouseEvent) {
                 onMouseDragged(e)
             }
 
-            override fun mouseReleased(e: MouseEvent?) {
+            override fun mouseReleased(e: MouseEvent) {
                 onMouseReleased(e)
             }
         }
 
         val keyListener = object : KeyAdapter() {
-            override fun keyPressed(e: KeyEvent?) {
+            override fun keyPressed(e: KeyEvent) {
                 onKeyPressed(e)
             }
         }
@@ -57,83 +62,87 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
         addKeyListener(keyListener)
     }
 
-    private fun onKeyPressed(e: KeyEvent?) {
-        e?.consume()
-        if (e == null) return
-        when (e.keyCode) {
-            KeyEvent.VK_BACK_SPACE -> {
-                model.backSpaceAction()
-                afterInput()
-            }
+    private fun onKeyPressed(e: KeyEvent) {
+        e.consume()
+        if (hasCtrlModifier(e)) {
+            when (e.keyCode) {
+                KeyEvent.VK_A -> {
+                    model.selectAllAction()
+                    return
+                }
 
-            KeyEvent.VK_DELETE -> {
-                model.deleteAction()
-                afterInput()
-            }
+                KeyEvent.VK_X -> {
+                    model.cutAction()
+                    return
+                }
 
-            KeyEvent.VK_TAB -> {
-                model.tabAction()
-                afterInput()
-            }
+                KeyEvent.VK_C -> {
+                    model.copyAction()
+                    return
+                }
 
-            KeyEvent.VK_UP -> {
-                if (hasShiftModifier(e)) {
+                KeyEvent.VK_V -> {
+                    model.pasteAction()
+                    return
+                }
+
+                else -> return
+            }
+        }
+        if (hasShiftModifier(e)) {
+            when (e.keyCode) {
+                KeyEvent.VK_UP -> {
                     model.moveEndCaretUp()
-                } else {
-                    model.moveBeginCaretUp()
+                    return
                 }
-                afterInput()
-            }
 
-            KeyEvent.VK_DOWN -> {
-                if (hasShiftModifier(e)) {
+                KeyEvent.VK_DOWN -> {
                     model.moveEndCaretDown()
-                } else {
-                    model.moveBeginCaretDown()
+                    return
                 }
-                afterInput()
-            }
 
-            KeyEvent.VK_LEFT -> {
-                if (hasShiftModifier(e)) {
+                KeyEvent.VK_LEFT -> {
                     model.moveEndCaretLeft()
-                } else {
-                    model.moveBeginCaretLeft()
+                    return
                 }
-                afterInput()
-            }
 
-            KeyEvent.VK_RIGHT -> {
-                if (hasShiftModifier(e)) {
+                KeyEvent.VK_RIGHT -> {
                     model.moveEndCaretRight()
-                } else {
-                    model.moveBeginCaretRight()
+                    return
                 }
-                afterInput()
             }
+        }
+        when (e.keyCode) {
+            KeyEvent.VK_UP -> model.moveBeginCaretUp()
+            KeyEvent.VK_DOWN -> model.moveBeginCaretDown()
+            KeyEvent.VK_LEFT -> model.moveBeginCaretLeft()
+            KeyEvent.VK_RIGHT -> model.moveBeginCaretRight()
 
-            KeyEvent.VK_ENTER -> {
-                model.enterAction()
-                afterInput()
-            }
+            KeyEvent.VK_HOME -> model.homeAction()
+            KeyEvent.VK_END -> model.endAction()
+            KeyEvent.VK_PAGE_UP -> model.pageUpAction(parent.size.height / letterHeight)
+            KeyEvent.VK_PAGE_DOWN -> model.pageDownAction(parent.size.height / letterHeight)
 
+            KeyEvent.VK_BACK_SPACE -> model.backSpaceAction()
+            KeyEvent.VK_DELETE -> model.deleteAction()
+            KeyEvent.VK_TAB -> model.tabAction()
+            KeyEvent.VK_ENTER -> model.enterAction()
             else -> {
-                if (e.keyChar.isDefined() && e.keyCode != KeyEvent.VK_ESCAPE) {
+                if (e.keyChar.isDefined() && e.keyCode != KeyEvent.VK_ESCAPE && !hasCtrlModifier(e)) {
                     model.addChar(e.keyChar)
-                    afterInput()
                 }
             }
         }
     }
 
-    private fun afterInput() {
+    private fun onViewModified(a:Unit) {
+        println("onViewModified")
         repaint()
         updatePreferredSize()
         scrollRectToVisible(Rectangle(model.endCaret.column * letterWidth, (model.endCaret.line - 1) * letterHeight, letterWidth, letterHeight * 3))
     }
 
-    fun onMousePressed(e: MouseEvent?) {
-        if (e == null) return
+    fun onMousePressed(e: MouseEvent) {
         requestFocus()
         if (!hasShiftModifier(e)) {
             model.updateBeginCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
@@ -144,16 +153,14 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
 
     private fun hasShiftModifier(e: MouseEvent) = (e.modifiersEx and KeyEvent.SHIFT_DOWN_MASK) != 0
     private fun hasShiftModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.SHIFT_DOWN_MASK) != 0
+    private fun hasCtrlModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.CTRL_DOWN_MASK) != 0
 
-    fun onMouseReleased(e: MouseEvent?) {
+    fun onMouseReleased(e: MouseEvent) {
 
     }
 
-    fun onMouseDragged(e: MouseEvent?) {
-        if (e == null) return
+    fun onMouseDragged(e: MouseEvent) {
         model.updateEndCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
-        //repaint()
-        afterInput()
     }
 
     public override fun paintComponent(g: Graphics) {
