@@ -5,7 +5,7 @@ import models.TokenizedTextModel
 import tokenizer.Token
 import tokenizer.TokenType
 
-class BracketFormattingRuleProvider(textModel: TextEditorModel, private val tokenizedModel: TokenizedTextModel) : IFormattingRuleProvider {
+class BracketFormattingRuleProvider(textModel: TextEditorModel, private val tokenizedModel: TokenizedTextModel) : BaseFormattingRuleProvider() {
 
     private var highlightedBrackets = mutableListOf<Token>()
 
@@ -16,7 +16,7 @@ class BracketFormattingRuleProvider(textModel: TextEditorModel, private val toke
     private fun onCaretMove(caret: TextEditorCaret) {
         highlightedBrackets.clear()
         val line = tokenizedModel.lines[caret.line]
-        val bracket = line.firstOrNull { t -> t.type.isBracket() && caret.column >= t.beginIndex && caret.column <= t.endIndex }
+        val bracket = line.firstOrNull { t -> t.type.isBracket() && caret.column >= t.startIndex && caret.column <= t.endIndex }
         if (bracket != null) {
             highlightedBrackets.add(bracket)
             val pairBracket = getPairBracket(bracket.type)
@@ -42,12 +42,12 @@ class BracketFormattingRuleProvider(textModel: TextEditorModel, private val toke
         }
     }
 
-    override fun getFormattingRule(lineIndex: Int): List<FormattingRule> {
+    override fun getRules(lineIndex: Int): List<FormattingRule> {
         val rules = mutableListOf<FormattingRule>()
 
         for (token in tokenizedModel.lines[lineIndex]) {
             if (token in highlightedBrackets) {
-                rules.add(FormattingRule(token.beginIndex, token.endIndex, Style.Bracket))
+                rules.add(FormattingRule(token.startIndex, token.endIndex, Style.Bracket))
             }
         }
 

@@ -1,12 +1,9 @@
 package ruleProviders
 
-import editor.TextEditorModel
-import editor.FormattingRule
-import editor.IFormattingRuleProvider
-import editor.Style
+import editor.*
 
-class SelectionFormattingRuleProvider(private val textModel: TextEditorModel) : IFormattingRuleProvider {
-    override fun getFormattingRule(lineIndex: Int): List<FormattingRule> {
+class SelectionFormattingRuleProvider(private val textModel: TextEditorModel) : BaseFormattingRuleProvider() {
+    override fun getRules(lineIndex: Int): List<FormattingRule> {
         val minCaret = minOf(textModel.beginCaret, textModel.endCaret)
         val maxCaret = maxOf(textModel.beginCaret, textModel.endCaret)
 

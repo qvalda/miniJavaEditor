@@ -1,19 +1,19 @@
 package ruleProviders
 
+import editor.BaseFormattingRuleProvider
 import editor.FormattingRule
-import editor.IFormattingRuleProvider
 import editor.Style
 import models.TokenizedTextModel
 import tokenizer.Token
 import tokenizer.TokenType
 
-class TokenizerFormattingRuleProvider(private val tokenizedModel: TokenizedTextModel) : IFormattingRuleProvider {
+class TokenizerFormattingRuleProvider(private val tokenizedModel: TokenizedTextModel) : BaseFormattingRuleProvider() {
 
-    override fun getFormattingRule(lineIndex: Int): List<FormattingRule> {
+    override fun getRules(lineIndex: Int): List<FormattingRule> {
         val rules = mutableListOf<FormattingRule>()
 
         fun addRule(token: Token, style: Style) {
-            rules.add(FormattingRule(token.beginIndex, token.endIndex, style))
+            rules.add(FormattingRule(token.startIndex, token.endIndex, style))
         }
 
         for (token in tokenizedModel.lines[lineIndex]) {

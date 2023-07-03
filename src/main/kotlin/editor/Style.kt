@@ -9,7 +9,6 @@ class Style(val color: Color? = null, val background: Color? = null, val underli
         val Font = Font("Courier New", java.awt.Font.PLAIN, 16)
 
         val BackgroundColor = Color(40, 42, 54)
-        val CurrentLineColor = Color(68, 71, 90)
         val SelectionColor = Color(68, 71, 90)
         val ForegroundColor = Color(248, 248, 242)
         val CommentColor = Color(98, 114, 164)

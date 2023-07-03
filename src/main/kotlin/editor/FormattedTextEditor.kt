@@ -17,19 +17,21 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
     private var prevPreferredSize = Dimension(0, 0)
 
     init {
-        model.onViewModified += ::onViewModified
+        model.onViewModified += ::onRepaintRequest
+        formattingRuleProvider.changed += ::onRepaintRequest
     }
 
     var model = model
         set(value) {
             field = value
-            value.onViewModified += ::onViewModified
+            value.onViewModified += ::onRepaintRequest
             repaint()
         }
 
     var formattingRuleProvider = formattingRuleProvider
         set(value) {
             field = value
+            value.changed += ::onRepaintRequest
             repaint()
         }
 
@@ -135,8 +137,8 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
         }
     }
 
-    private fun onViewModified(a:Unit) {
-        println("onViewModified")
+    private fun onRepaintRequest(a:Unit) {
+        println("onRepaintRequest")
         repaint()
         updatePreferredSize()
         scrollRectToVisible(Rectangle(model.endCaret.column * letterWidth, (model.endCaret.line - 1) * letterHeight, letterWidth, letterHeight * 3))
@@ -178,7 +180,7 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
             val line = model.lines[lineIndex]
             val lineY = letterHeight + lineIndex * letterHeight - letterShift
 
-            val rules = formattingRuleProvider.getFormattingRule(lineIndex)
+            val rules = formattingRuleProvider.getRules(lineIndex)
 
             for (rule in rules.filter { r -> r.style.background != null }) {
                 usingColor(g, rule.style.background!!) {

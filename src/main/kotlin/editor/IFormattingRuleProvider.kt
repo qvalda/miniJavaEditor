@@ -1,5 +1,8 @@
 package editor
 
-interface IFormattingRuleProvider{
-    fun getFormattingRule(lineIndex: Int): List<FormattingRule>
+import helpers.Event
+
+interface IFormattingRuleProvider {
+    fun getRules(lineIndex: Int): List<FormattingRule>
+    val changed: Event<Unit>
 }

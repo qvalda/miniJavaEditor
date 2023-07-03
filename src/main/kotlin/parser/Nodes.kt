@@ -2,45 +2,88 @@ package parser
 
 import tokenizer.TokenType
 
-open class Node
+class NodeLocation(val lineIndex:Int, val startIndex : Int, val endIndex : Int)
 
-class Program(val mainClass: MainClass, val classes : List<ClassDeclaration>) : Node()
+open class BaseNode(val location: NodeLocation)
 
-class MainClass(val name: String?,val  variables: List<VarDeclaration>,val  statements: List<Statement>): Node()
+class ProgramNode(val mainClass: MainClassNode, val classes : List<ClassDeclarationNode>) : IVisitableNode {
+    override fun accept(v: IVisitor) {
+        v.visit(this)
+    }
+}
 
-class ClassDeclaration(val name:String?, val baseName:String?, val variables : List<VarDeclaration>,val  methods : List<MethodDeclaration>): Node()
+class MainClassNode(val name: String?, val  variables: List<VarDeclarationNode>, val  statements: List<StatementNode>, location: NodeLocation): BaseNode(location),IVisitableNode {
+    override fun accept(v: IVisitor) {
+        v.visit(this)
+    }
+}
 
-class VarDeclaration(val name: String?, val type: Type): Node()
+class ClassDeclarationNode(val name:String?, val baseName:String?, val variables : List<VarDeclarationNode>, val  methods : List<MethodDeclarationNode>, location: NodeLocation):BaseNode(location), IVisitableNode {
+    override fun accept(v: IVisitor) {
+        v.visit(this)
+    }
+}
 
-class MethodDeclaration(val name: String?, val type: Type,val  arguments: List<FormalList>, val variables: List<VarDeclaration>, val statements: List<Statement>, val returnExp: Expression): Node()
+class VarDeclarationNode(val name: String?, val type: TypeNodeNode, location: NodeLocation):BaseNode(location), IVisitableNode {
+    override fun accept(v: IVisitor) {
+        v.visit(this)
+    }
+}
 
-class FormalList(val type: Type, val name: String?): Node()
+class MethodDeclarationNode(val name: String?, val type: TypeNodeNode, val  arguments: List<FormalListNode>, val variables: List<VarDeclarationNode>, val statements: List<StatementNode>, val returnExp: ExpressionNode,
+                            location: NodeLocation
+):BaseNode(location), IVisitableNode {
+    override fun accept(v: IVisitor) {
+        v.visit(this)
+    }
+}
 
-open class Type : Node()
-class BooleanType : Type()
-class IntType : Type()
-class IntArrayType : Type()
-class NameIdentifierType(val name: String?) : Type()
+class FormalListNode(val type: TypeNodeNode, val name: String?): IVisitableNode {
+    override fun accept(v: IVisitor) {
+        v.visit(this)
+    }
+}
 
-open class Statement : Node()
-class IfElseStatement(val condition:Expression, val ifStatement:Statement, val elseStatement:Statement) : Statement()
-class BlockStatement(val statements: List<Statement>) : Statement()
-class PrintStatement(val statement: Expression) : Statement()
-class WhileStatement(val condition: Expression, val bodyStatement: Statement) : Statement()
-class AssignStatement(val name: String?, val value: Expression) : Statement()
-class AssignIndexerStatement(val name: String?, val indexer: Expression, val value: Expression) : Statement()
+open class TypeNodeNode : IVisitableNode {
+    override fun accept(v: IVisitor) {
+        v.visit(this)
+    }
+}
 
-open class Expression: Node()
-class BinaryExpression(val a: Expression, val b: Expression, val tokenType: TokenType) : Expression()
-class IndexerExpression(val obj: Expression, val indexer: Expression) : Expression()
-class NotExpression(val obj: Expression) : Expression()
-class NewExpression(val name: String?) : Expression()
-class NewIntArrayExpression(val indexer: Expression) : Expression()
-class BracketExpression(val obj: Expression) : Expression()
-class LiteralExpression(val value: String?) : Expression()
-class NameIdentifierExpression(val name: String?) : Expression()
-class ThisExpression : Expression()
-class TrueExpression : Expression()
-class FalseExpression : Expression()
-class LengthExpression(val obj: Expression) : Expression()
-class MethodCallExpression(val obj: Expression, val method: String?, val args: List<Expression>) : Expression()
+class BooleanTypeNode : TypeNodeNode()
+class IntTypeNode : TypeNodeNode()
+class IntArrayTypeNode : TypeNodeNode()
+class NameIdentifierTypeNode(val name: String?) : TypeNodeNode()
+
+open class StatementNode : IVisitableNode {
+    override fun accept(v: IVisitor) {
+        v.visit(this)
+    }
+}
+
+class IfElseStatementNode(val condition:ExpressionNode, val ifStatement:StatementNode, val elseStatement:StatementNode) : StatementNode()
+class BlockStatementNode(val statements: List<StatementNode>) : StatementNode()
+class PrintStatementNode(val statement: ExpressionNode) : StatementNode()
+class WhileStatementNode(val condition: ExpressionNode, val bodyStatement: StatementNode) : StatementNode()
+class AssignStatementNode(val name: String?, val value: ExpressionNode) : StatementNode()
+class AssignIndexerStatementNode(val name: String?, val indexer: ExpressionNode, val value: ExpressionNode) : StatementNode()
+
+open class ExpressionNode: IVisitableNode {
+    override fun accept(v: IVisitor) {
+        v.visit(this)
+    }
+}
+
+class BinaryExpressionNode(val a: ExpressionNode, val b: ExpressionNode, val tokenType: TokenType) : ExpressionNode()
+class IndexerExpressionNode(val obj: ExpressionNode, val indexer: ExpressionNode) : ExpressionNode()
+class NotExpressionNode(val obj: ExpressionNode) : ExpressionNode()
+class NewExpressionNode(val name: String?) : ExpressionNode()
+class NewIntArrayExpressionNode(val indexer: ExpressionNode) : ExpressionNode()
+class BracketExpressionNode(val obj: ExpressionNode) : ExpressionNode()
+class LiteralExpressionNode(val value: String?) : ExpressionNode()
+class NameIdentifierExpressionNode(val name: String?) : ExpressionNode()
+class ThisExpressionNode : ExpressionNode()
+class TrueExpressionNode : ExpressionNode()
+class FalseExpressionNode : ExpressionNode()
+class LengthExpressionNode(val obj: ExpressionNode) : ExpressionNode()
+class MethodCallExpressionNode(val obj: ExpressionNode, val method: String?, val args: List<ExpressionNode>) : ExpressionNode()

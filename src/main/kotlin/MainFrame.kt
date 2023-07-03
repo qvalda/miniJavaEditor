@@ -1,6 +1,11 @@
 import editor.FormattedTextEditor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.swing.Swing
 import models.FileBrowserCodeSource
 import models.MainModel
+import org.jetbrains.annotations.Debug
 import ruleProviders.EmptyFormattingRuleProvider
 import java.awt.BorderLayout
 import javax.swing.*
@@ -14,17 +19,14 @@ class MainFrame : JFrame("Mini java editor") {
 	System.out.println(new Fac().ComputeFac(10));
     }
 }
-//todo
+
 class Fac {
-    { few
-    }
+
     public int ComputeFac(int num){
-	int num_aux ; // abc
-    l = 'AB'
-    q = "dwq"
+	int num_aux ;
 	if (num < 1)
 	    num_aux = 1 ;
-	else
+	else 
 	    num_aux = num * (this.ComputeFac(num-1)) ;
 	return num_aux ;
     }
@@ -71,17 +73,18 @@ class Fac {
         isVisible = true
         defaultCloseOperation = EXIT_ON_CLOSE
 
-        mainModel.onTextModelChanged +=  {
-            editor.formattingRuleProvider =  EmptyFormattingRuleProvider() //todo remove hack
+        mainModel.onTextModelChanged += {
+            editor.formattingRuleProvider = EmptyFormattingRuleProvider() //todo remove hack
             editor.model = mainModel.textModel
-            editor.formattingRuleProvider =   mainModel.formattingRuleProvider
+            editor.formattingRuleProvider = mainModel.formattingRuleProvider
         }
     }
 
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            SwingUtilities.invokeLater {
+            CoroutineScope(Dispatchers.Swing).launch {
+                println("UI started on thread ${Thread.currentThread().threadId()}")
                 MainFrame()
             }
         }

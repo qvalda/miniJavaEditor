@@ -2,42 +2,29 @@ package models
 
 import editor.TextEditorModel
 import helpers.Event
-import ruleProviders.AggregateFormattingRuleProvider
-import ruleProviders.BracketFormattingRuleProvider
-import ruleProviders.SelectionFormattingRuleProvider
-import ruleProviders.TokenizerFormattingRuleProvider
-import tokenizer.Tokenizer
+import ruleProviders.*
 
 class MainModel (private val codeSource: ICodeSource, defaultText:String) {
-    var textModel = TextEditorModel(defaultText)
-    val tokenizer = Tokenizer()
-    private var tokenizedTextModel = TokenizedTextModel(textModel)
-    var formattingRuleProvider = createFormattingRuleProvider()
-
     val onTextModelChanged = Event<Unit>()
 
-    private fun createFormattingRuleProvider(): AggregateFormattingRuleProvider {
-        val r1 = TokenizerFormattingRuleProvider(tokenizedTextModel)
-        val r2 = SelectionFormattingRuleProvider(textModel)
-        val r3 = BracketFormattingRuleProvider(textModel, tokenizedTextModel)
-        return AggregateFormattingRuleProvider(r1, r2, r3)
+    lateinit var textModel : TextEditorModel
+    private lateinit var tokenizedTextModel : TokenizedTextModel
+    private lateinit var parsedTextModel : ParsedTextModel
+    lateinit var formattingRuleProvider : AggregateFormattingRuleProvider
+
+    init {
+        createModels(defaultText)
     }
 
     fun openFile() {
         val code = codeSource.openCode()
         if (code != null) {
-            textModel = TextEditorModel(code)
-            tokenizedTextModel = TokenizedTextModel(textModel)
-            formattingRuleProvider = createFormattingRuleProvider()
-            onTextModelChanged(Unit)
+            createModels(code)
         }
     }
 
     fun newFile() {
-        textModel = TextEditorModel("")
-        tokenizedTextModel = TokenizedTextModel(textModel)
-        formattingRuleProvider = createFormattingRuleProvider()
-        onTextModelChanged(Unit)
+        createModels("")
     }
 
     fun saveFile() {
@@ -55,5 +42,22 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
 
     fun pasteAction() {
         textModel.pasteAction()
+    }
+
+    private fun createFormattingRuleProvider(): AggregateFormattingRuleProvider {
+        val r1 = TokenizerFormattingRuleProvider(tokenizedTextModel)
+        val r2 = SelectionFormattingRuleProvider(textModel)
+        val r3 = BracketFormattingRuleProvider(textModel, tokenizedTextModel)
+        val r4 = ParserFormattingRuleProvider(parsedTextModel)
+        val r5 = UniqueClassNameVisitor(parsedTextModel)
+        return AggregateFormattingRuleProvider(r1, r2, r3, r4, r5)
+    }
+
+    private fun createModels(input:String){
+        textModel = TextEditorModel(input)
+        tokenizedTextModel = TokenizedTextModel(textModel)
+        parsedTextModel = ParsedTextModel(tokenizedTextModel)
+        formattingRuleProvider = createFormattingRuleProvider()
+        onTextModelChanged(Unit)
     }
 }
