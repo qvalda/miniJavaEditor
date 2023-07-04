@@ -44,6 +44,14 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
         textModel.pasteAction()
     }
 
+    fun undoAction() {
+        textModel.undo()
+    }
+
+    fun redoAction() {
+        textModel.redo()
+    }
+
     private fun createFormattingRuleProvider(): AggregateFormattingRuleProvider {
         val r1 = TokenizerFormattingRuleProvider(tokenizedTextModel)
         val r2 = SelectionFormattingRuleProvider(textModel)

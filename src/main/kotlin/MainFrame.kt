@@ -53,6 +53,11 @@ class Fac {
         val pasteButton = JButton("paste")
         pasteButton.addActionListener { mainModel.pasteAction() }
 
+        val undoButton = JButton("undo")
+        undoButton.addActionListener { mainModel.undoAction() }
+        val redoButton = JButton("redo")
+        redoButton.addActionListener { mainModel.redoAction() }
+
         toolbar.add(newButton)
         toolbar.add(openButton)
         toolbar.add(saveButton)
@@ -60,6 +65,9 @@ class Fac {
         toolbar.add(cutButton)
         toolbar.add(copyButton)
         toolbar.add(pasteButton)
+        toolbar.addSeparator()
+        toolbar.add(undoButton)
+        toolbar.add(redoButton)
 
         val editor = FormattedTextEditor(mainModel.textModel, mainModel.formattingRuleProvider)
         val scrollPane = JScrollPane(editor)

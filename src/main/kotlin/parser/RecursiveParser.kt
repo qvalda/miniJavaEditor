@@ -94,8 +94,9 @@ class RecursiveParser(private val ts: ITokenSource) {
         expected(TokenType.NameIdentifier)
         expected(TokenType.BracketRoundClose)
         expected(TokenType.BracketCurlyOpen)
-        val variables = parseMethodVarDeclarationMultiple()
-        val statements = parseStatementMultiple()
+        val varAndStatements = parseMethodVarDeclarationOrStatementMultiple()
+        val variables = varAndStatements.first
+        val statements = varAndStatements.second + parseStatementMultiple()
         expected(TokenType.BracketCurlyClose)
         expected(TokenType.BracketCurlyClose)
 
@@ -147,8 +148,9 @@ class RecursiveParser(private val ts: ITokenSource) {
         val list = parseFormalListOptional()
         expected(TokenType.BracketRoundClose)
         expected(TokenType.BracketCurlyOpen)
-        val variables = parseMethodVarDeclarationMultiple()
-        val statements = parseStatementMultiple()
+        val varAndStatements = parseMethodVarDeclarationOrStatementMultiple()
+        val variables = varAndStatements.first
+        val statements = varAndStatements.second + parseStatementMultiple()
         expected(TokenType.KeyWordReturn)
         val returnExp = parseExpression()
         expected(TokenType.SymbolSemicolon)
@@ -174,13 +176,33 @@ class RecursiveParser(private val ts: ITokenSource) {
         return VarDeclarationNode(name, type, location)
     }
 
-    private fun parseMethodVarDeclarationMultiple(): List<VarDeclarationNode> {
+    private fun parseVarDeclaration(type: TypeNodeNode): VarDeclarationNode {
+        val name = ts.currentToken.value
+        val location = getLocation(ts.currentToken)
+        expected(TokenType.NameIdentifier)
+        expected(TokenType.SymbolSemicolon)
+        return VarDeclarationNode(name, type, location)
+    }
+
+    private fun parseMethodVarDeclarationOrStatementMultiple(): Pair<List<VarDeclarationNode>, List<StatementNode>> {
         val vars = mutableListOf<VarDeclarationNode>()
-        //while (ts.currentToken.type != TokenType.KeyWordReturn && ts.nextToken.type == TokenType.NameIdentifier && ts.nextToken2.type == TokenType.SymbolSemicolon) { //todo: support array
-        while (ts.currentToken.type != TokenType.KeyWordReturn && ts.nextToken.type == TokenType.NameIdentifier) { //todo: support array
-            vars.add(parseVarDeclaration())
+        val statements = mutableListOf<StatementNode>()
+        while (true) {
+            if (ts.currentToken.type == TokenType.KeyWordInt || ts.currentToken.type == TokenType.KeyWordBoolean) {
+                vars.add(parseVarDeclaration())
+            } else if (ts.currentToken.type == TokenType.NameIdentifier) {
+                val ident = ts.currentToken
+                ts.accept()
+                if (ts.currentToken.type == TokenType.NameIdentifier) {
+                    vars.add(parseVarDeclaration(NameIdentifierTypeNode(ident.value)))
+                } else {
+                    parseStatementAfterIdentifier(ident.value)
+                    return Pair(vars, statements)
+                }
+            } else {
+                return Pair(vars, statements)
+            }
         }
-        return vars
     }
 
     private fun parseClassVarDeclarationMultiple(): List<VarDeclarationNode> {
@@ -416,28 +438,7 @@ class RecursiveParser(private val ts: ITokenSource) {
             TokenType.NameIdentifier -> {
                 val name = ts.currentToken.value
                 ts.accept()
-                when (ts.currentToken.type) {
-                    TokenType.OperatorAssign -> {
-                        ts.accept()
-                        val value = parseExpression()
-                        expected(TokenType.SymbolSemicolon)
-                        return AssignStatementNode(name, value)
-                    }
-
-                    TokenType.BracketSquareOpen -> {
-                        ts.accept()
-                        val indexer = parseExpression()
-                        expected(TokenType.BracketSquareClose)
-                        expected(TokenType.OperatorAssign)
-                        val value = parseExpression()
-                        expected(TokenType.SymbolSemicolon)
-                        return AssignIndexerStatementNode(name, indexer, value)
-                    }
-
-                    else -> {
-                        throw ParseException("Unexpected token ${ts.currentToken.type}")
-                    }
-                }
+                return parseStatementAfterIdentifier(name)
             }
 
             else -> {
@@ -452,6 +453,31 @@ class RecursiveParser(private val ts: ITokenSource) {
             statements.add(parseStatement())
         }
         return statements
+    }
+
+    private fun parseStatementAfterIdentifier(name: String?): StatementNode {
+        when (ts.currentToken.type) {
+            TokenType.OperatorAssign -> {
+                ts.accept()
+                val value = parseExpression()
+                expected(TokenType.SymbolSemicolon)
+                return AssignStatementNode(name, value)
+            }
+
+            TokenType.BracketSquareOpen -> {
+                ts.accept()
+                val indexer = parseExpression()
+                expected(TokenType.BracketSquareClose)
+                expected(TokenType.OperatorAssign)
+                val value = parseExpression()
+                expected(TokenType.SymbolSemicolon)
+                return AssignIndexerStatementNode(name, indexer, value)
+            }
+
+            else -> {
+                throw ParseException("Unexpected token ${ts.currentToken.type}")
+            }
+        }
     }
 
     private fun getLocation(token: Token) : NodeLocation{

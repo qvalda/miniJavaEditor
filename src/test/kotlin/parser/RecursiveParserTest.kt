@@ -1,9 +1,9 @@
 package parser
 
-import toDelete.TokensSource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import tokenizer.ArrayTokensSource
 import tokenizer.TokenType
 import tokenizer.Tokenizer
 
@@ -33,7 +33,7 @@ class RecursiveParserTest : CodeTestBase() {
         val t =
             Tokenizer().getTokens(code).filter { t -> t.type != TokenType.Comment }
                 .toTypedArray()
-        val ts = TokensSource(t)
+        val ts = ArrayTokensSource(t)
         val p = RecursiveParser(ts).parse()
         assert(ts.isEOF())
         //Assertions.assertEquals(TokenType.EOF, ts.currentToken.type)

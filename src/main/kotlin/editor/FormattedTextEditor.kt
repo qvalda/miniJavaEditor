@@ -88,6 +88,16 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
                     return
                 }
 
+                KeyEvent.VK_Z -> {
+                    model.undo()
+                    return
+                }
+
+                KeyEvent.VK_Y -> {
+                    model.redo()
+                    return
+                }
+
                 else -> return
             }
         }
@@ -138,7 +148,7 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
     }
 
     private fun onRepaintRequest(a:Unit) {
-        println("onRepaintRequest")
+        //println("onRepaintRequest")
         repaint()
         updatePreferredSize()
         scrollRectToVisible(Rectangle(model.endCaret.column * letterWidth, (model.endCaret.line - 1) * letterHeight, letterWidth, letterHeight * 3))

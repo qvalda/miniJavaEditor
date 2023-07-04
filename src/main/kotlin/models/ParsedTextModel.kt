@@ -6,7 +6,7 @@ import parser.ParserResult
 import parser.RecursiveParser
 
 class ParsedTextModel(private val tokenSource: TokenizedTextModel) {
-    private val parser = RecursiveParser(tokenSource)
+    private val parser = RecursiveParser(tokenSource.asTokenSource())
 
     val onModifiedThrottled = ThrottleCall(500) { onModified() }
 
@@ -23,7 +23,7 @@ class ParsedTextModel(private val tokenSource: TokenizedTextModel) {
     }
 
     private fun onModified() {
-        tokenSource.reset()
+        //tokenSource.reset()
         parserResult = parser.parse()
         parserResultChanged(Unit)
     }
