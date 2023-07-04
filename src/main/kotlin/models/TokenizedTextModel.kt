@@ -30,8 +30,11 @@ class TokenizedTextModel(private val textModel: TextEditorModel) {
         modified(Unit)
     }
 
-    private fun onLineAdd(lineIndex: Int) {
-        lines.add(lineIndex, tokenizer.getTokens(textModel.lines[lineIndex]))
+    private fun onLineAdd(lineChangeArgs: LineChangeArgs) {
+        //lines.add(lineIndex, tokenizer.getTokens(textModel.lines[lineIndex]))
+        lines.addAll(lineChangeArgs.startIndex,
+            textModel.lines.subList(lineChangeArgs.startIndex, lineChangeArgs.startIndex + lineChangeArgs.count).map { tokenizer.getTokens(it) })
+
         modified(Unit)
     }
 

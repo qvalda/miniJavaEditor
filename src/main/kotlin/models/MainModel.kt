@@ -64,7 +64,7 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
     private fun createModels(input:String){
         textModel = TextEditorModel(input)
         tokenizedTextModel = TokenizedTextModel(textModel)
-        parsedTextModel = ParsedTextModel(tokenizedTextModel)
+        //parsedTextModel = ParsedTextModel(tokenizedTextModel)
         formattingRuleProvider = createFormattingRuleProvider()
         onTextModelChanged(Unit)
     }
