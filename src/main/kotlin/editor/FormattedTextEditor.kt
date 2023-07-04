@@ -1,5 +1,9 @@
 package editor
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.swing.Swing
 import java.awt.*
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
@@ -46,10 +50,6 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
 
             override fun mouseDragged(e: MouseEvent) {
                 onMouseDragged(e)
-            }
-
-            override fun mouseReleased(e: MouseEvent) {
-                onMouseReleased(e)
             }
         }
 
@@ -104,31 +104,31 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
         if (hasShiftModifier(e)) {
             when (e.keyCode) {
                 KeyEvent.VK_UP -> {
-                    model.moveEndCaretUp()
+                    model.moveSelectionCaretUp()
                     return
                 }
 
                 KeyEvent.VK_DOWN -> {
-                    model.moveEndCaretDown()
+                    model.moveSelectionCaretDown()
                     return
                 }
 
                 KeyEvent.VK_LEFT -> {
-                    model.moveEndCaretLeft()
+                    model.moveSelectionCaretLeft()
                     return
                 }
 
                 KeyEvent.VK_RIGHT -> {
-                    model.moveEndCaretRight()
+                    model.moveSelectionCaretRight()
                     return
                 }
             }
         }
         when (e.keyCode) {
-            KeyEvent.VK_UP -> model.moveBeginCaretUp()
-            KeyEvent.VK_DOWN -> model.moveBeginCaretDown()
-            KeyEvent.VK_LEFT -> model.moveBeginCaretLeft()
-            KeyEvent.VK_RIGHT -> model.moveBeginCaretRight()
+            KeyEvent.VK_UP -> model.moveEnterCaretUp()
+            KeyEvent.VK_DOWN -> model.moveEnterCaretDown()
+            KeyEvent.VK_LEFT -> model.moveEnterCaretLeft()
+            KeyEvent.VK_RIGHT -> model.moveEnterCaretRight()
 
             KeyEvent.VK_HOME -> model.homeAction()
             KeyEvent.VK_END -> model.endAction()
@@ -148,31 +148,32 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
     }
 
     private fun onRepaintRequest(a:Unit) {
-        //println("onRepaintRequest")
         repaint()
         updatePreferredSize()
-        scrollRectToVisible(Rectangle(model.endCaret.column * letterWidth, (model.endCaret.line - 1) * letterHeight, letterWidth, letterHeight * 3))
+        CoroutineScope(Dispatchers.Swing).launch { // bug visibleRect is not updated after preferredSize changed
+            val desiredRect = Rectangle(model.selectionCaret.column * letterWidth, (model.selectionCaret.line - 1) * letterHeight, letterWidth, letterHeight * 3)
+            if (!visibleRect.contains(desiredRect)) {
+                scrollRectToVisible(desiredRect)
+            }
+        }
     }
 
     fun onMousePressed(e: MouseEvent) {
         requestFocus()
         if (!hasShiftModifier(e)) {
-            model.updateBeginCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
+            model.updateCarets(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
         }
-        model.updateEndCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
-        repaint()
+        else{
+            model.updateSelectionCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
+        }
     }
 
     private fun hasShiftModifier(e: MouseEvent) = (e.modifiersEx and KeyEvent.SHIFT_DOWN_MASK) != 0
     private fun hasShiftModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.SHIFT_DOWN_MASK) != 0
     private fun hasCtrlModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.CTRL_DOWN_MASK) != 0
 
-    fun onMouseReleased(e: MouseEvent) {
-
-    }
-
     fun onMouseDragged(e: MouseEvent) {
-        model.updateEndCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
+        model.updateSelectionCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
     }
 
     public override fun paintComponent(g: Graphics) {
@@ -228,7 +229,6 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
                 }
             }
         }
-
         updatePreferredSize()
     }
 
@@ -255,9 +255,9 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
 
     private fun drawCaret(g: Graphics) {
         if (!hasFocus()) return //todo fix
-        drawCaret(g, model.beginCaret)
-        if (model.endCaret != model.beginCaret) {
-            drawCaret(g, model.endCaret)
+        drawCaret(g, model.enterCaret)
+        if (model.selectionCaret != model.enterCaret) {
+            drawCaret(g, model.selectionCaret)
         }
     }
 

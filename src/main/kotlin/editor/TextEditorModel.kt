@@ -1,45 +1,8 @@
 package editor
 
 import helpers.Event
-import java.util.*
 import kotlin.math.max
 import kotlin.math.min
-
-class LineChangeArgs(val startIndex: Int, val count: Int)
-
-interface ITextEditorCommand {
-    fun execute()
-    fun undo() {
-        println("'undo' is not implemented for ${this.javaClass.simpleName}")
-    }
-}
-
-class TextEditorCommandHistory {
-    private var undoStack = Stack<ITextEditorCommand>()
-    private var redoStack = Stack<ITextEditorCommand>()
-
-    fun add(command: ITextEditorCommand) {
-        command.execute()
-        undoStack.push(command)
-        redoStack.clear()
-    }
-
-    fun undo() {
-        if (!undoStack.isEmpty()) {
-            val command = undoStack.pop()
-            redoStack.push(command)
-            command.undo()
-        }
-    }
-
-    fun redo() {
-        if (!redoStack.isEmpty()) {
-            val command = redoStack.pop()
-            undoStack.push(command)
-            command.execute()
-        }
-    }
-}
 
 class TextEditorModel (text:String = "", private val clipboard: IClipboard = SystemClipboard()) {
     val onLineDelete = Event<LineChangeArgs>()
@@ -50,9 +13,9 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
 
     var lines = mutableListOf<String>()
     var maxLength = 0
-    var beginCaret = TextEditorCaret()
-    var endCaret = TextEditorCaret()
-    val commands = TextEditorCommandHistory()
+    var enterCaret = TextEditorCaret()
+    var selectionCaret = TextEditorCaret()
+    private val commands = TextEditorCommandHistory()
 
     init {
         val input = preprocessText(text)
@@ -61,8 +24,8 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
             lines.add(s)
             maxLength = max(maxLength, s.length)
         }
-        beginCaret = TextEditorCaret()
-        endCaret = TextEditorCaret()
+        enterCaret = TextEditorCaret()
+        selectionCaret = TextEditorCaret()
     }
 
     private var hasViewChanges = false
@@ -73,21 +36,21 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
             return
         }
         isTrackingActive = true
-        val initialBeginCaret = beginCaret.copy()
-        val initialEndCaret = endCaret.copy()
+        val initialEnterCaret = enterCaret.copy()
+        val initialSelectionCaret = selectionCaret.copy()
         hasViewChanges = false
         statement()
-        if (initialBeginCaret != beginCaret) {
-            onCaretMove(beginCaret)
+        if (initialEnterCaret != enterCaret) {
+            onCaretMove(enterCaret)
         }
-        if (initialBeginCaret != beginCaret || initialEndCaret != endCaret || hasViewChanges) {
+        if (initialEnterCaret != enterCaret || initialSelectionCaret != selectionCaret || hasViewChanges) {
             onViewModified(Unit)
         }
         isTrackingActive = false
     }
 
     private val hasSelection
-        get() = beginCaret != endCaret
+        get() = enterCaret != selectionCaret
 
     private fun preprocessText(input: String): String {
         return input.replace("\r", "").replace("\t", "    ")
@@ -98,10 +61,10 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
     }
 
     fun getSelectedText(): String? {
-        if (beginCaret == endCaret) return null
+        if (enterCaret == selectionCaret) return null
 
-        val minCaret = minOf(beginCaret, endCaret)
-        val maxCaret = maxOf(beginCaret, endCaret)
+        val minCaret = minOf(enterCaret, selectionCaret)
+        val maxCaret = maxOf(enterCaret, selectionCaret)
 
         if (minCaret.line == maxCaret.line) {
             return getSubstring(minCaret.line, minCaret.column, maxCaret.column)
@@ -241,8 +204,8 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
 
     fun selectAllAction() {
         trackChanges {
-            beginCaret = TextEditorCaret(0, 0)
-            endCaret = TextEditorCaret(lines.lastIndex, lines.last().length)
+            enterCaret = TextEditorCaret(0, 0)
+            selectionCaret = TextEditorCaret(lines.lastIndex, lines.last().length)
         }
     }
 
@@ -272,7 +235,6 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
                     commands.add(DeleteSelectionCommand(this))
                 }
                 val input = preprocessText(text).split('\n')
-                //insertInLine(beginCaret.line, beginCaret.column, input)
                 if (input.size == 1) {
                     commands.add(InsertSingleLineCommand(this, input[0]))
                 } else {
@@ -284,25 +246,25 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
 
     fun homeAction() {
         trackChanges {
-            setCaret(getAdjustedCaret(beginCaret.line, 0))
+            setCaret(getAdjustedCaret(enterCaret.line, 0))
         }
     }
 
     fun endAction() {
         trackChanges {
-            setCaret(getAdjustedCaret(beginCaret.line, lines[beginCaret.line].length))
+            setCaret(getAdjustedCaret(enterCaret.line, lines[enterCaret.line].length))
         }
     }
 
     fun pageUpAction(offset: Int) {
         trackChanges {
-            setCaret(getAdjustedCaret(beginCaret.line - offset, beginCaret.column))
+            setCaret(getAdjustedCaret(enterCaret.line - offset, enterCaret.column))
         }
     }
 
     fun pageDownAction(offset: Int) {
         trackChanges {
-            setCaret(getAdjustedCaret(beginCaret.line + offset, beginCaret.column))
+            setCaret(getAdjustedCaret(enterCaret.line + offset, enterCaret.column))
         }
     }
 
@@ -310,67 +272,74 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
 
     //region caret
 
-    fun moveBeginCaretLeft() {
+    fun moveEnterCaretLeft() {
         trackChanges {
-            beginCaret = getCaretLeft(beginCaret)
-            endCaret = beginCaret.copy()
+            enterCaret = getCaretLeft(enterCaret)
+            selectionCaret = enterCaret.copy()
         }
     }
 
-    fun moveEndCaretLeft() {
+    fun moveSelectionCaretLeft() {
         trackChanges {
-            endCaret = getCaretLeft(endCaret)
+            selectionCaret = getCaretLeft(selectionCaret)
         }
     }
 
-    fun moveBeginCaretRight() {
+    fun moveEnterCaretRight() {
         trackChanges {
-            beginCaret = getCaretRight(beginCaret)
-            endCaret = beginCaret.copy()
+            enterCaret = getCaretRight(enterCaret)
+            selectionCaret = enterCaret.copy()
         }
     }
 
-    fun moveEndCaretRight() {
+    fun moveSelectionCaretRight() {
         trackChanges {
-            endCaret = getCaretRight(endCaret)
+            selectionCaret = getCaretRight(selectionCaret)
         }
     }
 
-    fun moveBeginCaretDown() {
+    fun moveEnterCaretDown() {
         trackChanges {
-            beginCaret = getCaretDown(beginCaret)
-            endCaret = beginCaret.copy()
+            enterCaret = getCaretDown(enterCaret)
+            selectionCaret = enterCaret.copy()
         }
     }
 
-    fun moveEndCaretDown() {
+    fun moveSelectionCaretDown() {
         trackChanges {
-            endCaret = getCaretDown(endCaret)
+            selectionCaret = getCaretDown(selectionCaret)
         }
     }
 
-    fun moveBeginCaretUp() {
+    fun moveEnterCaretUp() {
         trackChanges {
-            beginCaret = getCaretUp(beginCaret)
-            endCaret = beginCaret.copy()
+            enterCaret = getCaretUp(enterCaret)
+            selectionCaret = enterCaret.copy()
         }
     }
 
-    fun moveEndCaretUp() {
+    fun moveSelectionCaretUp() {
         trackChanges {
-            endCaret = getCaretUp(endCaret)
+            selectionCaret = getCaretUp(selectionCaret)
         }
     }
 
-    fun updateEndCaret(lineIndex: Int, columnIndex: Int) {
+    fun updateSelectionCaret(lineIndex: Int, columnIndex: Int) {
         trackChanges {
-            endCaret = getAdjustedCaret(lineIndex, columnIndex)
+            selectionCaret = getAdjustedCaret(lineIndex, columnIndex)
         }
     }
 
-    fun updateBeginCaret(lineIndex: Int, columnIndex: Int) {
+    fun updateEnterCaret(lineIndex: Int, columnIndex: Int) {
         trackChanges {
-            beginCaret = getAdjustedCaret(lineIndex, columnIndex)
+            enterCaret = getAdjustedCaret(lineIndex, columnIndex)
+        }
+    }
+
+    fun updateCarets(lineIndex: Int, columnIndex: Int) {
+        trackChanges {
+            enterCaret = getAdjustedCaret(lineIndex, columnIndex)
+            selectionCaret = enterCaret.copy()
         }
     }
 
@@ -419,15 +388,15 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
 
     private fun setCaret(caret: TextEditorCaret) {
         trackChanges {
-            beginCaret = caret.copy()
-            endCaret = caret.copy()
+            enterCaret = caret.copy()
+            selectionCaret = caret.copy()
         }
     }
 
     private fun setCaret(begin: TextEditorCaret, end: TextEditorCaret) {
         trackChanges {
-            beginCaret = begin.copy()
-            endCaret = end.copy()
+            enterCaret = begin.copy()
+            selectionCaret = end.copy()
         }
     }
 
@@ -439,8 +408,8 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         private var lines: List<String>
 
         init {
-            minCaret = minOf(textEditorModel.beginCaret, textEditorModel.endCaret)
-            maxCaret = maxOf(textEditorModel.beginCaret, textEditorModel.endCaret)
+            minCaret = minOf(textEditorModel.enterCaret, textEditorModel.selectionCaret)
+            maxCaret = maxOf(textEditorModel.enterCaret, textEditorModel.selectionCaret)
             lines = textEditorModel.lines.subList(minCaret.line, maxCaret.line + 1).toList() //todo optimize
         }
 
@@ -463,9 +432,10 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
             textEditorModel.setCaret(minCaret, maxCaret)
 
             textEditorModel.deleteLine(minCaret.line)
-            for ((index, line) in lines.withIndex()) {
+            for ((index, line) in lines.withIndex()) { //todo optimize
                 textEditorModel.addLine(minCaret.line + index, line)
             }
+
             textEditorModel.hasViewChanges = true
         }
     }
@@ -477,15 +447,15 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         private var length: Int = 0
 
         init {
-            caretState = textEditorModel.beginCaret.copy()
+            caretState = textEditorModel.enterCaret.copy()
         }
 
         override fun execute() {
             textEditorModel.setCaret(caretState)
 
             result = when {
-                textEditorModel.beginCaret.column == 0 && textEditorModel.beginCaret.line == 0 -> BackSpaceResult.None
-                textEditorModel.beginCaret.column == 0 -> BackSpaceResult.LineRemoved
+                textEditorModel.enterCaret.column == 0 && textEditorModel.enterCaret.line == 0 -> BackSpaceResult.None
+                textEditorModel.enterCaret.column == 0 -> BackSpaceResult.LineRemoved
                 else -> BackSpaceResult.CharRemoved
             }
 
@@ -493,18 +463,18 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
                 BackSpaceResult.None -> return
 
                 BackSpaceResult.LineRemoved -> {
-                    length = textEditorModel.lines[textEditorModel.beginCaret.line - 1].length
-                    val suffix = textEditorModel.getSuffix(textEditorModel.beginCaret.line, 0)
-                    textEditorModel.deleteLine(textEditorModel.beginCaret.line)
-                    textEditorModel.moveBeginCaretLeft()
-                    textEditorModel.appendToLine(textEditorModel.beginCaret.line, suffix)
+                    length = textEditorModel.lines[textEditorModel.enterCaret.line - 1].length
+                    val suffix = textEditorModel.getSuffix(textEditorModel.enterCaret.line, 0)
+                    textEditorModel.deleteLine(textEditorModel.enterCaret.line)
+                    textEditorModel.moveEnterCaretLeft()
+                    textEditorModel.appendToLine(textEditorModel.enterCaret.line, suffix)
                 }
 
                 BackSpaceResult.CharRemoved -> {
-                    char = textEditorModel.getSubstring(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column - 1, textEditorModel.beginCaret.column)
+                    char = textEditorModel.getSubstring(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column - 1, textEditorModel.enterCaret.column)
 
-                    textEditorModel.removeRangeInLine(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column - 1, textEditorModel.beginCaret.column)
-                    textEditorModel.moveBeginCaretLeft()
+                    textEditorModel.removeRangeInLine(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column - 1, textEditorModel.enterCaret.column)
+                    textEditorModel.moveEnterCaretLeft()
                 }
             }
         }
@@ -516,13 +486,13 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
                 BackSpaceResult.None -> return
 
                 BackSpaceResult.LineRemoved -> {
-                    val suffix = textEditorModel.getSuffix(textEditorModel.beginCaret.line - 1, length)
-                    textEditorModel.removeRangeInLine(textEditorModel.beginCaret.line - 1, length, textEditorModel.lines[textEditorModel.beginCaret.line - 1].length)
-                    textEditorModel.addLine(textEditorModel.beginCaret.line, suffix)
+                    val suffix = textEditorModel.getSuffix(textEditorModel.enterCaret.line - 1, length)
+                    textEditorModel.removeRangeInLine(textEditorModel.enterCaret.line - 1, length, textEditorModel.lines[textEditorModel.enterCaret.line - 1].length)
+                    textEditorModel.addLine(textEditorModel.enterCaret.line, suffix)
                 }
 
                 BackSpaceResult.CharRemoved -> {
-                    textEditorModel.insertInLine(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column - 1, char)
+                    textEditorModel.insertInLine(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column - 1, char)
                 }
             }
         }
@@ -540,15 +510,15 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         private lateinit var innerCommand: ITextEditorCommand
 
         init {
-            caretState = textEditorModel.beginCaret.copy()
+            caretState = textEditorModel.enterCaret.copy()
         }
 
         override fun execute() {
             textEditorModel.setCaret(caretState)
 
             result = when {
-                textEditorModel.beginCaret.column == textEditorModel.lines.last().length
-                        && textEditorModel.beginCaret.line == textEditorModel.lines.size - 1 -> DeleteResult.None
+                textEditorModel.enterCaret.column == textEditorModel.lines.last().length
+                        && textEditorModel.enterCaret.line == textEditorModel.lines.size - 1 -> DeleteResult.None
 
                 else -> DeleteResult.Deleted
             }
@@ -556,7 +526,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
             when (result) {
                 DeleteResult.None -> return
                 DeleteResult.Deleted -> {
-                    textEditorModel.moveBeginCaretRight()
+                    textEditorModel.moveEnterCaretRight()
                     innerCommand = BackSpaceCommand(textEditorModel)
                     innerCommand.execute()
                     textEditorModel.hasViewChanges = true //todo fix hack
@@ -585,20 +555,20 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         private var caretState: TextEditorCaret
 
         init {
-            caretState = textEditorModel.beginCaret.copy()
+            caretState = textEditorModel.enterCaret.copy()
         }
 
         override fun execute() {
             textEditorModel.setCaret(caretState)
 
-            textEditorModel.insertInLine(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column, text)
-            textEditorModel.setCaret(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column + text.length)
+            textEditorModel.insertInLine(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column, text)
+            textEditorModel.setCaret(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column + text.length)
         }
 
         override fun undo() {
             textEditorModel.setCaret(caretState)
 
-            textEditorModel.removeRangeInLine(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column, textEditorModel.beginCaret.column + text.length)
+            textEditorModel.removeRangeInLine(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column, textEditorModel.enterCaret.column + text.length)
         }
     }
 
@@ -606,24 +576,24 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         private var caretState: TextEditorCaret
 
         init {
-            caretState = textEditorModel.beginCaret.copy()
+            caretState = textEditorModel.enterCaret.copy()
         }
 
         override fun execute() {
             textEditorModel.setCaret(caretState)
 
-            val suffix = textEditorModel.getSuffix(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column)
-            textEditorModel.removeRangeInLine(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column, textEditorModel.lines[textEditorModel.beginCaret.line].length)
-            textEditorModel.addLine(textEditorModel.beginCaret.line + 1, suffix)
-            textEditorModel.moveBeginCaretRight()
+            val suffix = textEditorModel.getSuffix(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column)
+            textEditorModel.removeRangeInLine(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column, textEditorModel.lines[textEditorModel.enterCaret.line].length)
+            textEditorModel.addLine(textEditorModel.enterCaret.line + 1, suffix)
+            textEditorModel.moveEnterCaretRight()
         }
 
         override fun undo() {
             textEditorModel.setCaret(caretState)
 
-            val suffix = textEditorModel.lines[textEditorModel.beginCaret.line + 1]
-            textEditorModel.appendToLine(textEditorModel.beginCaret.line, suffix)
-            textEditorModel.deleteLine(textEditorModel.beginCaret.line + 1)
+            val suffix = textEditorModel.lines[textEditorModel.enterCaret.line + 1]
+            textEditorModel.appendToLine(textEditorModel.enterCaret.line, suffix)
+            textEditorModel.deleteLine(textEditorModel.enterCaret.line + 1)
         }
     }
 
@@ -631,27 +601,29 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         private var caretState: TextEditorCaret
 
         init {
-            caretState = textEditorModel.beginCaret.copy()
+            caretState = textEditorModel.enterCaret.copy()
         }
 
         override fun execute() {
             textEditorModel.setCaret(caretState)
 
-            textEditorModel.insertInLine(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column, lines)
+            textEditorModel.insertInLine(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column, lines)
 
-            val line = textEditorModel.beginCaret.line + lines.size - 1
+            val line = textEditorModel.enterCaret.line + lines.size - 1
             val column = lines.last().length
             textEditorModel.setCaret(line, column)
+            textEditorModel.hasViewChanges = true
         }
 
         override fun undo() {
             textEditorModel.setCaret(caretState)
 
-            val suffix = textEditorModel.getSuffix(textEditorModel.beginCaret.line + lines.size - 1, lines.last().length)
+            val suffix = textEditorModel.getSuffix(textEditorModel.enterCaret.line + lines.size - 1, lines.last().length)
 
-            textEditorModel.removeRangeInLine(textEditorModel.beginCaret.line, textEditorModel.beginCaret.column, textEditorModel.beginCaret.column + lines.first().length)
-            textEditorModel.appendToLine(textEditorModel.beginCaret.line, suffix)
-            textEditorModel.deleteLine(textEditorModel.beginCaret.line + 1, lines.size - 1)
+            textEditorModel.removeRangeInLine(textEditorModel.enterCaret.line, textEditorModel.enterCaret.column, textEditorModel.enterCaret.column + lines.first().length)
+            textEditorModel.appendToLine(textEditorModel.enterCaret.line, suffix)
+            textEditorModel.deleteLine(textEditorModel.enterCaret.line + 1, lines.size - 1)
+            textEditorModel.hasViewChanges = true
         }
     }
 }

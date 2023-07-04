@@ -4,8 +4,8 @@ import editor.*
 
 class SelectionFormattingRuleProvider(private val textModel: TextEditorModel) : BaseFormattingRuleProvider() {
     override fun getRules(lineIndex: Int): List<FormattingRule> {
-        val minCaret = minOf(textModel.beginCaret, textModel.endCaret)
-        val maxCaret = maxOf(textModel.beginCaret, textModel.endCaret)
+        val minCaret = minOf(textModel.enterCaret, textModel.selectionCaret)
+        val maxCaret = maxOf(textModel.enterCaret, textModel.selectionCaret)
 
         if (minCaret == maxCaret || lineIndex < minCaret.line || lineIndex > maxCaret.line) {
             return emptyList()

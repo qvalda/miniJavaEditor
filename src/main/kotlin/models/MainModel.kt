@@ -55,10 +55,10 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
     private fun createFormattingRuleProvider(): AggregateFormattingRuleProvider {
         val r1 = TokenizerFormattingRuleProvider(tokenizedTextModel)
         val r2 = SelectionFormattingRuleProvider(textModel)
-        val r3 = BracketFormattingRuleProvider(textModel, tokenizedTextModel)
-        val r4 = ParserFormattingRuleProvider(parsedTextModel)
-        val r5 = UniqueClassNameVisitor(parsedTextModel)
-        return AggregateFormattingRuleProvider(r1, r2, r3, r4, r5)
+        //val r3 = BracketFormattingRuleProvider(textModel, tokenizedTextModel)
+        //val r4 = ParserFormattingRuleProvider(parsedTextModel)
+        //val r5 = UniqueClassNameVisitor(parsedTextModel)
+        return AggregateFormattingRuleProvider(r1, r2, )//r3, r4, r5)
     }
 
     private fun createModels(input:String){
