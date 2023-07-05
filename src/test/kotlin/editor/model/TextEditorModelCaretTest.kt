@@ -2,7 +2,7 @@ package editor.model
 
 import org.junit.jupiter.api.Test
 
-class TextEditorModelCaretTest : TextEditorModelBaseTest(){
+class TextEditorModelCaretTest : TextEditorModelBaseTest() {
 
     @Test
     fun testCarteMoveLeft() {
@@ -91,7 +91,35 @@ class TextEditorModelCaretTest : TextEditorModelBaseTest(){
     @Test
     fun testCaretAdjusted() {
         val model = creteTextEditorModelWithCaret("ab|c\r\ndef")
-        model.setCarets(100,100)
+        model.setCarets(100, 100)
         assertEnterCaret(model, 1, 3)
+    }
+
+    @Test
+    fun testSelectionCaretLeftAction() {
+        val model = creteTextEditorModelWithCaret("ab[cd]ef")
+        model.moveSelectionCaretLeft()
+        assertTextAndCaret(model, "ab[c]def")
+    }
+
+    @Test
+    fun testSelectionCaretRightAction() {
+        val model = creteTextEditorModelWithCaret("ab[cd]ef")
+        model.moveSelectionCaretRight()
+        assertTextAndCaret(model, "ab[cde]f")
+    }
+
+    @Test
+    fun testSelectionCaretUpAction() {
+        val model = creteTextEditorModelWithCaret("ab[c\r\nzxc\r\nd]ef")
+        model.moveSelectionCaretUp()
+        assertTextAndCaret(model, "ab[c\r\nz]xc\r\ndef")
+    }
+
+    @Test
+    fun testSelectionCaretDownAction() {
+        val model = creteTextEditorModelWithCaret("ab[c]\r\ndefg")
+        model.moveSelectionCaretDown()
+        assertTextAndCaret(model, "ab[c\r\ndef]g")
     }
 }

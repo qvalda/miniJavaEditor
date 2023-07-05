@@ -141,4 +141,15 @@ class TextEditorModelActionsTest : TextEditorModelBaseTest() {
         model.selectAllAction()
         assertTextAndCaret(model, "[abc\r\ndef]")
     }
+
+    @Test
+    fun testRedo() {
+        val model = creteTextEditorModelWithCaret("abc|def")
+        model.backSpaceAction()
+        assertTextAndCaret(model, "ab|def")
+        model.undo()
+        assertTextAndCaret(model, "abc|def")
+        model.redo()
+        assertTextAndCaret(model, "ab|def")
+    }
 }

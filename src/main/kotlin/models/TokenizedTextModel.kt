@@ -25,8 +25,8 @@ class TokenizedTextModel(private val textModel: TextEditorModel) {
         modified(Unit)
     }
 
-    private fun onLineModified(lineIndex: Int) {
-        lines[lineIndex] = tokenizer.getTokens(textModel.lines[lineIndex])
+    private fun onLineModified(lineChangeArgs: LineChangeArgs) {
+        lines[lineChangeArgs.startIndex] = tokenizer.getTokens(textModel.lines[lineChangeArgs.startIndex])
         modified(Unit)
     }
 

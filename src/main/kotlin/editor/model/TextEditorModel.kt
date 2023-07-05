@@ -7,10 +7,10 @@ import kotlin.math.min
 
 class TextEditorModel (text:String = "", private val clipboard: IClipboard = SystemClipboard()) {
     val onLineDelete = Event<LineChangeArgs>()
-    val onLineModified = Event<Int>()
+    val onLineModified = Event<LineChangeArgs>()
     val onLineAdd = Event<LineChangeArgs>()
     val onCaretMove = Event<TextEditorCaret>()
-    val onViewModified = Event<Unit>()
+    val onViewModified = Event<Unit>() //todo test
 
     var lines = mutableListOf<String>()
     var maxLength = 0
@@ -102,13 +102,13 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
 
     private fun removeRangeInLine(lineIndex: Int, startIndex: Int, endIndex: Int) {
         lines[lineIndex] = lines[lineIndex].removeRange(startIndex, endIndex)
-        onLineModified(lineIndex)
+        onLineModified(LineChangeArgs(lineIndex))
         updateMaxLength()
     }
 
     private fun removeRangeInLines(lineIndex: Int, startIndex: Int, endLineIndex: Int, endIndex: Int) {
         lines[lineIndex] = getPrefix(lineIndex, startIndex) + getSuffix(endLineIndex, endIndex)
-        onLineModified(lineIndex)
+        onLineModified(LineChangeArgs(lineIndex))
         onLineDelete(LineChangeArgs(lineIndex + 1, endLineIndex - lineIndex))
         lines.subList(lineIndex + 1, endLineIndex + 1).clear()
         updateMaxLength()
@@ -116,22 +116,21 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
 
     private fun insertInLine(lineIndex: Int, columnIndex: Int, value: String) {
         lines[lineIndex] = StringBuilder(lines[lineIndex]).insert(columnIndex, value).toString()
-        onLineModified(lineIndex)
+        onLineModified(LineChangeArgs(lineIndex))
         updateMaxLength()
     }
 
     private fun insertInLine(lineIndex: Int, columnIndex: Int, values: List<String>) {
         val suffix = getSuffix(lineIndex, columnIndex)
         lines[lineIndex] = getPrefix(lineIndex, columnIndex) + values[0]
-        onLineModified(lineIndex)
+        onLineModified(LineChangeArgs(lineIndex))
         if (values.size > 2) {
             lines.addAll(lineIndex + 1, values.drop(1).dropLast(1))
-            onLineAdd(LineChangeArgs(lineIndex + 1, values.size - 2))
         }
         val lastIndex = lineIndex + values.size - 1
         val lastValue = values.last() + suffix
         lines.add(lastIndex, lastValue)
-        onLineAdd(LineChangeArgs(lastIndex))
+        onLineAdd(LineChangeArgs(lineIndex + 1, values.size - 1))
         updateMaxLength()
     }
 
@@ -141,7 +140,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
 
     private fun removeLineBreak(lineIndex: Int, columnIndex: Int) {
         lines[lineIndex] += lines[lineIndex + 1]
-        onLineModified(lineIndex)
+        onLineModified(LineChangeArgs(lineIndex))
         onLineDelete(LineChangeArgs(lineIndex + 1))
         lines.removeAt(lineIndex + 1)
         updateMaxLength()

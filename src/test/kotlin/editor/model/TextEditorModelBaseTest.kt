@@ -1,21 +1,26 @@
 package editor.model
 
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 
 open class TextEditorModelBaseTest {
 
     val clipboard = MemoryClipboard()
+
+    @BeforeEach
+    fun beforeTest() {
+        clipboard.setData("")
+    }
 
     fun creteTextEditorModelWithCaret(text: String): TextEditorModel {
         val model = TextEditorModel(cleanTestText(text), clipboard)
         val caretPos = getCaretPos(text)
         val enterCaretPos = getEnterCaretPos(text)
         val selectionCaretPos = getSelectionCaretPos(text)
-        if(enterCaretPos!=null &&selectionCaretPos!=null) {
+        if (enterCaretPos != null && selectionCaretPos != null) {
             model.setCarets(enterCaretPos.first, enterCaretPos.second)
             model.setSelectionCaret(selectionCaretPos.first, selectionCaretPos.second)
-        }
-        else if(caretPos!=null) {
+        } else if (caretPos != null) {
             model.setCarets(caretPos.first, caretPos.second)
         }
         return model
@@ -27,8 +32,8 @@ open class TextEditorModelBaseTest {
     private fun getSelectionCaretPos(text: String) = getPos(text.replace("[", ""), "]")
 
     fun assertEnterCaret(model: TextEditorModel, line: Int, column: Int) {
-        Assertions.assertEquals(line, model.enterCaret.line)
-        Assertions.assertEquals(column, model.enterCaret.column)
+        assertEquals(line, model.enterCaret.line)
+        assertEquals(column, model.enterCaret.column)
     }
 
     fun assertTextAndCaret(model: TextEditorModel, text: String) {
@@ -37,18 +42,23 @@ open class TextEditorModelBaseTest {
         val selectionCaretPos = getSelectionCaretPos(text)
 
         if (enterCaretPos != null && selectionCaretPos != null) {
-            Assertions.assertEquals(enterCaretPos.first, model.enterCaret.line)
-            Assertions.assertEquals(enterCaretPos.second, model.enterCaret.column)
-            Assertions.assertEquals(selectionCaretPos.first, model.selectionCaret.line)
-            Assertions.assertEquals(selectionCaretPos.second, model.selectionCaret.column)
+            assertEquals(enterCaretPos.first, model.enterCaret.line)
+            assertEquals(enterCaretPos.second, model.enterCaret.column)
+            assertEquals(selectionCaretPos.first, model.selectionCaret.line)
+            assertEquals(selectionCaretPos.second, model.selectionCaret.column)
         } else if (caretPos != null) {
-            Assertions.assertEquals(caretPos.first, model.selectionCaret.line)
-            Assertions.assertEquals(caretPos.second, model.selectionCaret.column)
-            Assertions.assertEquals(caretPos.first, model.selectionCaret.line)
-            Assertions.assertEquals(caretPos.second, model.selectionCaret.column)
+            assertEquals(caretPos.first, model.selectionCaret.line)
+            assertEquals(caretPos.second, model.selectionCaret.column)
+            assertEquals(caretPos.first, model.selectionCaret.line)
+            assertEquals(caretPos.second, model.selectionCaret.column)
         }
 
-        Assertions.assertEquals(cleanTestText(text), model.getText())
+        assertEquals(cleanTestText(text), model.getText())
+    }
+
+    fun assertLineArgs(args: LineChangeArgs, startIndex: Int, count: Int = 1) {
+        assertEquals(args.startIndex, startIndex)
+        assertEquals(args.count, count)
     }
 
     private fun cleanTestText(text: String) = text.replace("|", "").replace("[", "").replace("]", "")
