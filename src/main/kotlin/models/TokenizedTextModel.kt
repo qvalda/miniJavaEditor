@@ -31,14 +31,13 @@ class TokenizedTextModel(private val textModel: TextEditorModel) {
     }
 
     private fun onLineAdd(lineChangeArgs: LineChangeArgs) {
-        //lines.add(lineIndex, tokenizer.getTokens(textModel.lines[lineIndex]))
         lines.addAll(lineChangeArgs.startIndex,
             textModel.lines.subList(lineChangeArgs.startIndex, lineChangeArgs.startIndex + lineChangeArgs.count).map { tokenizer.getTokens(it) })
 
         modified(Unit)
     }
 
-    fun iterateTokens(startIndex: Int = 0, startTokenIndex: Int = 0): Sequence<Pair<Token, Int>> {
+    fun iterateTokens(startIndex: Int = 0, startTokenIndex: Int = 0): Sequence<Pair<Token, Int>> { //todo remove?
         val sequence = sequence {
             for (index in startTokenIndex + 1 until lines[startIndex].size) {
                 yield(Pair(lines[startIndex][index], startIndex))
@@ -100,9 +99,5 @@ class TokenizedTextModel(private val textModel: TextEditorModel) {
         }
 
         override fun isEOF() = cursor.line >= tokenizedTextModel.lines.lastIndex && cursor.column >= tokenizedTextModel.lines.last().size
-
-//        override fun reset() {
-//            cursor = Cursor(0, 0)
-//        }
     }
 }

@@ -4,13 +4,16 @@ import editor.BaseFormattingRuleProvider
 import editor.FormattingRule
 import editor.Style
 import models.ParsedTextModel
+import models.TokenizedTextModel
 
-class ParserFormattingRuleProvider(private val parserModel: ParsedTextModel) : BaseFormattingRuleProvider() {
+class ParserFormattingRuleProvider(private val parserModel: ParsedTextModel, tokenizedTextModel: TokenizedTextModel) : BaseFormattingRuleProvider() {
 
     private var errors = mapOf<Int, List<FormattingRule>>()
 
     init {
+        onParserResultChanged(Unit)
         parserModel.parserResultChanged += ::onParserResultChanged
+        tokenizedTextModel.modified += ::onTokenizedTextModelChanged
     }
 
     private fun onParserResultChanged(unit: Unit) {
@@ -21,6 +24,11 @@ class ParserFormattingRuleProvider(private val parserModel: ParsedTextModel) : B
                 .associate { g -> g.key to g.value.map { e -> FormattingRule(e.token.startIndex, e.token.endIndex, Style.Error) }.toList() }
             changed(Unit)
         }
+    }
+
+    private fun onTokenizedTextModelChanged(unit: Unit) {
+        errors = emptyMap()
+        changed(Unit)
     }
 
     override fun getRules(lineIndex: Int): List<FormattingRule> {

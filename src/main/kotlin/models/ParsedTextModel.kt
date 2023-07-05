@@ -1,30 +1,21 @@
 package models
 
 import helpers.Event
-import helpers.ThrottleCall
+import parser.ITokenSource
 import parser.ParserResult
 import parser.RecursiveParser
 
-class ParsedTextModel(private val tokenSource: TokenizedTextModel) {
-    private val parser = RecursiveParser(tokenSource.asTokenSource())
-
-    val onModifiedThrottled = ThrottleCall(500) { onModified() }
+class ParsedTextModel(tokenSource: ITokenSource) {
 
     var parserResult: ParserResult? = null
     val parserResultChanged = Event<Unit>()
 
     init {
-        onModifiedThrottled()
-        tokenSource.modified += ::onModifiedDelayed
+        parserResult = RecursiveParser(tokenSource).parse()
     }
 
-    private fun onModifiedDelayed(unit: Unit) {
-        onModifiedThrottled()
-    }
-
-    private fun onModified() {
-        //tokenSource.reset()
-        parserResult = parser.parse()
+    fun update(tokenSource: ITokenSource) {
+        parserResult = RecursiveParser(tokenSource).parse()
         parserResultChanged(Unit)
     }
 }

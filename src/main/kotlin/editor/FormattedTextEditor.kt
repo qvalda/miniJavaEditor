@@ -148,6 +148,7 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
     }
 
     private fun onRepaintRequest(a:Unit) {
+        //println("onRepaintRequest")
         repaint()
         updatePreferredSize()
         CoroutineScope(Dispatchers.Swing).launch { // bug visibleRect is not updated after preferredSize changed

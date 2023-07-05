@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import parser.CodeTestBase
+import base.BaseTest
 import tokenizer.TokenType.*
 
-class TokenizerTest : CodeTestBase() {
+class TokenizerTest : BaseTest() {
 
     @ParameterizedTest
     @ValueSource(strings = ["binarysearch.javam", "binarytree.javam", "bubblesort.javam", "factorial.javam", "linearsearch.javam", "linkedlist.javam", "quicksort.javam", "treevisitor.javam"])
@@ -43,7 +43,7 @@ class TokenizerTest : CodeTestBase() {
     fun canTokenizeLiteralString(input: String) {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
-        assertEquals(Token(LiteralString, 0, input.length, input), tokens[0])
+        assertEqualsToken(Token(LiteralString, 0, input.length, input), tokens[0])
     }
 
     @ParameterizedTest
@@ -51,7 +51,7 @@ class TokenizerTest : CodeTestBase() {
     fun hasInvalidLiteralString(input: String) {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
-        assertEquals(Token(InvalidSyntax, 0, input.length, input), tokens[0])
+        assertEqualsToken(Token(InvalidSyntax, 0, input.length, input), tokens[0])
     }
 
     @Test
@@ -59,7 +59,7 @@ class TokenizerTest : CodeTestBase() {
         val input = "'a'"
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
-        assertEquals(Token(LiteralChar, 0, 3, "'a'"), tokens[0])
+        assertEqualsToken(Token(LiteralChar, 0, 3, "'a'"), tokens[0])
     }
 
     @Test
@@ -67,7 +67,7 @@ class TokenizerTest : CodeTestBase() {
         val input = "'"
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
-        assertEquals(Token(InvalidSyntax, 0, 1, "'"), tokens[0])
+        assertEqualsToken(Token(InvalidSyntax, 0, 1, "'"), tokens[0])
     }
 
     @Test
@@ -75,7 +75,7 @@ class TokenizerTest : CodeTestBase() {
         val input = "'ab'"
         val tokens = getTokenizer().getTokens(input)
         assertEquals(2, tokens.size)
-        assertEquals(Token(InvalidSyntax, 0, 3, "'ab"), tokens[0])
+        assertEqualsToken(Token(InvalidSyntax, 0, 3, "'ab"), tokens[0])
         assertEquals(InvalidSyntax, tokens[1].type)
     }
 
@@ -84,7 +84,7 @@ class TokenizerTest : CodeTestBase() {
     fun canTokenizeLiteralNumeral(input: String) {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
-        assertEquals(Token(LiteralNumber, 0, input.length, input), tokens[0])
+        assertEqualsToken(Token(LiteralNumber, 0, input.length, input), tokens[0])
     }
 
     @ParameterizedTest
@@ -92,7 +92,7 @@ class TokenizerTest : CodeTestBase() {
     fun canTokenizeLiteralNumeralWithSemicolon(input: String) {
         val tokens = getTokenizer().getTokens("$input;")
         assertEquals(2, tokens.size)
-        assertEquals(Token(LiteralNumber, 0, input.length, input), tokens[0])
+        assertEqualsToken(Token(LiteralNumber, 0, input.length, input), tokens[0])
         assertEquals(SymbolSemicolon, tokens[1].type)
     }
 
@@ -101,7 +101,7 @@ class TokenizerTest : CodeTestBase() {
     fun hasInvalidLiteralNumeral(input: String) {
         val tokens = getTokenizer().getTokens(input + "a")
         assertEquals(2, tokens.size)
-        assertEquals(Token(InvalidSyntax, 0, input.length, input), tokens[0])
+        assertEqualsToken(Token(InvalidSyntax, 0, input.length, input), tokens[0])
         assertEquals(NameIdentifier, tokens[1].type)
     }
 
@@ -110,7 +110,7 @@ class TokenizerTest : CodeTestBase() {
     fun hasInvalidLiteralNumeralWithSemicolon(input: String) {
         val tokens = getTokenizer().getTokens(input + "a;")
         assertEquals(3, tokens.size)
-        assertEquals(Token(InvalidSyntax, 0, input.length, input), tokens[0])
+        assertEqualsToken(Token(InvalidSyntax, 0, input.length, input), tokens[0])
         assertEquals(NameIdentifier, tokens[1].type)
         assertEquals(SymbolSemicolon, tokens[2].type)
     }
@@ -120,7 +120,7 @@ class TokenizerTest : CodeTestBase() {
     fun canTokenizeNameIdentifier(input: String) {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
-        assertEquals(Token(NameIdentifier, 0, input.length, input), tokens[0])
+        assertEqualsToken(Token(NameIdentifier, 0, input.length, input), tokens[0])
     }
 
     @ParameterizedTest
@@ -128,7 +128,7 @@ class TokenizerTest : CodeTestBase() {
     fun canTokenizeNameIdentifierWithSemicolon(input: String) {
         val tokens = getTokenizer().getTokens("$input;")
         assertEquals(2, tokens.size)
-        assertEquals(Token(NameIdentifier, 0, input.length, input), tokens[0])
+        assertEqualsToken(Token(NameIdentifier, 0, input.length, input), tokens[0])
         assertEquals(SymbolSemicolon, tokens[1].type)
     }
 
@@ -137,7 +137,7 @@ class TokenizerTest : CodeTestBase() {
     fun canTokenizeComment(input: String) {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
-        assertEquals(Token(Comment, 0, input.length, input), tokens[0])
+        assertEqualsToken(Token(Comment, 0, input.length, input), tokens[0])
     }
 
     @Test
@@ -146,7 +146,7 @@ class TokenizerTest : CodeTestBase() {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(3, tokens.size)
         assertEquals(NameIdentifier, tokens[0].type)
-        assertEquals(Token(InvalidSyntax, 4, 5, "%"), tokens[1])
+        assertEqualsToken(Token(InvalidSyntax, 4, 5, "%"), tokens[1])
         assertEquals(SymbolSemicolon, tokens[2].type)
     }
 
@@ -155,8 +155,8 @@ class TokenizerTest : CodeTestBase() {
         val input = "&& <"
         val tokens = getTokenizer().getTokens(input)
         assertEquals(2, tokens.size)
-        assertEquals(Token(OperatorAnd, 0, 2), tokens[0])
-        assertEquals(Token(OperatorLess, 3, 4), tokens[1])
+        assertEqualsToken(Token(OperatorAnd, 0, 2), tokens[0])
+        assertEqualsToken(Token(OperatorLess, 3, 4), tokens[1])
     }
 
     @Test
@@ -165,7 +165,7 @@ class TokenizerTest : CodeTestBase() {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(3, tokens.size)
         assertEquals(NameIdentifier, tokens[0].type)
-        assertEquals(Token(KeyWordThis, 4, 8), tokens[1])
+        assertEqualsToken(Token(KeyWordThis, 4, 8), tokens[1])
         assertEquals(LiteralNumber, tokens[2].type)
     }
 

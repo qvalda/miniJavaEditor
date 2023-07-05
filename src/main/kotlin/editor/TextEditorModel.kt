@@ -60,19 +60,23 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         return lines.joinToString("\r\n")
     }
 
-    fun getSelectedText(): String? {
-        if (enterCaret == selectionCaret) return null
+    fun getSelectedText(): String {
+        return getSelectedLines().joinToString("\r\n")
+    }
+
+    private fun getSelectedLines(): List<String> {
+        if (enterCaret == selectionCaret) return emptyList()
 
         val minCaret = minOf(enterCaret, selectionCaret)
         val maxCaret = maxOf(enterCaret, selectionCaret)
 
         if (minCaret.line == maxCaret.line) {
-            return getSubstring(minCaret.line, minCaret.column, maxCaret.column)
+            return listOf(getSubstring(minCaret.line, minCaret.column, maxCaret.column))
         } else {
             val suffix = getSuffix(minCaret.line, minCaret.column)
             val prefix = getPrefix(maxCaret.line, maxCaret.column)
             val body = lines.subList(minCaret.line + 1, maxCaret.line)
-            return (arrayOf(suffix) + body + arrayOf(prefix)).joinToString("\r\n")
+            return (arrayOf(suffix) + body + arrayOf(prefix)).toList()
         }
     }
 
@@ -211,9 +215,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
     fun copyAction() {
         trackChanges {
             val text = getSelectedText()
-            if (text != null) {
-                clipboard.setData(text)
-            }
+            clipboard.setData(text)
         }
     }
 
@@ -430,11 +432,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         init {
             minCaret = minOf(textEditorModel.enterCaret, textEditorModel.selectionCaret)
             maxCaret = maxOf(textEditorModel.enterCaret, textEditorModel.selectionCaret)
-            val suffix = textEditorModel.getSuffix(minCaret.line, minCaret.column)
-            val prefix = textEditorModel.getPrefix(maxCaret.line, maxCaret.column)
-            val body = textEditorModel.lines.subList(minCaret.line + 1, maxCaret.line)
-
-            lines = (arrayOf(suffix) + body + arrayOf(prefix)).toList()
+            lines = textEditorModel.getSelectedLines()
         }
 
         override fun execute() {
