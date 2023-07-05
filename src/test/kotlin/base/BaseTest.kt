@@ -1,8 +1,11 @@
 package base
 
 import org.junit.jupiter.api.Assertions
+import parser.ArrayTokensSource
+import parser.ITokenSource
 import parser.RecursiveParserTest
 import tokenizer.Token
+import tokenizer.TokenType
 
 open class BaseTest {
     protected fun getFileContent(name: String): String {
@@ -26,5 +29,9 @@ open class BaseTest {
 
     inline fun <reified T> assertIs(actual: Any) {
         assert(actual is T) { "Expected ${T::class.java.name} but actual is ${actual.javaClass.name}" }
+    }
+
+    fun createTokenSource(vararg tokens: TokenType): ITokenSource {
+        return ArrayTokensSource(tokens.mapIndexed { index: Int, tokenType: TokenType -> Token(tokenType, 0, 0, index.toString()) }.toList())
     }
 }

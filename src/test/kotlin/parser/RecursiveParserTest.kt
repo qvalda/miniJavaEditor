@@ -136,8 +136,4 @@ class RecursiveParserTest : BaseTest() {
         assertEquals(BracketRoundOpen, parserResult.errors[0].token.type)
         assertEquals("Expected 'BracketCurlyOpen', but got '[0:0]BracketRoundOpen=2'", parserResult.errors[0].message)
     }
-
-    private fun createTokenSource(vararg tokens: TokenType): ITokenSource {
-        return ArrayTokensSource(tokens.mapIndexed { index: Int, tokenType: TokenType -> Token(tokenType, 0, 0, index.toString()) }.toList())
-    }
 }

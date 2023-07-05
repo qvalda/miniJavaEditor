@@ -3,6 +3,7 @@ package models
 import editor.model.TextEditorModel
 import helpers.Event
 import helpers.ThrottleCall
+import parser.SignificantTokenSource
 import ruleProviders.*
 
 class MainModel (private val codeSource: ICodeSource, defaultText:String) {
@@ -69,7 +70,7 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
 
         textModel = TextEditorModel(input)
         tokenizedTextModel = TokenizedTextModel(textModel)
-        parsedTextModel = ParsedTextModel(tokenizedTextModel.asTokenSource())
+        parsedTextModel = ParsedTextModel(SignificantTokenSource(tokenizedTextModel.asTokenSource()))
         formattingRuleProvider = createFormattingRuleProvider()
         onTextModelChanged(Unit)
 
