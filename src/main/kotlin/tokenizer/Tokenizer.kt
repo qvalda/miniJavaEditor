@@ -4,7 +4,6 @@ class Tokenizer {
 
     private val numbers = '0'..'9'
     private val whiteSpaces = arrayOf('\r', '\n', ' ', '\t')
-    //private val whiteSpaces = arrayOf(' ', '\t')
     private val numberEndings = arrayOf('f', 'd', 'L')
     private val letters = ('a'..'z').union(('A'..'Z')).union(charArrayOf('_').asIterable()).toSet()
     private val lettersWithNumbers = letters.union(numbers).toSet()
@@ -29,7 +28,7 @@ class Tokenizer {
                 tryReadOperatorToken(reader) ?:
                 readInvalidToken(reader)
 
-            if(token!=null) {
+            if(token != null) {
                 tokens.add(token)
             }
         }
@@ -49,7 +48,6 @@ class Tokenizer {
         }
 
         return null
-        //return Token(TokenType.Whitespace, begin, reader.pointer)
     }
 
     private fun tryReadNewLineToken(reader: CharArraySafeReader): Token? {
@@ -57,7 +55,6 @@ class Tokenizer {
         val begin = reader.pointer
         reader.moveNext()
         return null
-        //return Token(TokenType.NewLine, begin, begin+1)
     }
 
     private fun tryReadBracketToken(reader: CharArraySafeReader): Token? {
@@ -214,7 +211,7 @@ class Tokenizer {
     }
 
     private fun tryReadCommentToken(reader: CharArraySafeReader): Token? {
-        if (reader.currentChar != '/' || reader.getNextChar() != '/') return null
+        if (reader.currentChar != '/' || reader.nextChar != '/') return null
 
         val begin = reader.pointer
         while (reader.moveNext()) {
@@ -230,8 +227,8 @@ class Tokenizer {
     private fun tryReadOperatorToken(reader: CharArraySafeReader): Token? {
         if (reader.currentChar !in operatorChars) return null
         val begin = reader.pointer
-        if (reader.getNextChar() in operatorChars) {
-            val doubleCharOperator = String(charArrayOf(reader.currentChar, reader.getNextChar()))
+        if (reader.nextChar in operatorChars) {
+            val doubleCharOperator = String(charArrayOf(reader.currentChar, reader.nextChar))
             val operator = Tokens.operators[doubleCharOperator]
             if (operator != null) {
                 reader.moveNext()

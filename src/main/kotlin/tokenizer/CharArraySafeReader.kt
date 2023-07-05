@@ -2,18 +2,12 @@ package tokenizer
 
 class CharArraySafeReader(private val input: String) {
     var pointer = 0
-    var line = 0
-    var position = 0
 
     val currentChar: Char
-        get() = if (pointer >= input.length) Char.MIN_VALUE else input[pointer]
+        get() = if (pointer < input.length) input[pointer] else Char.MIN_VALUE
 
-    fun getNextChar(): Char {
-        if (pointer + 1 >= input.length) {
-            return Char.MIN_VALUE;
-        }
-        return input[pointer + 1];
-    }
+    val nextChar: Char
+        get() = if (pointer + 1 < input.length) input[pointer + 1] else Char.MIN_VALUE
 
     fun moveNext(): Boolean {
         pointer++;

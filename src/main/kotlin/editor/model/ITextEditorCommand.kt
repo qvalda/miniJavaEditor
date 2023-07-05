@@ -1,4 +1,4 @@
-package editor
+package editor.model
 
 interface ITextEditorCommand {
     fun execute()

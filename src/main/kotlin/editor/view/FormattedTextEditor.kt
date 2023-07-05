@@ -1,5 +1,7 @@
-package editor
+package editor.view
 
+import editor.model.TextEditorCaret
+import editor.model.TextEditorModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -162,10 +164,10 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
     fun onMousePressed(e: MouseEvent) {
         requestFocus()
         if (!hasShiftModifier(e)) {
-            model.updateCarets(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
+            model.setCarets(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
         }
         else{
-            model.updateSelectionCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
+            model.setSelectionCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
         }
     }
 
@@ -174,7 +176,7 @@ class FormattedTextEditor(model: TextEditorModel, formattingRuleProvider: IForma
     private fun hasCtrlModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.CTRL_DOWN_MASK) != 0
 
     fun onMouseDragged(e: MouseEvent) {
-        model.updateSelectionCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
+        model.setSelectionCaret(e.y / letterHeight, (e.x.toFloat() / letterWidth).roundToInt())
     }
 
     public override fun paintComponent(g: Graphics) {

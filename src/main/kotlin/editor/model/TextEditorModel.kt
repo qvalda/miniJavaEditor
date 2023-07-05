@@ -1,5 +1,6 @@
-package editor
+package editor.model
 
+import editor.view.SystemClipboard
 import helpers.Event
 import kotlin.math.max
 import kotlin.math.min
@@ -314,19 +315,13 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    fun updateSelectionCaret(lineIndex: Int, columnIndex: Int) {
+    fun setSelectionCaret(lineIndex: Int, columnIndex: Int) {
         trackChanges {
             selectionCaret = getAdjustedCaret(lineIndex, columnIndex)
         }
     }
 
-    fun updateEnterCaret(lineIndex: Int, columnIndex: Int) {
-        trackChanges {
-            enterCaret = getAdjustedCaret(lineIndex, columnIndex)
-        }
-    }
-
-    fun updateCarets(lineIndex: Int, columnIndex: Int) {
+    fun setCarets(lineIndex: Int, columnIndex: Int) {
         trackChanges {
             enterCaret = getAdjustedCaret(lineIndex, columnIndex)
             selectionCaret = enterCaret.copy()

@@ -1,11 +1,10 @@
-import editor.FormattedTextEditor
+import editor.view.FormattedTextEditor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.swing.Swing
 import models.FileBrowserCodeSource
 import models.MainModel
-import org.jetbrains.annotations.Debug
 import ruleProviders.EmptyFormattingRuleProvider
 import java.awt.BorderLayout
 import javax.swing.*

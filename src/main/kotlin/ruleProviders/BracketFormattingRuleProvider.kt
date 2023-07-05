@@ -1,6 +1,10 @@
 package ruleProviders
 
-import editor.*
+import editor.model.TextEditorCaret
+import editor.model.TextEditorModel
+import editor.view.BaseFormattingRuleProvider
+import editor.view.FormattingRule
+import editor.view.Style
 import models.TokenizedTextModel
 import tokenizer.Token
 import tokenizer.TokenType

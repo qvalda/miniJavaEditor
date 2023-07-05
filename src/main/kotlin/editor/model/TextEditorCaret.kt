@@ -1,4 +1,4 @@
-package editor
+package editor.model
 
 data class TextEditorCaret(val line : Int = 0, val column: Int = 0) : Comparable<TextEditorCaret>{
     override fun compareTo(other: TextEditorCaret): Int {

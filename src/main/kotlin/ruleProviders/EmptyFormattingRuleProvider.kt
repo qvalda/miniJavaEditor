@@ -1,8 +1,7 @@
 package ruleProviders
 
-import editor.BaseFormattingRuleProvider
-import editor.FormattingRule
-import editor.IFormattingRuleProvider
+import editor.view.BaseFormattingRuleProvider
+import editor.view.FormattingRule
 
 class EmptyFormattingRuleProvider : BaseFormattingRuleProvider() {
 

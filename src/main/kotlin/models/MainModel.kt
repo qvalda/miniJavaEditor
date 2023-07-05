@@ -1,6 +1,6 @@
 package models
 
-import editor.TextEditorModel
+import editor.model.TextEditorModel
 import helpers.Event
 import helpers.ThrottleCall
 import ruleProviders.*

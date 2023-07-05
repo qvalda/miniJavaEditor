@@ -1,7 +1,7 @@
 package models
 
-import editor.LineChangeArgs
-import editor.TextEditorModel
+import editor.model.LineChangeArgs
+import editor.model.TextEditorModel
 import helpers.Event
 import parser.ITokenSource
 import tokenizer.Token

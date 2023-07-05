@@ -1,8 +1,8 @@
 package ruleProviders
 
-import editor.BaseFormattingRuleProvider
-import editor.FormattingRule
-import editor.Style
+import editor.view.BaseFormattingRuleProvider
+import editor.view.FormattingRule
+import editor.view.Style
 import models.TokenizedTextModel
 import tokenizer.Token
 import tokenizer.TokenType

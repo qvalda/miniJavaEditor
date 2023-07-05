@@ -1,8 +1,8 @@
 package ruleProviders
 
-import editor.BaseFormattingRuleProvider
-import editor.FormattingRule
-import editor.IFormattingRuleProvider
+import editor.view.BaseFormattingRuleProvider
+import editor.view.FormattingRule
+import editor.view.IFormattingRuleProvider
 
 class AggregateFormattingRuleProvider(private vararg val providers: IFormattingRuleProvider) : BaseFormattingRuleProvider() {
 

@@ -1,5 +1,6 @@
-package editor
+package editor.view
 
+import editor.model.IClipboard
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.StringSelection

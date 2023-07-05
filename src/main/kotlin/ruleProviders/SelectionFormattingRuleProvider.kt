@@ -1,6 +1,9 @@
 package ruleProviders
 
-import editor.*
+import editor.model.TextEditorModel
+import editor.view.BaseFormattingRuleProvider
+import editor.view.FormattingRule
+import editor.view.Style
 
 class SelectionFormattingRuleProvider(private val textModel: TextEditorModel) : BaseFormattingRuleProvider() {
     override fun getRules(lineIndex: Int): List<FormattingRule> {
