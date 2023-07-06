@@ -3,7 +3,7 @@ package editor.model
 import helpers.Event
 
 interface ITextEditorModel {
-    val onModified: Event<Unit>
+    val onModified: Event<LineChangeArgs>
     val onLineDelete : Event<LineChangeArgs>
     val onLineModified : Event<LineChangeArgs>
     val onLineAdd : Event<LineChangeArgs>

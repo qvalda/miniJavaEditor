@@ -1,12 +1,10 @@
 package models
 
-import editor.model.ITextEditorModel
 import editor.view.IViewItemsContainer
 import editor.view.Style
 import editor.view.item.ErrorViewItem
 import editor.view.item.IViewItem
 import helpers.Event
-import java.awt.Dimension
 
 class ParserViewItemsContainer(private val parserModel: ParsedTextModel, tokenizedTextModel: TokenizedTextModel) : IViewItemsContainer {
 
@@ -24,8 +22,10 @@ class ParserViewItemsContainer(private val parserModel: ParsedTextModel, tokeniz
     }
 
     private fun onTokenizedTextModelChanged(unit: Unit) {
-        errors = emptyMap()
-        onItemsUpdated(Unit)
+        if(errors.isNotEmpty()){
+            errors = emptyMap()
+            onItemsUpdated(Unit)
+        }
     }
 
     private fun onParserResultChanged(unit: Unit) {

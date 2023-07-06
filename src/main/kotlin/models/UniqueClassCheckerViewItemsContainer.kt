@@ -7,7 +7,6 @@ import editor.view.item.IViewItem
 import helpers.Event
 import parser.IVisitor
 import parser.ProgramNode
-import java.awt.Dimension
 
 class UniqueClassCheckerViewItemsContainer(private val parserModel: ParsedTextModel, tokenizedTextModel: TokenizedTextModel) : IViewItemsContainer, IVisitor {
 
@@ -22,8 +21,10 @@ class UniqueClassCheckerViewItemsContainer(private val parserModel: ParsedTextMo
     }
 
     private fun onTokenizedTextModelChanged(unit: Unit) {
-        errors = emptyMap()
-        onItemsUpdated(Unit)
+        if(errors.isNotEmpty()){
+            errors = emptyMap()
+            onItemsUpdated(Unit)
+        }
     }
 
     private fun onParserResultChanged(unit: Unit) {

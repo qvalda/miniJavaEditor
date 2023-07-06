@@ -7,17 +7,17 @@ import parser.ITokenSource
 import tokenizer.Token
 import tokenizer.Tokenizer
 
-class TokenizedTextModel(private val textModel: ITextEditorModel) {
+class TokenizedTextModel(private val model: ITextEditorModel) {
     val modified = Event<Unit>()
     var lines: MutableList<List<Token>>
     private val tokenizer = Tokenizer()
 
     init {
-        lines = textModel.getLines().map { l -> tokenizer.getTokens(l) }.toMutableList()
+        lines = model.getLines().map { l -> tokenizer.getTokens(l) }.toMutableList()
 
-        textModel.onLineDelete += ::onLineDelete
-        textModel.onLineModified += ::onLineModified
-        textModel.onLineAdd += ::onLineAdd
+        model.onLineDelete += ::onLineDelete
+        model.onLineModified += ::onLineModified
+        model.onLineAdd += ::onLineAdd
     }
 
     private fun onLineDelete(lineChangeArgs: LineChangeArgs) {
@@ -26,13 +26,13 @@ class TokenizedTextModel(private val textModel: ITextEditorModel) {
     }
 
     private fun onLineModified(lineChangeArgs: LineChangeArgs) {
-        lines[lineChangeArgs.startIndex] = tokenizer.getTokens(textModel.getLine(lineChangeArgs.startIndex))
+        lines[lineChangeArgs.startIndex] = tokenizer.getTokens(model.getLine(lineChangeArgs.startIndex))
         modified(Unit)
     }
 
     private fun onLineAdd(lineChangeArgs: LineChangeArgs) {
         lines.addAll(lineChangeArgs.startIndex,
-            textModel.getLines().subList(lineChangeArgs.startIndex, lineChangeArgs.startIndex + lineChangeArgs.count).map { tokenizer.getTokens(it) })
+            model.getLines().subList(lineChangeArgs.startIndex, lineChangeArgs.startIndex + lineChangeArgs.count).map { tokenizer.getTokens(it) })
 
         modified(Unit)
     }

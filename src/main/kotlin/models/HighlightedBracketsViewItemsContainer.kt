@@ -10,13 +10,13 @@ import tokenizer.Token
 import tokenizer.TokenType
 import java.awt.Graphics
 
-class HighlightedBracketsViewItemsContainer(private val textModel: ITextEditorModel, private val tokenizedModel: TokenizedTextModel) : IViewItemsContainer {
+class HighlightedBracketsViewItemsContainer(private val model: ITextEditorModel, private val tokenizedModel: TokenizedTextModel) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
     private var highlightedBrackets = mutableListOf<Token>()
 
     init {
-        textModel.onCaretMove += ::onCaretMove
+        model.onCaretMove += ::onCaretMove
     }
 
     private fun onCaretMove(caret: TextEditorCaret) {
@@ -53,7 +53,7 @@ class HighlightedBracketsViewItemsContainer(private val textModel: ITextEditorMo
 
         for (token in tokenizedModel.lines[lineIndex]) {
             if (token in highlightedBrackets) {
-                val text = textModel.getLine(lineIndex).substring(token.startIndex, token.endIndex)
+                val text = model.getLine(lineIndex).substring(token.startIndex, token.endIndex)
                 rules.add(ColoredBracket(text, token.startIndex))
             }
         }
@@ -61,7 +61,7 @@ class HighlightedBracketsViewItemsContainer(private val textModel: ITextEditorMo
         return rules
     }
 
-    class ColoredBracket(private val text: String, private val column: Int) : IViewItem {
+    private class ColoredBracket(private val text: String, private val column: Int) : IViewItem {
         override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
             val lineY = measures.letterHeight + lineIndex * measures.letterHeight - measures.letterShift
             DrawStateSaver.usingColor(g, Style.Bracket.background!!) {
@@ -76,7 +76,7 @@ class HighlightedBracketsViewItemsContainer(private val textModel: ITextEditorMo
         }
     }
 
-    enum class LookupDirection {
+    private enum class LookupDirection {
         Backward,
         Forward
     }

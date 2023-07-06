@@ -19,12 +19,7 @@ class FormattedTextEditor(controller: ITextEditorController, itemsContainer: IVi
 
     private var initialized = false
     private var prevPreferredSize = Dimension(0, 0)
-
     private var measures = DrawMeasures(0,0,0)
-
-    init {
-        itemsContainer.onItemsUpdated += ::onRepaintRequest
-    }
 
     var controller = controller
         set(value) {
@@ -42,6 +37,8 @@ class FormattedTextEditor(controller: ITextEditorController, itemsContainer: IVi
     init {
         isFocusable = true
         focusTraversalKeysEnabled = false
+
+        itemsContainer.onItemsUpdated += ::onRepaintRequest
 
         val mouseListener = object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
@@ -66,6 +63,25 @@ class FormattedTextEditor(controller: ITextEditorController, itemsContainer: IVi
         addMouseListener(mouseListener)
         addMouseMotionListener(mouseListener)
         addKeyListener(keyListener)
+    }
+
+    public override fun paintComponent(g: Graphics) {
+        super.paintComponent(g)
+
+        drawBackground(g)
+        setDefaultStyle(g)
+        initValues(g)
+
+        val visibleLineFrom = (g.clipBounds.y / measures.letterHeight).coerceIn(0, itemsContainer.size.height - 1)
+        val visibleLineTo = ((g.clipBounds.y + g.clipBounds.height) / measures.letterHeight).coerceIn(0, itemsContainer.size.height - 1)
+
+        for (lineIndex in visibleLineFrom..visibleLineTo) {
+            val items = itemsContainer.getItems(lineIndex)
+            for (i  in items) {
+                i.draw(g, lineIndex, measures)
+            }
+        }
+        updatePreferredSize()
     }
 
     private fun onKeyPressed(e: KeyEvent) {
@@ -151,8 +167,7 @@ class FormattedTextEditor(controller: ITextEditorController, itemsContainer: IVi
         }
     }
 
-    private fun onRepaintRequest(a:Unit) {
-        //println("onRepaintRequest")
+    private fun onRepaintRequest(args: Unit) {
         repaint()
         updatePreferredSize()
         CoroutineScope(Dispatchers.Swing).launch { // bug visibleRect is not updated after preferredSize changed
@@ -164,7 +179,7 @@ class FormattedTextEditor(controller: ITextEditorController, itemsContainer: IVi
         }
     }
 
-    fun onMousePressed(e: MouseEvent) {
+    private fun onMousePressed(e: MouseEvent) {
         requestFocus()
         if (!hasShiftModifier(e)) {
             controller.setCarets(e.y / measures.letterHeight, (e.x.toFloat() / measures.letterWidth).roundToInt())
@@ -178,33 +193,14 @@ class FormattedTextEditor(controller: ITextEditorController, itemsContainer: IVi
     private fun hasShiftModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.SHIFT_DOWN_MASK) != 0
     private fun hasCtrlModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.CTRL_DOWN_MASK) != 0
 
-    var mousePoint = Point()
+    private var mousePoint = Point()
 
-    fun onMouseMoved(e: MouseEvent) {
+    private fun onMouseMoved(e: MouseEvent) {
         mousePoint = Point(e.y / measures.letterHeight, (e.x.toFloat() / measures.letterWidth).roundToInt())
     }
 
-    fun onMouseDragged(e: MouseEvent) {
+    private fun onMouseDragged(e: MouseEvent) {
         controller.setSelectionCaret(e.y / measures.letterHeight, (e.x.toFloat() / measures.letterWidth).roundToInt())
-    }
-
-    public override fun paintComponent(g: Graphics) {
-        super.paintComponent(g)
-
-        drawBackground(g)
-        setDefaultStyle(g)
-        initValues(g)
-
-        val visibleLineFrom = (g.clipBounds.y / measures.letterHeight).coerceIn(0, itemsContainer.size.height - 1)
-        val visibleLineTo = ((g.clipBounds.y + g.clipBounds.height) / measures.letterHeight).coerceIn(0, itemsContainer.size.height - 1)
-
-        for (lineIndex in visibleLineFrom..visibleLineTo) {
-            val items = itemsContainer.getItems(lineIndex)
-            for (i  in items) {
-                i.draw(g, lineIndex, measures)
-            }
-        }
-        updatePreferredSize()
     }
 
     private fun drawBackground(g: Graphics) {

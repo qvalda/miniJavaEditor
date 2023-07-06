@@ -9,7 +9,7 @@ class TextEditorCommandHistoryTest {
     fun executeOnAdd() {
         val history = TextEditorCommandHistory()
         val c = TestCommand()
-        history.add(c)
+        history.run(c)
         assertTrue(c.isExecuted)
     }
 
@@ -17,7 +17,7 @@ class TextEditorCommandHistoryTest {
     fun canUndo() {
         val history = TextEditorCommandHistory()
         val c = TestCommand()
-        history.add(c)
+        history.run(c)
         c.undo()
         assertTrue(c.isUndo)
     }
@@ -26,7 +26,7 @@ class TextEditorCommandHistoryTest {
     fun undoRedoDoNotThrow() {
         val history = TextEditorCommandHistory()
         val c = TestCommand()
-        history.add(c)
+        history.run(c)
         history.undo()
         history.undo()
         history.undo()
@@ -39,8 +39,8 @@ class TextEditorCommandHistoryTest {
         val history = TextEditorCommandHistory()
         val c1 = TestCommand()
         val c2 = TestCommand()
-        history.add(c1)
-        history.add(c2)
+        history.run(c1)
+        history.run(c2)
         history.undo()
         assertTrue(c2.isUndo)
         assertFalse(c1.isUndo)

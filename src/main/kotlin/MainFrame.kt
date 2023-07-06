@@ -11,7 +11,6 @@ import javax.swing.*
 class MainFrame : JFrame("Mini java editor") {
 
     init {
-        //editor.canvas.text = File("""D:\Kotlin\bigInput2.txt""").readText()
         val text = """class Factorial{
     public static void main(String[] a){
 	System.out.println(new Fac().ComputeFac(10));
@@ -80,10 +79,8 @@ class Fac {
         defaultCloseOperation = EXIT_ON_CLOSE
 
         mainModel.onTextModelChanged += {
-            //editor.formattingRuleProvider = EmptyFormattingRuleProvider() //todo remove hack
             editor.controller = mainModel.textModel
             editor.itemsContainer = mainModel.visualItemsContainer
-            //editor.formattingRuleProvider = mainModel.formattingRuleProvider
         }
     }
 
@@ -91,7 +88,6 @@ class Fac {
         @JvmStatic
         fun main(args: Array<String>) {
             CoroutineScope(Dispatchers.Swing).launch {
-                println("UI started on thread ${Thread.currentThread().threadId()}")
                 MainFrame()
             }
         }

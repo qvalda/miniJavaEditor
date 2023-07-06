@@ -9,6 +9,7 @@ import helpers.ThrottleCall
 import parser.SignificantTokenSource
 
 class MainModel (private val codeSource: ICodeSource, defaultText:String) {
+
     val onTextModelChanged = Event<Unit>()
 
     lateinit var textModel: TextEditorModel
@@ -59,7 +60,7 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
 
     private fun createVisualItemsContainer(): IViewItemsContainer {
         val m = TextViewItemsContainer(textModel)
-        val t = TokenizerViewItemsContainer(tokenizedTextModel, textModel)
+        val t = TokenizerViewItemsContainer(textModel, tokenizedTextModel)
         val p = ParserViewItemsContainer(parsedTextModel, tokenizedTextModel)
         val u = UniqueClassCheckerViewItemsContainer(parsedTextModel, tokenizedTextModel)
         val b = HighlightedBracketsViewItemsContainer(textModel, tokenizedTextModel)

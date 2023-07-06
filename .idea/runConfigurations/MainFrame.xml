@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="MainFrame" type="JetRunConfigurationType" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="MainFrame" />
+    <module name="test2" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

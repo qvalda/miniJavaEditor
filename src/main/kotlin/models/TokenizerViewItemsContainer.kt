@@ -12,7 +12,7 @@ import tokenizer.Token
 import tokenizer.TokenType
 import java.awt.Graphics
 
-class TokenizerViewItemsContainer(private val tokenizedModel: TokenizedTextModel, private val textModel: ITextEditorModel) : IViewItemsContainer {
+class TokenizerViewItemsContainer(private val model: ITextEditorModel, private val tokenizedModel: TokenizedTextModel) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
 
@@ -20,7 +20,7 @@ class TokenizerViewItemsContainer(private val tokenizedModel: TokenizedTextModel
         val rules = mutableListOf<IViewItem>()
 
         fun addColoredString(token: Token, style: Style) {
-            val text = textModel.getLine(lineIndex).substring(token.startIndex, token.endIndex)
+            val text = model.getLine(lineIndex).substring(token.startIndex, token.endIndex)
             rules.add(ColoredString(text, token.startIndex, style))
         }
 
