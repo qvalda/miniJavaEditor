@@ -5,18 +5,20 @@ import helpers.Event
 import kotlin.math.max
 import kotlin.math.min
 
-class TextEditorModel (text:String = "", private val clipboard: IClipboard = SystemClipboard()) {
-    val onLineDelete = Event<LineChangeArgs>()
-    val onLineModified = Event<LineChangeArgs>()
-    val onLineAdd = Event<LineChangeArgs>()
-    val onCaretMove = Event<TextEditorCaret>()
-    val onViewModified = Event<Unit>() //todo test
+class TextEditorModel (text:String = "", private val clipboard: IClipboard = SystemClipboard()) : ITextEditorModel, ITextEditorController  {
 
-    var lines = mutableListOf<String>()
-    var maxLength = 0
-    var enterCaret = TextEditorCaret()
-    var selectionCaret = TextEditorCaret()
+    private val lines = mutableListOf<String>()
     private val commands = TextEditorCommandHistory()
+
+    override val onLineDelete = Event<LineChangeArgs>()
+    override val onLineModified = Event<LineChangeArgs>()
+    override val onLineAdd = Event<LineChangeArgs>()
+    override val onCaretMove = Event<TextEditorCaret>()
+    override val onModified = Event<Unit>() //todo test
+
+    override var enterCaret = TextEditorCaret()
+    override var selectionCaret = TextEditorCaret()
+    override var maxLength = 0
 
     init {
         val input = preprocessText(text)
@@ -28,6 +30,17 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         enterCaret = TextEditorCaret()
         selectionCaret = TextEditorCaret()
     }
+
+    override fun getLine(lineIndex: Int) : String{
+        return lines[lineIndex]
+    }
+
+    override fun getLines(): List<String> {
+        return lines
+    }
+
+    override val linesCount: Int
+        get() = lines.size
 
     private var hasViewChanges = false
     private var isTrackingActive = false
@@ -45,13 +58,10 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
             onCaretMove(enterCaret)
         }
         if (initialEnterCaret != enterCaret || initialSelectionCaret != selectionCaret || hasViewChanges) {
-            onViewModified(Unit)
+            onModified(Unit)
         }
         isTrackingActive = false
     }
-
-    private val hasSelection
-        get() = enterCaret != selectionCaret
 
     private fun preprocessText(input: String): String {
         return input.replace("\r", "").replace("\t", "    ")
@@ -149,7 +159,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
     //endregion
 
     //region public actions
-    fun backSpaceAction() {
+    override fun backSpaceAction() {
         trackChanges {
             if (!deleteSelection() && !(enterCaret.column == 0 && enterCaret.line == 0)) {
                 commands.add(BackSpaceCommand(this))
@@ -157,7 +167,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    fun deleteAction() {
+    override fun deleteAction() {
         trackChanges {
             if (!deleteSelection() && !(enterCaret.column == lines.last().length && enterCaret.line == lines.size - 1)) {
                 commands.add(DeleteCommand(this))
@@ -165,61 +175,61 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    fun addChar(keyChar: Char) {
+    override fun addChar(keyChar: Char) {
         trackChanges {
             deleteSelection()
             commands.add(InsertSingleLineCommand(this, keyChar.toString()))
         }
     }
 
-    fun tabAction() {
+    override fun tabAction() {
         trackChanges {
             deleteSelection()
             commands.add(InsertSingleLineCommand(this, "    "))
         }
     }
 
-    fun enterAction() {
+    override fun enterAction() {
         trackChanges {
             deleteSelection()
             commands.add(InsertNewLineCommand(this))
         }
     }
 
-    fun undo() {
+    override fun undo() {
         trackChanges {
             commands.undo()
         }
     }
 
-    fun redo() {
+    override fun redo() {
         trackChanges {
             commands.redo()
         }
     }
 
-    fun selectAllAction() {
+    override fun selectAllAction() {
         trackChanges {
             enterCaret = TextEditorCaret(0, 0)
             selectionCaret = TextEditorCaret(lines.lastIndex, lines.last().length)
         }
     }
 
-    fun cutAction() {
+    override fun cutAction() {
         trackChanges {
             copyAction()
             deleteSelection()
         }
     }
 
-    fun copyAction() {
+    override fun copyAction() {
         trackChanges {
             val text = getSelectedText()
             clipboard.setData(text)
         }
     }
 
-    fun pasteAction() {
+    override fun pasteAction() {
         trackChanges {
             val text = clipboard.getData()
             if (!text.isNullOrEmpty()) {
@@ -234,25 +244,25 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    fun homeAction() {
+    override fun homeAction() {
         trackChanges {
             setCaret(getAdjustedCaret(enterCaret.line, 0))
         }
     }
 
-    fun endAction() {
+    override fun endAction() {
         trackChanges {
             setCaret(getAdjustedCaret(enterCaret.line, lines[enterCaret.line].length))
         }
     }
 
-    fun pageUpAction(offset: Int) {
+    override fun pageUpAction(offset: Int) {
         trackChanges {
             setCaret(getAdjustedCaret(enterCaret.line - offset, enterCaret.column))
         }
     }
 
-    fun pageDownAction(offset: Int) {
+    override fun pageDownAction(offset: Int) {
         trackChanges {
             setCaret(getAdjustedCaret(enterCaret.line + offset, enterCaret.column))
         }
@@ -262,65 +272,65 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
 
     //region caret
 
-    fun moveEnterCaretLeft() {
+    override fun moveEnterCaretLeft() {
         trackChanges {
             enterCaret = getCaretLeft(enterCaret)
             selectionCaret = enterCaret.copy()
         }
     }
 
-    fun moveSelectionCaretLeft() {
+    override fun moveSelectionCaretLeft() {
         trackChanges {
             selectionCaret = getCaretLeft(selectionCaret)
         }
     }
 
-    fun moveEnterCaretRight() {
+    override fun moveEnterCaretRight() {
         trackChanges {
             enterCaret = getCaretRight(enterCaret)
             selectionCaret = enterCaret.copy()
         }
     }
 
-    fun moveSelectionCaretRight() {
+    override fun moveSelectionCaretRight() {
         trackChanges {
             selectionCaret = getCaretRight(selectionCaret)
         }
     }
 
-    fun moveEnterCaretDown() {
+    override fun moveEnterCaretDown() {
         trackChanges {
             enterCaret = getCaretDown(enterCaret)
             selectionCaret = enterCaret.copy()
         }
     }
 
-    fun moveSelectionCaretDown() {
+    override fun moveSelectionCaretDown() {
         trackChanges {
             selectionCaret = getCaretDown(selectionCaret)
         }
     }
 
-    fun moveEnterCaretUp() {
+    override fun moveEnterCaretUp() {
         trackChanges {
             enterCaret = getCaretUp(enterCaret)
             selectionCaret = enterCaret.copy()
         }
     }
 
-    fun moveSelectionCaretUp() {
+    override fun moveSelectionCaretUp() {
         trackChanges {
             selectionCaret = getCaretUp(selectionCaret)
         }
     }
 
-    fun setSelectionCaret(lineIndex: Int, columnIndex: Int) {
+    override fun setSelectionCaret(lineIndex: Int, columnIndex: Int) {
         trackChanges {
             selectionCaret = getAdjustedCaret(lineIndex, columnIndex)
         }
     }
 
-    fun setCarets(lineIndex: Int, columnIndex: Int) {
+    override fun setCarets(lineIndex: Int, columnIndex: Int) {
         trackChanges {
             enterCaret = getAdjustedCaret(lineIndex, columnIndex)
             selectionCaret = enterCaret.copy()
@@ -387,7 +397,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
     //endregion
 
     private fun deleteSelection(): Boolean {
-        if (!hasSelection) return false
+        if (enterCaret == selectionCaret) return false
         if (enterCaret.line == selectionCaret.line) {
             commands.add(DeleteSingleSelectionCommand(this))
         } else {
@@ -396,7 +406,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         return true
     }
 
-    class DeleteSingleSelectionCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
+    private class DeleteSingleSelectionCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var minCaret: TextEditorCaret
         private var maxCaret: TextEditorCaret
         private var text: String
@@ -418,7 +428,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    class DeleteMultiSelectionCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
+    private class DeleteMultiSelectionCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var minCaret: TextEditorCaret
         private var maxCaret: TextEditorCaret
         private var lines: List<String>
@@ -440,7 +450,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    class InsertNewLineCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
+    private class InsertNewLineCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var caretState: TextEditorCaret
 
         init {
@@ -459,7 +469,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    class InsertSingleLineCommand(private val textEditorModel: TextEditorModel, private val text: String) : ITextEditorCommand {
+    private class InsertSingleLineCommand(private val textEditorModel: TextEditorModel, private val text: String) : ITextEditorCommand {
         private var caretState: TextEditorCaret
 
         init {
@@ -480,7 +490,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    class InsertMultiLineCommand(private val textEditorModel: TextEditorModel, private val lines: List<String>) : ITextEditorCommand {
+    private class InsertMultiLineCommand(private val textEditorModel: TextEditorModel, private val lines: List<String>) : ITextEditorCommand {
         private var prevCaret: TextEditorCaret
         private lateinit var newCaret: TextEditorCaret
 
@@ -506,7 +516,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    class BackSpaceCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
+    private class BackSpaceCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var prevCaret: TextEditorCaret
         private lateinit var newCaret: TextEditorCaret
         private lateinit var char: String
@@ -557,7 +567,7 @@ class TextEditorModel (text:String = "", private val clipboard: IClipboard = Sys
         }
     }
 
-    class DeleteCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
+    private class DeleteCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var caretState: TextEditorCaret
         private lateinit var result: DeleteResult
         private lateinit var char: String

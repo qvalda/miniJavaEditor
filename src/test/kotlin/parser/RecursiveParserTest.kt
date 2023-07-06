@@ -128,6 +128,20 @@ class RecursiveParserTest : BaseTest() {
     }
 
     @Test
+    fun canParseEmptyClass() {
+        val ts = createTokenSource(KeyWordClass, NameIdentifier, BracketCurlyOpen, BracketCurlyClose)
+        val parserResult = RecursiveParser(ts).parseClassDeclaration()
+        assertEquals("1", parserResult.name)
+    }
+
+    @Test
+    fun canParseEmptyMethod() {
+        val ts = createTokenSource(KeyWordPublic, KeyWordInt, NameIdentifier, BracketRoundOpen, BracketRoundClose,  BracketCurlyOpen, KeyWordReturn, LiteralNumber, SymbolSemicolon, BracketCurlyClose)
+        val parserResult = RecursiveParser(ts).parseMethodDeclaration()
+        assertEquals("2", parserResult.name)
+    }
+
+    @Test
     fun provideParseErrors() {
         val ts = createTokenSource(KeyWordClass, NameIdentifier, BracketRoundOpen)
         val parserResult = RecursiveParser(ts).parse()

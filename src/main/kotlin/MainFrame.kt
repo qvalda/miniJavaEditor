@@ -5,7 +5,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.swing.Swing
 import models.FileBrowserCodeSource
 import models.MainModel
-import ruleProviders.EmptyFormattingRuleProvider
 import java.awt.BorderLayout
 import javax.swing.*
 
@@ -68,7 +67,7 @@ class Fac {
         toolbar.add(undoButton)
         toolbar.add(redoButton)
 
-        val editor = FormattedTextEditor(mainModel.textModel, mainModel.formattingRuleProvider)
+        val editor = FormattedTextEditor(mainModel.textModel, mainModel.visualItemsContainer)
         val scrollPane = JScrollPane(editor)
 
         contentPane.add(toolbar, BorderLayout.NORTH)
@@ -81,9 +80,10 @@ class Fac {
         defaultCloseOperation = EXIT_ON_CLOSE
 
         mainModel.onTextModelChanged += {
-            editor.formattingRuleProvider = EmptyFormattingRuleProvider() //todo remove hack
-            editor.model = mainModel.textModel
-            editor.formattingRuleProvider = mainModel.formattingRuleProvider
+            //editor.formattingRuleProvider = EmptyFormattingRuleProvider() //todo remove hack
+            editor.controller = mainModel.textModel
+            editor.itemsContainer = mainModel.visualItemsContainer
+            //editor.formattingRuleProvider = mainModel.formattingRuleProvider
         }
     }
 

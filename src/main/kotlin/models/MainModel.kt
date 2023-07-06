@@ -1,18 +1,21 @@
 package models
 
+import editor.view.ComposedViewItemsContainer
+import editor.view.IViewItemsContainer
 import editor.model.TextEditorModel
+import editor.view.TextViewItemsContainer
 import helpers.Event
 import helpers.ThrottleCall
 import parser.SignificantTokenSource
-import ruleProviders.*
 
 class MainModel (private val codeSource: ICodeSource, defaultText:String) {
     val onTextModelChanged = Event<Unit>()
 
-    lateinit var textModel : TextEditorModel
-    private lateinit var tokenizedTextModel : TokenizedTextModel
-    private lateinit var parsedTextModel : ParsedTextModel
-    lateinit var formattingRuleProvider : AggregateFormattingRuleProvider
+    lateinit var textModel: TextEditorModel
+    lateinit var visualItemsContainer: IViewItemsContainer
+
+    private lateinit var tokenizedTextModel: TokenizedTextModel
+    private lateinit var parsedTextModel: ParsedTextModel
 
     init {
         createModels(defaultText)
@@ -54,36 +57,36 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
         textModel.redo()
     }
 
-    private fun createFormattingRuleProvider(): AggregateFormattingRuleProvider {
-        val r1 = TokenizerFormattingRuleProvider(tokenizedTextModel)
-        val r2 = SelectionFormattingRuleProvider(textModel)
-        val r3 = BracketFormattingRuleProvider(textModel, tokenizedTextModel)
-        val r4 = ParserFormattingRuleProvider(parsedTextModel, tokenizedTextModel)
-        val r5 = UniqueClassNameVisitor(parsedTextModel, tokenizedTextModel)
-        return AggregateFormattingRuleProvider(r1, r2, r3, r4, r5)//r3, r4, r5)
+    private fun createVisualItemsContainer(): IViewItemsContainer {
+        val m = TextViewItemsContainer(textModel)
+        val t = TokenizerViewItemsContainer(tokenizedTextModel, textModel)
+        val p = ParserViewItemsContainer(parsedTextModel, tokenizedTextModel)
+        val u = UniqueClassCheckerViewItemsContainer(parsedTextModel, tokenizedTextModel)
+        val b = HighlightedBracketsViewItemsContainer(textModel, tokenizedTextModel)
+        return ComposedViewItemsContainer(m, t, p, u, b)
     }
 
-    private fun createModels(input:String){
-        if(this::tokenizedTextModel.isInitialized){
+    private fun createModels(input: String) {
+        if (this::tokenizedTextModel.isInitialized) {
             tokenizedTextModel.modified -= ::onTokenizedTextModelModifiedDelayed
         }
 
         textModel = TextEditorModel(input)
         tokenizedTextModel = TokenizedTextModel(textModel)
         parsedTextModel = ParsedTextModel(SignificantTokenSource(tokenizedTextModel.asTokenSource()))
-        formattingRuleProvider = createFormattingRuleProvider()
-        onTextModelChanged(Unit)
-
+        visualItemsContainer = createVisualItemsContainer()
         tokenizedTextModel.modified += ::onTokenizedTextModelModifiedDelayed
+
+        onTextModelChanged(Unit)
     }
 
     val onTokenizedTextModelThrottled = ThrottleCall(500) { onTokenizedTextModelModified() }
 
-    private fun onTokenizedTextModelModifiedDelayed(unit:Unit) {
+    private fun onTokenizedTextModelModifiedDelayed(unit: Unit) {
         onTokenizedTextModelThrottled()
     }
 
     private fun onTokenizedTextModelModified() {
-        parsedTextModel.update(tokenizedTextModel.asTokenSource())
+        parsedTextModel.update(SignificantTokenSource(tokenizedTextModel.asTokenSource()))
     }
 }

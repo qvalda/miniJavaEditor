@@ -102,7 +102,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         return classes
     }
 
-    private fun parseClassDeclaration(): ClassDeclarationNode {
+    fun parseClassDeclaration(): ClassDeclarationNode {
         //    'class' identifier ( 'extends' identifier )? '{'
         //        var-declaration*
         //        method-declaration*
@@ -121,7 +121,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         return ClassDeclarationNode(nameToken.value, baseNameToken?.value, variables, methods,  getLocation(nameToken))
     }
 
-    private fun parseMethodDeclaration(): MethodDeclarationNode {
+    fun parseMethodDeclaration(): MethodDeclarationNode {
         //    'public' type identifier '(' formal-list? ')' '{'
         //        var-declaration*
         //        statement*
@@ -188,7 +188,7 @@ class RecursiveParser(private val ts: ITokenSource) {
 
     private fun parseClassVarDeclarationMultiple(): List<VarDeclarationNode> {
         val vars = mutableListOf<VarDeclarationNode>()
-        while (ts.currentToken.type != TokenType.KeyWordPublic) {
+        while (ts.currentToken.type != TokenType.KeyWordPublic && ts.currentToken.type != TokenType.BracketCurlyClose ) {
             vars.add(parseVarDeclaration())
         }
         return vars

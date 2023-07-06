@@ -1,16 +1,18 @@
-package ruleProviders
+package models
 
+import editor.model.ITextEditorModel
 import editor.model.TextEditorCaret
-import editor.model.TextEditorModel
-import editor.view.BaseFormattingRuleProvider
-import editor.view.FormattingRule
-import editor.view.Style
-import models.TokenizedTextModel
+import editor.view.*
+import editor.view.item.IViewItem
+import helpers.DrawStateSaver
+import helpers.Event
 import tokenizer.Token
 import tokenizer.TokenType
+import java.awt.Graphics
 
-class BracketFormattingRuleProvider(textModel: TextEditorModel, private val tokenizedModel: TokenizedTextModel) : BaseFormattingRuleProvider() {
+class HighlightedBracketsViewItemsContainer(private val textModel: ITextEditorModel, private val tokenizedModel: TokenizedTextModel) : IViewItemsContainer {
 
+    override val onItemsUpdated = Event<Unit>()
     private var highlightedBrackets = mutableListOf<Token>()
 
     init {
@@ -46,16 +48,32 @@ class BracketFormattingRuleProvider(textModel: TextEditorModel, private val toke
         }
     }
 
-    override fun getRules(lineIndex: Int): List<FormattingRule> {
-        val rules = mutableListOf<FormattingRule>()
+    override fun getItems(lineIndex: Int): List<IViewItem> {
+        val rules = mutableListOf<ColoredBracket>()
 
         for (token in tokenizedModel.lines[lineIndex]) {
             if (token in highlightedBrackets) {
-                rules.add(FormattingRule(token.startIndex, token.endIndex, Style.Bracket))
+                val text = textModel.getLine(lineIndex).substring(token.startIndex, token.endIndex)
+                rules.add(ColoredBracket(text, token.startIndex))
             }
         }
 
         return rules
+    }
+
+    class ColoredBracket(private val text: String, private val column: Int) : IViewItem {
+        override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
+            val lineY = measures.letterHeight + lineIndex * measures.letterHeight - measures.letterShift
+            DrawStateSaver.usingColor(g, Style.Bracket.background!!) {
+                g.fillRect(
+                    column * measures.letterWidth,
+                    lineIndex * measures.letterHeight,
+                    measures.letterWidth,
+                    measures.letterHeight
+                )
+            }
+            g.drawString(text, column * measures.letterWidth, lineY)
+        }
     }
 
     enum class LookupDirection {

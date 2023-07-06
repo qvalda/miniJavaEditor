@@ -1,19 +1,19 @@
 package models
 
+import editor.model.ITextEditorModel
 import editor.model.LineChangeArgs
-import editor.model.TextEditorModel
 import helpers.Event
 import parser.ITokenSource
 import tokenizer.Token
 import tokenizer.Tokenizer
 
-class TokenizedTextModel(private val textModel: TextEditorModel) {
+class TokenizedTextModel(private val textModel: ITextEditorModel) {
     val modified = Event<Unit>()
     var lines: MutableList<List<Token>>
     private val tokenizer = Tokenizer()
 
     init {
-        lines = textModel.lines.map { l -> tokenizer.getTokens(l) }.toMutableList()
+        lines = textModel.getLines().map { l -> tokenizer.getTokens(l) }.toMutableList()
 
         textModel.onLineDelete += ::onLineDelete
         textModel.onLineModified += ::onLineModified
@@ -26,13 +26,13 @@ class TokenizedTextModel(private val textModel: TextEditorModel) {
     }
 
     private fun onLineModified(lineChangeArgs: LineChangeArgs) {
-        lines[lineChangeArgs.startIndex] = tokenizer.getTokens(textModel.lines[lineChangeArgs.startIndex])
+        lines[lineChangeArgs.startIndex] = tokenizer.getTokens(textModel.getLine(lineChangeArgs.startIndex))
         modified(Unit)
     }
 
     private fun onLineAdd(lineChangeArgs: LineChangeArgs) {
         lines.addAll(lineChangeArgs.startIndex,
-            textModel.lines.subList(lineChangeArgs.startIndex, lineChangeArgs.startIndex + lineChangeArgs.count).map { tokenizer.getTokens(it) })
+            textModel.getLines().subList(lineChangeArgs.startIndex, lineChangeArgs.startIndex + lineChangeArgs.count).map { tokenizer.getTokens(it) })
 
         modified(Unit)
     }
@@ -79,6 +79,7 @@ class TokenizedTextModel(private val textModel: TextEditorModel) {
                 if (isEOF()) return Token.EOF
                 return tokenizedTextModel.lines[cursor.line][cursor.column]
             }
+
         override val lineIndex: Int
             get() = cursor.line
 
