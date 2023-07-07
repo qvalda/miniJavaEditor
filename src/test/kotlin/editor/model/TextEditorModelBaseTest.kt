@@ -26,11 +26,6 @@ open class TextEditorModelBaseTest {
         return model
     }
 
-    private fun getPos(text: String, pattern: String) = text.split("\r\n").mapIndexed { index: Int, s: String -> Pair(index, s.indexOf(pattern)) }.firstOrNull { p -> p.second != -1 }
-    private fun getCaretPos(text: String) = getPos(text, "|")
-    private fun getEnterCaretPos(text: String) = getPos(text.replace("]", ""), "[")
-    private fun getSelectionCaretPos(text: String) = getPos(text.replace("[", ""), "]")
-
     fun assertEnterCaret(model: TextEditorModel, line: Int, column: Int) {
         assertEquals(line, model.enterCaret.line)
         assertEquals(column, model.enterCaret.column)
@@ -61,8 +56,6 @@ open class TextEditorModelBaseTest {
         assertEquals(args.count, count)
     }
 
-    private fun cleanTestText(text: String) = text.replace("|", "").replace("[", "").replace("]", "")
-
     class MemoryClipboard : IClipboard {
         private var memoryData: String? = null
         override fun getData(): String? {
@@ -72,5 +65,13 @@ open class TextEditorModelBaseTest {
         override fun setData(text: String) {
             memoryData = text
         }
+    }
+
+    companion object {
+        private fun getPos(text: String, pattern: String) = text.split("\r\n").mapIndexed { index: Int, s: String -> Pair(index, s.indexOf(pattern)) }.firstOrNull { p -> p.second != -1 }
+        fun getCaretPos(text: String) = getPos(text, "|")
+        fun getEnterCaretPos(text: String) = getPos(text.replace("]", ""), "[")
+        fun getSelectionCaretPos(text: String) = getPos(text.replace("[", ""), "]")
+        fun cleanTestText(text: String) = text.replace("|", "").replace("[", "").replace("]", "")
     }
 }

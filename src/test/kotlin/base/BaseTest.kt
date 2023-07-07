@@ -1,6 +1,7 @@
 package base
 
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.fail
 import parser.ArrayTokensSource
 import parser.ITokenSource
 import parser.RecursiveParserTest
@@ -27,11 +28,17 @@ open class BaseTest {
         assert(equals) { "expected:${expected}|actual:${actual}" }
     }
 
-    inline fun <reified T> assertIs(actual: Any) {
-        assert(actual is T) { "Expected ${T::class.java.name} but actual is ${actual.javaClass.name}" }
-    }
-
     fun createTokenSource(vararg tokens: TokenType): ITokenSource {
         return ArrayTokensSource(tokens.mapIndexed { index: Int, tokenType: TokenType -> Token(tokenType, 0, 0, index.toString()) }.toList())
+    }
+
+    companion object {
+        inline fun <reified T> assertIs(actual: Any) {
+            assert(actual is T) { "Expected ${T::class.java.name} but actual is ${actual.javaClass.name}" }
+        }
+
+        fun assertFail(string: String): Nothing {
+            fail(string)
+        }
     }
 }
