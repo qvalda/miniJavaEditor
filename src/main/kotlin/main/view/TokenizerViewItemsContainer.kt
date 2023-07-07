@@ -1,4 +1,4 @@
-package models
+package main.view
 
 import editor.model.ITextEditorModel
 import editor.view.DrawMeasures
@@ -8,11 +8,12 @@ import editor.view.item.ErrorViewItem
 import editor.view.item.IViewItem
 import helpers.DrawStateSaver
 import helpers.Event
+import main.model.ITokenizedModel
 import tokenizer.Token
 import tokenizer.TokenType
 import java.awt.Graphics
 
-class TokenizerViewItemsContainer(private val model: ITextEditorModel, private val tokenizedModel: TokenizedTextModel) : IViewItemsContainer {
+class TokenizerViewItemsContainer(private val model: ITextEditorModel, private val tokenizedModel: ITokenizedModel) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
 
@@ -24,7 +25,7 @@ class TokenizerViewItemsContainer(private val model: ITextEditorModel, private v
             rules.add(ColoredString(text, token.startIndex, style))
         }
 
-        for (token in tokenizedModel.lines[lineIndex]) {
+        for (token in tokenizedModel.getLine(lineIndex)) {
             if (token.type.isKeyWord()) {
                 addColoredString(token, Style.KeyWord)
             } else if (token.type == TokenType.Comment) {

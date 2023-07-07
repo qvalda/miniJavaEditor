@@ -15,7 +15,7 @@ import javax.swing.JComponent
 import javax.swing.Scrollable
 import kotlin.math.roundToInt
 
-class FormattedTextEditor(controller: ITextEditorController, itemsContainer: IViewItemsContainer) : JComponent(), Scrollable {
+class TextEditorComponent(controller: ITextEditorController, itemsContainer: IViewItemsContainer) : JComponent(), Scrollable {
 
     private var initialized = false
     private var prevPreferredSize = Dimension(0, 0)
@@ -29,6 +29,7 @@ class FormattedTextEditor(controller: ITextEditorController, itemsContainer: IVi
 
     var itemsContainer = itemsContainer
         set(value) {
+            field.onItemsUpdated -= ::onRepaintRequest
             field = value
             value.onItemsUpdated += ::onRepaintRequest
             repaint()
@@ -152,8 +153,8 @@ class FormattedTextEditor(controller: ITextEditorController, itemsContainer: IVi
 
             KeyEvent.VK_HOME -> controller.homeAction()
             KeyEvent.VK_END -> controller.endAction()
-            KeyEvent.VK_PAGE_UP -> controller.pageUpAction(parent.size.height / measures.letterHeight)
-            KeyEvent.VK_PAGE_DOWN -> controller.pageDownAction(parent.size.height / measures.letterHeight)
+            KeyEvent.VK_PAGE_UP -> controller.pageUpAction((parent?.size?.height ?: measures.letterHeight) / measures.letterHeight)
+            KeyEvent.VK_PAGE_DOWN -> controller.pageDownAction((parent?.size?.height ?: measures.letterHeight) / measures.letterHeight)
 
             KeyEvent.VK_BACK_SPACE -> controller.backSpaceAction()
             KeyEvent.VK_DELETE -> controller.deleteAction()

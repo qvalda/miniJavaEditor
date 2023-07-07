@@ -1,4 +1,4 @@
-package models
+package main.view
 
 import editor.model.ITextEditorModel
 import editor.model.TextEditorCaret
@@ -6,11 +6,12 @@ import editor.view.*
 import editor.view.item.IViewItem
 import helpers.DrawStateSaver
 import helpers.Event
+import main.model.TokenizedModel
 import tokenizer.Token
 import tokenizer.TokenType
 import java.awt.Graphics
 
-class HighlightedBracketsViewItemsContainer(private val model: ITextEditorModel, private val tokenizedModel: TokenizedTextModel) : IViewItemsContainer {
+class HighlightedBracketsViewItemsContainer(private val model: ITextEditorModel, private val tokenizedModel: TokenizedModel) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
     private var highlightedBrackets = mutableListOf<Token>()
@@ -21,7 +22,7 @@ class HighlightedBracketsViewItemsContainer(private val model: ITextEditorModel,
 
     private fun onCaretMove(caret: TextEditorCaret) {
         highlightedBrackets.clear()
-        val line = tokenizedModel.lines[caret.line]
+        val line = tokenizedModel.getLine(caret.line)
         val bracket = line.firstOrNull { t -> t.type.isBracket() && caret.column >= t.startIndex && caret.column <= t.endIndex }
         if (bracket != null) {
             highlightedBrackets.add(bracket)
@@ -51,7 +52,7 @@ class HighlightedBracketsViewItemsContainer(private val model: ITextEditorModel,
     override fun getItems(lineIndex: Int): List<IViewItem> {
         val rules = mutableListOf<ColoredBracket>()
 
-        for (token in tokenizedModel.lines[lineIndex]) {
+        for (token in tokenizedModel.getLine(lineIndex)) {
             if (token in highlightedBrackets) {
                 val text = model.getLine(lineIndex).substring(token.startIndex, token.endIndex)
                 rules.add(ColoredBracket(text, token.startIndex))

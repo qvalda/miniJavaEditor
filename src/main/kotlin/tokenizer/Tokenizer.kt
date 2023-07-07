@@ -1,6 +1,6 @@
 package tokenizer
 
-class Tokenizer {
+class Tokenizer : ITokenizer {
 
     private val numbers = '0'..'9'
     private val whiteSpaces = arrayOf('\r', '\n', ' ', '\t')
@@ -9,7 +9,7 @@ class Tokenizer {
     private val lettersWithNumbers = letters.union(numbers).toSet()
     private val operatorChars = Tokens.operators.keys.flatMap { k-> k.toCharArray().asIterable() }.toSet()
 
-    fun getTokens(input: String): List<Token> {
+    override fun getTokens(input: String): List<Token> {
         val tokens = mutableListOf<Token>()
 
         val reader = CharArraySafeReader(input)
@@ -260,14 +260,14 @@ class Tokenizer {
         return Token(TokenType.InvalidSyntax, begin, reader.pointer, reader.substring(begin, reader.pointer))
     }
 
-    enum class LiteralNumberParserStates{
+    private enum class LiteralNumberParserStates{
         IntegerPart,
         FloatDelimiter,
         FloatPart,
         LetterEnding,
         Error,
     }
-    enum class LiteralCharParserStates{
+    private enum class LiteralCharParserStates{
         //OpenBracket,
         Char,
         CloseBracket,

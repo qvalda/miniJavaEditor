@@ -4,59 +4,62 @@ import tokenizer.TokenType
 
 class NodeLocation(val lineIndex:Int, val startIndex : Int, val endIndex : Int)
 
-open class BaseNode(val location: NodeLocation)
+interface INodeWithLocation {
+    val location: NodeLocation
+    val name: String
+}
 
 class ProgramNode(val mainClass: MainClassNode, val classes : List<ClassDeclarationNode>) : IVisitableNode {
-    override fun accept(v: IVisitor) {
+    override fun accept(v: IProgramVisitor) {
         v.visit(this)
     }
 }
 
-class MainClassNode(val name: String?, val  variables: List<VarDeclarationNode>, val  statements: List<StatementNode>, location: NodeLocation): BaseNode(location),IVisitableNode {
-    override fun accept(v: IVisitor) {
+class MainClassNode(override val name: String, val  variables: List<VarDeclarationNode>, val  statements: List<StatementNode>, override val location: NodeLocation): INodeWithLocation, IVisitableNode {
+    override fun accept(v: IProgramVisitor) {
         v.visit(this)
     }
 }
 
-class ClassDeclarationNode(val name:String?, val baseName:String?, val variables : List<VarDeclarationNode>, val  methods : List<MethodDeclarationNode>, location: NodeLocation):BaseNode(location), IVisitableNode {
-    override fun accept(v: IVisitor) {
+class ClassDeclarationNode(override val name:String, val baseName:String?, val variables : List<VarDeclarationNode>, val  methods : List<MethodDeclarationNode>,
+                           override val location: NodeLocation): INodeWithLocation, IVisitableNode {
+    override fun accept(v: IProgramVisitor) {
         v.visit(this)
     }
 }
 
-class VarDeclarationNode(val name: String?, val type: TypeNodeNode, location: NodeLocation):BaseNode(location), IVisitableNode {
-    override fun accept(v: IVisitor) {
+class VarDeclarationNode(override val name: String, val type: TypeNode,override val location: NodeLocation): INodeWithLocation, IVisitableNode {
+    override fun accept(v: IProgramVisitor) {
         v.visit(this)
     }
 }
 
-class MethodDeclarationNode(val name: String?, val type: TypeNodeNode, val  arguments: List<FormalListNode>, val variables: List<VarDeclarationNode>, val statements: List<StatementNode>, val returnExp: ExpressionNode,
-                            location: NodeLocation
-):BaseNode(location), IVisitableNode {
-    override fun accept(v: IVisitor) {
+class MethodDeclarationNode(override val name: String, val type: TypeNode, val  arguments: List<FormalListNode>, val variables: List<VarDeclarationNode>,
+                            val statements: List<StatementNode>, val returnExp: ExpressionNode, override val location: NodeLocation): INodeWithLocation, IVisitableNode {
+    override fun accept(v: IProgramVisitor) {
         v.visit(this)
     }
 }
 
-class FormalListNode(val type: TypeNodeNode, val name: String?): IVisitableNode {
-    override fun accept(v: IVisitor) {
+class FormalListNode(val type: TypeNode, override val name: String, override val location: NodeLocation): INodeWithLocation, IVisitableNode {
+    override fun accept(v: IProgramVisitor) {
         v.visit(this)
     }
 }
 
-open class TypeNodeNode : IVisitableNode {
-    override fun accept(v: IVisitor) {
+open class TypeNode : IVisitableNode {
+    override fun accept(v: IProgramVisitor) {
         v.visit(this)
     }
 }
 
-class BooleanTypeNode : TypeNodeNode()
-class IntTypeNode : TypeNodeNode()
-class IntArrayTypeNode : TypeNodeNode()
-class NameIdentifierTypeNode(val name: String?) : TypeNodeNode()
+class BooleanTypeNode : TypeNode()
+class IntTypeNode : TypeNode()
+class IntArrayTypeNode : TypeNode()
+class NameIdentifierTypeNode(val name: String?) : TypeNode()
 
 open class StatementNode : IVisitableNode {
-    override fun accept(v: IVisitor) {
+    override fun accept(v: IProgramVisitor) {
         v.visit(this)
     }
 }
@@ -69,7 +72,7 @@ class AssignStatementNode(val name: String?, val value: ExpressionNode) : Statem
 class AssignIndexerStatementNode(val name: String?, val indexer: ExpressionNode, val value: ExpressionNode) : StatementNode()
 
 open class ExpressionNode: IVisitableNode {
-    override fun accept(v: IVisitor) {
+    override fun accept(v: IProgramVisitor) {
         v.visit(this)
     }
 }

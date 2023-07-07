@@ -11,9 +11,9 @@ class ErrorViewItem(private val start: Int, private val end: Int, private val st
             DrawStateSaver.usingStroke(g, 2) {
                 g.drawLine(
                     start * measures.letterWidth,
-                    lineIndex * measures.letterHeight + measures.letterHeight,
+                    (lineIndex+1) * measures.letterHeight,
                     end * measures.letterWidth,
-                    lineIndex * measures.letterHeight + measures.letterHeight
+                    (lineIndex+1) * measures.letterHeight
                 )
             }
         }

@@ -7,6 +7,6 @@ class Token(val type: TokenType, val startIndex : Int, val endIndex : Int, val v
     }
 
     companion object {
-        val EOF = Token(TokenType.InvalidSyntax, 0, 0, "Unexpected EOF")
+        val EOF = Token(TokenType.InvalidSyntax, 0, 10, "Unexpected EOF")
     }
 }

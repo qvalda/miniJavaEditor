@@ -29,5 +29,6 @@
     </orderEntry>
     <orderEntry type="library" name="jetbrains.kotlinx.coroutines.core" level="project" />
     <orderEntry type="library" name="jetbrains.kotlinx.coroutines.swing" level="project" />
+    <orderEntry type="library" name="mockito.junit.jupiter" level="project" />
   </component>
 </module>

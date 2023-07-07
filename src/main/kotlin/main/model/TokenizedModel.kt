@@ -1,24 +1,30 @@
-package models
+package main.model
 
 import editor.model.ITextEditorModel
 import editor.model.LineChangeArgs
 import helpers.Event
 import parser.ITokenSource
+import tokenizer.ITokenizer
 import tokenizer.Token
-import tokenizer.Tokenizer
+import kotlin.math.max
+import kotlin.math.min
 
-class TokenizedTextModel(private val model: ITextEditorModel) {
-    val modified = Event<Unit>()
-    var lines: MutableList<List<Token>>
-    private val tokenizer = Tokenizer()
+class TokenizedModel(private val model: ITextEditorModel, private val tokenizer: ITokenizer) : ITokenizedModel {
+    override val modified = Event<Unit>()
+    private var lines = model.getLines().map { l -> tokenizer.getTokens(l) }.toMutableList()
 
     init {
-        lines = model.getLines().map { l -> tokenizer.getTokens(l) }.toMutableList()
-
         model.onLineDelete += ::onLineDelete
         model.onLineModified += ::onLineModified
         model.onLineAdd += ::onLineAdd
     }
+
+    override fun getLine(index:Int): List<Token> {
+        return lines[index]
+    }
+
+    override val linesCount: Int
+        get() = lines.size
 
     private fun onLineDelete(lineChangeArgs: LineChangeArgs) {
         lines.subList(lineChangeArgs.startIndex, lineChangeArgs.startIndex + lineChangeArgs.count).clear()
@@ -33,11 +39,10 @@ class TokenizedTextModel(private val model: ITextEditorModel) {
     private fun onLineAdd(lineChangeArgs: LineChangeArgs) {
         lines.addAll(lineChangeArgs.startIndex,
             model.getLines().subList(lineChangeArgs.startIndex, lineChangeArgs.startIndex + lineChangeArgs.count).map { tokenizer.getTokens(it) })
-
         modified(Unit)
     }
 
-    fun iterateTokens(startIndex: Int = 0, startTokenIndex: Int = 0): Sequence<Pair<Token, Int>> { //todo remove?
+    override fun iterateTokens(startIndex: Int, startTokenIndex: Int): Sequence<Pair<Token, Int>> { //todo remove?
         val sequence = sequence {
             for (index in startTokenIndex + 1 until lines[startIndex].size) {
                 yield(Pair(lines[startIndex][index], startIndex))
@@ -51,7 +56,7 @@ class TokenizedTextModel(private val model: ITextEditorModel) {
         return sequence
     }
 
-    fun iterateTokensBackward(startIndex: Int = 0, startTokenIndex: Int = 0): Sequence<Pair<Token, Int>> {
+    override fun iterateTokensBackward(startIndex: Int, startTokenIndex: Int): Sequence<Pair<Token, Int>> {
         val sequence = sequence {
             for (index in startTokenIndex - 1 downTo 0) {
                 yield(Pair(lines[startIndex][index], startIndex))
@@ -65,11 +70,11 @@ class TokenizedTextModel(private val model: ITextEditorModel) {
         return sequence
     }
 
-    fun asTokenSource(): ITokenSource {
+    override fun asTokenSource(): ITokenSource {
         return TokenizedTextModelTokenSource(this)
     }
 
-    private class TokenizedTextModelTokenSource(private val tokenizedTextModel: TokenizedTextModel) : ITokenSource {
+    private class TokenizedTextModelTokenSource(private val tokenizedModel: TokenizedModel) : ITokenSource {
         private class Cursor(val line: Int, val column: Int)
 
         private var cursor = Cursor(0, 0)
@@ -77,28 +82,28 @@ class TokenizedTextModel(private val model: ITextEditorModel) {
         override val currentToken: Token
             get() {
                 if (isEOF()) return Token.EOF
-                return tokenizedTextModel.lines[cursor.line][cursor.column]
+                return tokenizedModel.lines[cursor.line][cursor.column]
             }
 
         override val lineIndex: Int
-            get() = cursor.line
+            get() = min(cursor.line, tokenizedModel.lines.size - 1)
 
         override fun accept() {
             cursor = getNextCursor()
         }
 
         private fun getNextCursor(): Cursor {
-            return if (cursor.column < tokenizedTextModel.lines[cursor.line].size - 1) {
+            return if (cursor.column < tokenizedModel.lines[cursor.line].size - 1) {
                 Cursor(cursor.line, cursor.column + 1)
             } else {
                 var newLine = cursor.line
                 do {
                     newLine++
-                } while (newLine < tokenizedTextModel.lines.size && tokenizedTextModel.lines[newLine].isEmpty())
+                } while (newLine < tokenizedModel.lines.size && tokenizedModel.lines[newLine].isEmpty())
                 Cursor(newLine, 0)
             }
         }
 
-        override fun isEOF() = cursor.line >= tokenizedTextModel.lines.lastIndex && cursor.column >= tokenizedTextModel.lines.last().size
+        override fun isEOF() = cursor.line >= tokenizedModel.lines.size || cursor.column >= tokenizedModel.lines[cursor.line].size
     }
 }

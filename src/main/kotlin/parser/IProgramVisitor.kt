@@ -1,10 +1,6 @@
 package parser
 
-interface IVisitableNode {
-    fun accept(v: IVisitor)
-}
-
-interface IVisitor {
+interface IProgramVisitor {
     fun visit(node: ProgramNode) {}
     fun visit(node: MainClassNode) {}
     fun visit(node: ClassDeclarationNode) {}
@@ -12,6 +8,6 @@ interface IVisitor {
     fun visit(node: VarDeclarationNode) {}
     fun visit(node: MethodDeclarationNode) {}
     fun visit(node: FormalListNode) {}
-    fun visit(node: TypeNodeNode) {}
+    fun visit(node: TypeNode) {}
     fun visit(node: ExpressionNode) {}
 }

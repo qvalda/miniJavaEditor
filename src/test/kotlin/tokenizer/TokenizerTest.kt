@@ -169,6 +169,18 @@ class TokenizerTest : BaseTest() {
         assertEquals(LiteralNumber, tokens[2].type)
     }
 
+    @Test
+    fun tokenIsKeyword() {
+        assertTrue(KeyWordThis.isKeyWord())
+        assertFalse(BracketRoundOpen.isKeyWord())
+    }
+
+    @Test
+    fun tokenIsBracket() {
+        assertTrue(BracketRoundOpen.isBracket())
+        assertFalse(KeyWordThis.isBracket())
+    }
+
     private fun getTokenizer(): Tokenizer {
         return Tokenizer()
     }

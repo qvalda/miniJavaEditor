@@ -1,12 +1,14 @@
-package models
+package main.view
 
 import editor.view.IViewItemsContainer
 import editor.view.Style
 import editor.view.item.ErrorViewItem
 import editor.view.item.IViewItem
 import helpers.Event
+import main.model.ParsedTextModel
+import main.model.TokenizedModel
 
-class ParserViewItemsContainer(private val parserModel: ParsedTextModel, tokenizedTextModel: TokenizedTextModel) : IViewItemsContainer {
+class ParserViewItemsContainer(private val parserModel: ParsedTextModel, tokenizedModel: TokenizedModel) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
     private var errors = mapOf<Int, List<ErrorViewItem>>()
@@ -14,7 +16,7 @@ class ParserViewItemsContainer(private val parserModel: ParsedTextModel, tokeniz
     init {
         onParserResultChanged(Unit)
         parserModel.parserResultChanged += ::onParserResultChanged
-        tokenizedTextModel.modified += ::onTokenizedTextModelChanged
+        tokenizedModel.modified += ::onTokenizedTextModelChanged
     }
 
     override fun getItems(lineIndex: Int): List<IViewItem> {

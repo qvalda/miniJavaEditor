@@ -1,10 +1,10 @@
-import editor.view.FormattedTextEditor
+import editor.view.TextEditorComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.swing.Swing
-import models.FileBrowserCodeSource
-import models.MainModel
+import main.model.FileBrowserCodeSource
+import main.model.MainModel
 import java.awt.BorderLayout
 import javax.swing.*
 
@@ -66,7 +66,7 @@ class Fac {
         toolbar.add(undoButton)
         toolbar.add(redoButton)
 
-        val editor = FormattedTextEditor(mainModel.textModel, mainModel.visualItemsContainer)
+        val editor = TextEditorComponent(mainModel.textModel, mainModel.visualItemsContainer)
         val scrollPane = JScrollPane(editor)
 
         contentPane.add(toolbar, BorderLayout.NORTH)

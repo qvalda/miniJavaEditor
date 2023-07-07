@@ -72,7 +72,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         //        '}'
         //    '}'
         expected(TokenType.KeyWordClass)
-        val nameToken = expected(TokenType.NameIdentifier)
+        val (nameToken, location) = expectedWithLocation(TokenType.NameIdentifier)
         expected(TokenType.BracketCurlyOpen)
         expected(TokenType.KeyWordPublic)
         expected(TokenType.KeyWordStatic)
@@ -91,7 +91,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         expected(TokenType.BracketCurlyClose)
         expected(TokenType.BracketCurlyClose)
 
-        return MainClassNode(nameToken.value, variables, statements, getLocation(nameToken))
+        return MainClassNode(nameToken.value!!, variables, statements, location)
     }
 
     private fun parseClassDeclarationMultiple(): List<ClassDeclarationNode> {
@@ -108,7 +108,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         //        method-declaration*
         //    '}'
         expected(TokenType.KeyWordClass)
-        val nameToken = expected(TokenType.NameIdentifier)
+        val (nameToken, location) = expectedWithLocation(TokenType.NameIdentifier)
         var baseNameToken: Token? = null
         if (ts.currentToken.type == TokenType.KeyWordExtends) {
             expected(TokenType.KeyWordExtends)
@@ -118,7 +118,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         val variables = parseClassVarDeclarationMultiple()
         val methods = parseMethodDeclarationMultiple()
         expected(TokenType.BracketCurlyClose)
-        return ClassDeclarationNode(nameToken.value, baseNameToken?.value, variables, methods,  getLocation(nameToken))
+        return ClassDeclarationNode(nameToken.value!!, baseNameToken?.value, variables, methods,  location)
     }
 
     fun parseMethodDeclaration(): MethodDeclarationNode {
@@ -129,7 +129,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         //    '}'
         expected(TokenType.KeyWordPublic)
         val type = parseType()
-        val nameToken = expected(TokenType.NameIdentifier)
+        val (nameToken, location) = expectedWithLocation(TokenType.NameIdentifier)
         expected(TokenType.BracketRoundOpen)
         val list = parseFormalListOptional()
         expected(TokenType.BracketRoundClose)
@@ -141,7 +141,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         val returnExp = parseExpression()
         expected(TokenType.SymbolSemicolon)
         expected(TokenType.BracketCurlyClose)
-        return MethodDeclarationNode(nameToken.value, type, list, variables, statements, returnExp,  getLocation(nameToken))
+        return MethodDeclarationNode(nameToken.value!!, type, list, variables, statements, returnExp,  location)
     }
 
     private fun parseMethodDeclarationMultiple(): List<MethodDeclarationNode> {
@@ -155,15 +155,15 @@ class RecursiveParser(private val ts: ITokenSource) {
     private fun parseVarDeclaration(): VarDeclarationNode {
         //type identifier ';'
         val type = parseType()
-        val nameToken = expected(TokenType.NameIdentifier)
+        val (nameToken, location) = expectedWithLocation(TokenType.NameIdentifier)
         expected(TokenType.SymbolSemicolon)
-        return VarDeclarationNode(nameToken.value, type, getLocation(nameToken))
+        return VarDeclarationNode(nameToken.value!!, type, location)
     }
 
-    private fun parseVarDeclaration(type: TypeNodeNode): VarDeclarationNode {
-        val nameToken = expected(TokenType.NameIdentifier)
+    private fun parseVarDeclaration(type: TypeNode): VarDeclarationNode {
+        val (nameToken, location) = expectedWithLocation(TokenType.NameIdentifier)
         expected(TokenType.SymbolSemicolon)
-        return VarDeclarationNode(nameToken.value, type, getLocation(nameToken))
+        return VarDeclarationNode(nameToken.value!!, type, location)
     }
 
     private fun parseMethodVarDeclarationOrStatementMultiple(): Pair<List<VarDeclarationNode>, List<StatementNode>> {
@@ -194,7 +194,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         return vars
     }
 
-    private fun parseType(): TypeNodeNode {
+    private fun parseType(): TypeNode {
         when (ts.currentToken.type) {
             //'boolean'
             TokenType.KeyWordBoolean -> {
@@ -239,8 +239,8 @@ class RecursiveParser(private val ts: ITokenSource) {
     private fun parseFormalList(): FormalListNode {
         //type identifier ( ',' formal-list )?
         val type = parseType()
-        val nameToken = expected(TokenType.NameIdentifier)
-        return FormalListNode(type, nameToken.value)
+        val (nameToken, location) = expectedWithLocation(TokenType.NameIdentifier)
+        return FormalListNode(type, nameToken.value!!, location)
     }
 
     private fun parseExpressionList(): List<ExpressionNode> {
@@ -447,15 +447,21 @@ class RecursiveParser(private val ts: ITokenSource) {
         }
     }
 
-    private fun getLocation(token: Token) : NodeLocation{
-        return NodeLocation(ts.lineIndex, token.startIndex, token.endIndex)
-    }
-
     private fun expected(tokenType: TokenType): Token {
         if (ts.currentToken.type == tokenType) {
             val result = ts.currentToken
             ts.accept()
             return result
+        }
+        throwUnexpectedException(tokenType.toString())
+    }
+
+    private fun expectedWithLocation(tokenType: TokenType): Pair<Token, NodeLocation> {
+        if (ts.currentToken.type == tokenType) {
+            val result = ts.currentToken
+            val location = NodeLocation(ts.lineIndex, result.startIndex, result.endIndex)
+            ts.accept()
+            return Pair(result, location)
         }
         throwUnexpectedException(tokenType.toString())
     }

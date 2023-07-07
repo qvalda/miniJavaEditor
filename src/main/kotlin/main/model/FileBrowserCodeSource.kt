@@ -1,4 +1,4 @@
-package models
+package main.model
 
 import java.awt.Component
 import java.io.File

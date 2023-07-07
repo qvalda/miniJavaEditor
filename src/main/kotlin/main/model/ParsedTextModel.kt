@@ -1,4 +1,4 @@
-package models
+package main.model
 
 import helpers.Event
 import parser.ITokenSource

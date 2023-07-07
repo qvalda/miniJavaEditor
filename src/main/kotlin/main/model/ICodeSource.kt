@@ -1,4 +1,4 @@
-package models
+package main.model
 
 interface ICodeSource {
     fun openCode(): String?
