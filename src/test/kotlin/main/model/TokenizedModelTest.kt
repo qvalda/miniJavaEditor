@@ -2,9 +2,9 @@ package main.model
 
 import base.BaseTest.Companion.assertCollectionEquals
 import mocks.TextEditorModelMock
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mockito
 import tokenizer.ITokenizer
 import tokenizer.Token

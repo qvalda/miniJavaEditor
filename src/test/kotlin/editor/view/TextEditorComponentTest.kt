@@ -5,14 +5,12 @@ import base.BaseTest.Companion.setAndReturnPrivateProperty
 import editor.model.ITextEditorController
 import editor.view.item.IViewItem
 import helpers.ThrottleCall
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mocks.ViewItemsContainerMock
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
-import org.mockito.internal.verification.VerificationModeFactory
 import org.mockito.internal.verification.VerificationModeFactory.noInteractions
 import java.awt.*
 import java.awt.event.KeyEvent

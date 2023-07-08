@@ -1,8 +1,8 @@
 package main.model
 
+import editor.model.TextEditorModel
 import editor.view.ComposedViewItemsContainer
 import editor.view.IViewItemsContainer
-import editor.model.TextEditorModel
 import editor.view.TextViewItemsContainer
 import helpers.Event
 import helpers.ThrottleCall

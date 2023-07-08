@@ -5,9 +5,9 @@ import editor.model.TextEditorCaret
 import editor.view.DrawMeasures
 import helpers.Event
 import main.model.ITokenizedModel
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import tokenizer.Token
 import tokenizer.TokenType

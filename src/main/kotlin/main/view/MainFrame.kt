@@ -8,7 +8,10 @@ import kotlinx.coroutines.swing.Swing
 import main.model.FileBrowserCodeSource
 import main.model.MainModel
 import java.awt.BorderLayout
-import javax.swing.*
+import javax.swing.JButton
+import javax.swing.JFrame
+import javax.swing.JScrollPane
+import javax.swing.JToolBar
 
 class MainFrame: JFrame("Mini java editor") {
 

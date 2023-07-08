@@ -3,9 +3,8 @@ package main.itemsContainer
 import helpers.Event
 import main.model.IParsedModel
 import main.model.ITokenizedModel
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import parser.*

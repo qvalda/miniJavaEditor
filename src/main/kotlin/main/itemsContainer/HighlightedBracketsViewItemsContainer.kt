@@ -2,7 +2,9 @@ package main.itemsContainer
 
 import editor.model.ITextEditorModel
 import editor.model.TextEditorCaret
-import editor.view.*
+import editor.view.DrawMeasures
+import editor.view.IViewItemsContainer
+import editor.view.Style
 import editor.view.item.IViewItem
 import helpers.DrawStateSaver
 import helpers.Event

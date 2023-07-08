@@ -2,11 +2,8 @@ package editor.view
 
 import editor.model.TextEditorCaret
 import editor.view.item.*
-import editor.view.item.StringRow
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.mockito.Mockito.*
-import org.mockito.internal.verification.VerificationModeFactory
 import org.mockito.internal.verification.VerificationModeFactory.noInteractions
 import java.awt.Font
 import java.awt.Graphics

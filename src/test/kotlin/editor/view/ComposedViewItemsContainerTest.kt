@@ -3,9 +3,9 @@ package editor.view
 import base.BaseTest.Companion.assertCollectionEquals
 import mocks.ViewItemMock
 import mocks.ViewItemsContainerMock
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import java.awt.Dimension
 
 class ComposedViewItemsContainerTest {
