@@ -2,7 +2,7 @@ package parser
 
 import tokenizer.Token
 
-class ArrayTokensSource(private val tokens: List<Token>): ITokenSource {
+class ArrayTokensSource(private val tokens: List<Token>) : ITokenSource {
     private var index = 0
 
     override val currentToken: Token

@@ -45,13 +45,13 @@ expression ::= expression ('&&' | '<' | '+' | '-' | '*') expression
 expression-list ::= expression ( ',' expression-list )?
  */
 
-class RecursiveParser(private val ts: ITokenSource)  {
+class RecursiveParser(private val ts: ITokenSource) {
 
     fun parse(): ParserResult {
         return try {
             val parseProgram = parseProgram()
             ParserResult(parseProgram, emptyList())
-        } catch (e: ParseException){
+        } catch (e: ParseException) {
             val error = ParseError(ts.lineIndex, ts.currentToken, e.message!!)
             ParserResult(null, listOf(error))
         }
@@ -118,7 +118,7 @@ class RecursiveParser(private val ts: ITokenSource)  {
         val variables = parseClassVarDeclarationMultiple()
         val methods = parseMethodDeclarationMultiple()
         expected(TokenType.BracketCurlyClose)
-        return ClassDeclarationNode(nameToken.value!!, baseNameToken?.value, variables, methods,  location)
+        return ClassDeclarationNode(nameToken.value!!, baseNameToken?.value, variables, methods, location)
     }
 
     fun parseMethodDeclaration(): MethodDeclarationNode {
@@ -141,7 +141,7 @@ class RecursiveParser(private val ts: ITokenSource)  {
         val returnExp = parseExpression()
         expected(TokenType.SymbolSemicolon)
         expected(TokenType.BracketCurlyClose)
-        return MethodDeclarationNode(nameToken.value!!, type, list, variables, statements, returnExp,  location)
+        return MethodDeclarationNode(nameToken.value!!, type, list, variables, statements, returnExp, location)
     }
 
     private fun parseMethodDeclarationMultiple(): List<MethodDeclarationNode> {
@@ -188,7 +188,7 @@ class RecursiveParser(private val ts: ITokenSource)  {
 
     private fun parseClassVarDeclarationMultiple(): List<VarDeclarationNode> {
         val vars = mutableListOf<VarDeclarationNode>()
-        while (ts.currentToken.type != TokenType.KeyWordPublic && ts.currentToken.type != TokenType.BracketCurlyClose ) {
+        while (ts.currentToken.type != TokenType.KeyWordPublic && ts.currentToken.type != TokenType.BracketCurlyClose) {
             vars.add(parseVarDeclaration())
         }
         return vars
@@ -208,7 +208,7 @@ class RecursiveParser(private val ts: ITokenSource)  {
             }
             // char
             TokenType.KeyWordChar -> {
-                 expected(TokenType.KeyWordChar)
+                expected(TokenType.KeyWordChar)
                 return CharTypeNode()
             }
             //('int' | 'int' '[' ']')

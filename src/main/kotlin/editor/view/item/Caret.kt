@@ -6,7 +6,7 @@ import editor.view.Style
 import helpers.DrawStateSaver
 import java.awt.Graphics
 
-class Caret(private val caret: TextEditorCaret): IViewItem {
+class Caret(private val caret: TextEditorCaret) : IViewItem {
     override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
         DrawStateSaver.usingColor(g, Style.Caret.color!!) {
             DrawStateSaver.usingStroke(g, 2) {

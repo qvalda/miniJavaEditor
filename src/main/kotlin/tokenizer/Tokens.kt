@@ -65,7 +65,7 @@ object Tokens {
         //"break" to TokenType.KeyWordBreak,
         "double" to TokenType.KeyWordDouble,
         //"implements" to TokenType.KeyWordImplements,
-       // "protected" to TokenType.KeyWordProtected,
+        // "protected" to TokenType.KeyWordProtected,
         //"throw" to TokenType.KeyWordThrow,
         //"byte" to TokenType.KeyWordByte,
         "else" to TokenType.KeyWordElse,

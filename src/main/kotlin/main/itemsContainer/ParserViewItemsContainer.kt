@@ -7,7 +7,7 @@ import helpers.Event
 import main.model.IParsedModel
 import main.model.ITokenizedModel
 
-class ParserViewItemsContainer(tokenizedModel: ITokenizedModel, private val parserModel: IParsedModel): IViewItemsContainer {
+class ParserViewItemsContainer(tokenizedModel: ITokenizedModel, private val parserModel: IParsedModel) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
     private var errors = mapOf<Int, List<ErrorViewItem>>()

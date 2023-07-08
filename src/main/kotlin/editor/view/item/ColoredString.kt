@@ -5,7 +5,7 @@ import editor.view.Style
 import helpers.DrawStateSaver
 import java.awt.Graphics
 
-class ColoredString(private val text: String, private val column: Int, private val style: Style): IViewItem {
+class ColoredString(private val text: String, private val column: Int, private val style: Style) : IViewItem {
     override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
         val lineY = measures.letterHeight + lineIndex * measures.letterHeight - measures.letterShift
         DrawStateSaver.usingColor(g, style.color!!) {

@@ -2,7 +2,6 @@ package tokenizer
 
 enum class TokenType {
     NotDefined,
-    //EOF,
     InvalidSyntax,
 
     //Whitespace,
@@ -22,7 +21,7 @@ enum class TokenType {
     SymbolSemicolon,
     SymbolColon,
 
-//    OperatorEquals,
+    //    OperatorEquals,
 //    OperatorNotEquals,
 //    OperatorLessOrEqual,
 //    OperatorMoreOrEqual,
@@ -33,14 +32,17 @@ enum class TokenType {
 //    OperatorMultAssign,
 //    OperatorDivAssign,
     OperatorAnd,
-//    OperatorOr,
+
+    //    OperatorOr,
     OperatorNot,
     OperatorAssign,
     OperatorLess,
-//    OperatorMore,
+
+    //    OperatorMore,
     OperatorPlus,
     OperatorMinus,
-//    OperatorDiv,
+
+    //    OperatorDiv,
     OperatorMult,
 
     LiteralString,
@@ -50,48 +52,59 @@ enum class TokenType {
     LiteralFalse,
     LiteralNull,
 
-//    KeyWordAbstract,
+    //    KeyWordAbstract,
 //    KeyWordContinue,
 //    KeyWordFor,
     KeyWordNew,
-//    KeyWordSwitch,
+
+    //    KeyWordSwitch,
 //    KeyWordAssert,
 //    KeyWordDefault,
 //    KeyWordGoto,
 //    KeyWordPackage,
 //    KeyWordSynchronized,
     KeyWordBoolean,
-//    KeyWordDo,
+
+    //    KeyWordDo,
     KeyWordIf,
-//    KeyWordPrivate,
+
+    //    KeyWordPrivate,
     KeyWordThis,
-//    KeyWordBreak,
+
+    //    KeyWordBreak,
     KeyWordDouble,
-//    KeyWordImplements,
+
+    //    KeyWordImplements,
 //    KeyWordProtected,
 //    KeyWordThrow,
 //    KeyWordByte,
     KeyWordElse,
-//    KeyWordImport,
+
+    //    KeyWordImport,
     KeyWordPublic,
-//    KeyWordThrows,
+
+    //    KeyWordThrows,
 //    KeyWordCase,
 //    KeyWordEnum,
 //    KeyWordInstanceof,
     KeyWordReturn,
-//    KeyWordTransient,
+
+    //    KeyWordTransient,
 //    KeyWordCatch,
     KeyWordExtends,
     KeyWordInt,
-//    KeyWordShort,
+
+    //    KeyWordShort,
 //    KeyWordTry,
     KeyWordChar,
-//    KeyWordFinal,
+
+    //    KeyWordFinal,
 //    KeyWordInterface,
     KeyWordStatic,
     KeyWordVoid,
     KeyWordClass,
-//    KeyWordFinally,
+
+    //    KeyWordFinally,
 //    KeyWordLong,
 //    KeyWordStrictfp,
 //    KeyWordVolatile,

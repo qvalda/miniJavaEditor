@@ -12,10 +12,10 @@ import tokenizer.TokenType
 
 class TokenizedModelTest {
 
-    private val token1 = Token(TokenType.NameIdentifier, 0,0)
-    private val token2 = Token(TokenType.NameIdentifier, 0,0)
-    private val token3 = Token(TokenType.NameIdentifier, 0,0)
-    private val token4 = Token(TokenType.NameIdentifier, 0,0)
+    private val token1 = Token(TokenType.NameIdentifier, 0, 0)
+    private val token2 = Token(TokenType.NameIdentifier, 0, 0)
+    private val token3 = Token(TokenType.NameIdentifier, 0, 0)
+    private val token4 = Token(TokenType.NameIdentifier, 0, 0)
 
     @Test
     fun tokenizeOnInit() {
@@ -34,7 +34,7 @@ class TokenizedModelTest {
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)
         var called = false
-        tm.modified += {called = true}
+        tm.modified += { called = true }
 
         textModel.addLine("b")
 
@@ -50,13 +50,13 @@ class TokenizedModelTest {
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)
         var called = false
-        tm.modified += {called = true}
+        tm.modified += { called = true }
 
         assertEquals(1, tm.getLine(1).size)
         assertEquals(token2, tm.getLine(1)[0])
         assertEquals(2, tm.linesCount)
 
-        textModel.modifyLine("c",1)
+        textModel.modifyLine("c", 1)
 
         assertTrue(called)
         assertEquals(1, tm.getLine(1).size)
@@ -70,7 +70,7 @@ class TokenizedModelTest {
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)
         var called = false
-        tm.modified += {called = true}
+        tm.modified += { called = true }
 
         assertEquals(2, tm.linesCount)
 
@@ -87,8 +87,8 @@ class TokenizedModelTest {
         val tm = TokenizedModel(textModel, tokenizer)
 
         val tokens = tm.iterateTokens(1, 0).toList()
-        assertCollectionEquals(listOf(token3, token4), tokens.map { t->t.first })
-        assertCollectionEquals(listOf(2,3), tokens.map { t->t.second })
+        assertCollectionEquals(listOf(token3, token4), tokens.map { t -> t.first })
+        assertCollectionEquals(listOf(2, 3), tokens.map { t -> t.second })
     }
 
     @Test
@@ -98,8 +98,8 @@ class TokenizedModelTest {
         val tm = TokenizedModel(textModel, tokenizer)
 
         val tokens = tm.iterateTokensBackward(2, 0).toList()
-        assertCollectionEquals(listOf(token2, token1), tokens.map { t->t.first })
-        assertCollectionEquals(listOf(1,0), tokens.map { t->t.second })
+        assertCollectionEquals(listOf(token2, token1), tokens.map { t -> t.first })
+        assertCollectionEquals(listOf(1, 0), tokens.map { t -> t.second })
     }
 
     @Test

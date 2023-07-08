@@ -1,3 +1,3 @@
 package parser
 
-class ParseException(message: String): Exception(message)
+class ParseException(message: String) : Exception(message)

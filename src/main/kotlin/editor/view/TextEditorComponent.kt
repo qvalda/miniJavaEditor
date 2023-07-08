@@ -17,10 +17,10 @@ import javax.swing.Scrollable
 import kotlin.math.roundToInt
 
 
-class TextEditorComponent(controller: ITextEditorController, itemsContainer: IViewItemsContainer): JComponent(), Scrollable {
+class TextEditorComponent(controller: ITextEditorController, itemsContainer: IViewItemsContainer) : JComponent(), Scrollable {
 
     private var prevPreferredSize = Dimension(0, 0)
-    private var measures = DrawMeasures(0,0,0)
+    private var measures = DrawMeasures(0, 0, 0)
     private var renderTooltip = false
     private var tooltipPoint = Point()
 
@@ -44,7 +44,7 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
 
         itemsContainer.onItemsUpdated += ::onRepaintRequest
 
-        val mouseListener = object: MouseAdapter() {
+        val mouseListener = object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
                 onMousePressed(e)
             }
@@ -58,7 +58,7 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
             }
         }
 
-        val keyListener = object: KeyAdapter() {
+        val keyListener = object : KeyAdapter() {
             override fun keyPressed(e: KeyEvent) {
                 onKeyPressed(e)
             }
@@ -189,8 +189,10 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
         repaint()
         updatePreferredSize()
         CoroutineScope(Dispatchers.Swing).launch { // bug visibleRect is not updated after preferredSize changed
-            val desiredRect = Rectangle(controller.selectionCaret.column * measures.letterWidth, (controller.selectionCaret.line - 1) * measures.letterHeight,
-                measures.letterWidth, measures.letterHeight * 3)
+            val desiredRect = Rectangle(
+                controller.selectionCaret.column * measures.letterWidth, (controller.selectionCaret.line - 1) * measures.letterHeight,
+                measures.letterWidth, measures.letterHeight * 3
+            )
             if (!visibleRect.contains(desiredRect)) {
                 scrollRectToVisible(desiredRect)
             }
@@ -201,8 +203,7 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
         requestFocus()
         if (!hasShiftModifier(e)) {
             controller.setCarets(e.y / measures.letterHeight, (e.x.toFloat() / measures.letterWidth).roundToInt())
-        }
-        else{
+        } else {
             controller.setSelectionCaret(e.y / measures.letterHeight, (e.x.toFloat() / measures.letterWidth).roundToInt())
         }
     }
@@ -218,7 +219,7 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
 
     private fun onMouseMoved(e: MouseEvent) {
         tooltipPoint = e.point
-        if(renderTooltip){
+        if (renderTooltip) {
             renderTooltip = false
             repaint()
         }

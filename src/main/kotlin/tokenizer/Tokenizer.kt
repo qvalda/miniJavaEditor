@@ -1,6 +1,6 @@
 package tokenizer
 
-class Tokenizer: ITokenizer {
+class Tokenizer : ITokenizer {
 
     private val numbers = '0'..'9'
     private val whiteSpaces = arrayOf('\r', '\n', ' ', '\t')

@@ -5,7 +5,7 @@ import parser.IParser
 import parser.ITokenSource
 import parser.ParserResult
 
-class ParsedModel(private val parser: IParser): IParsedModel {
+class ParsedModel(private val parser: IParser) : IParsedModel {
 
     override var parserResult: ParserResult? = null
     override val parserResultChanged = Event<Unit>()

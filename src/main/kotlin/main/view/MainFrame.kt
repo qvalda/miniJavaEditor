@@ -13,7 +13,7 @@ import javax.swing.JFrame
 import javax.swing.JScrollPane
 import javax.swing.JToolBar
 
-class MainFrame: JFrame("Mini java editor") {
+class MainFrame : JFrame("Mini java editor") {
 
     init {
         val text = """class Factorial{

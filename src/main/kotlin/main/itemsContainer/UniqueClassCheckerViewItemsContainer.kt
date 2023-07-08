@@ -8,7 +8,7 @@ import main.model.IParsedModel
 import main.model.ITokenizedModel
 import parser.*
 
-class UniqueClassCheckerViewItemsContainer(tokenizedModel: ITokenizedModel, private val parserModel: IParsedModel): IViewItemsContainer, NodeWithLocationVisitor() {
+class UniqueClassCheckerViewItemsContainer(tokenizedModel: ITokenizedModel, private val parserModel: IParsedModel) : IViewItemsContainer, NodeWithLocationVisitor() {
 
     override val onItemsUpdated = Event<Unit>()
 
@@ -26,7 +26,7 @@ class UniqueClassCheckerViewItemsContainer(tokenizedModel: ITokenizedModel, priv
     }
 
     private fun onTokenizedTextModelChanged(unit: Unit) {
-        if(errors.isNotEmpty()){
+        if (errors.isNotEmpty()) {
             errors.clear()
             onItemsUpdated(Unit)
         }
@@ -39,12 +39,11 @@ class UniqueClassCheckerViewItemsContainer(tokenizedModel: ITokenizedModel, priv
         }
     }
 
-    private fun mergeErrors(newErrors: Map<Int, MutableList<ErrorViewItem>>){
-        for (e in newErrors){
-            if(errors.containsKey(e.key)){
+    private fun mergeErrors(newErrors: Map<Int, MutableList<ErrorViewItem>>) {
+        for (e in newErrors) {
+            if (errors.containsKey(e.key)) {
                 errors[e.key]!!.addAll(e.value)
-            }
-            else{
+            } else {
                 errors[e.key] = e.value
             }
         }

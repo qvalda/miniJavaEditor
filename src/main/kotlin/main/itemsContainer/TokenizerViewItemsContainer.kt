@@ -11,7 +11,7 @@ import main.model.ITokenizedModel
 import tokenizer.Token
 import tokenizer.TokenType
 
-class TokenizerViewItemsContainer(private val textEditorModel: ITextEditorModel, private val tokenizedModel: ITokenizedModel): IViewItemsContainer {
+class TokenizerViewItemsContainer(private val textEditorModel: ITextEditorModel, private val tokenizedModel: ITokenizedModel) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
 

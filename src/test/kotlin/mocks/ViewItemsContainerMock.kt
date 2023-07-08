@@ -7,7 +7,7 @@ import helpers.Event
 import java.awt.Dimension
 import java.awt.Graphics
 
-class ViewItemsContainerMock(private val items: Map<Int, List<IViewItem>>? = null): IViewItemsContainer {
+class ViewItemsContainerMock(private val items: Map<Int, List<IViewItem>>? = null) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
     override var size = Dimension()
@@ -16,12 +16,12 @@ class ViewItemsContainerMock(private val items: Map<Int, List<IViewItem>>? = nul
         return items?.get(lineIndex) ?: emptyList()
     }
 
-    fun invokeOnItemsUpdated()    {
+    fun invokeOnItemsUpdated() {
         onItemsUpdated(Unit)
     }
 }
 
-class ViewItemMock(val id: Int): IViewItem{
+class ViewItemMock(val id: Int) : IViewItem {
 
     override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
 

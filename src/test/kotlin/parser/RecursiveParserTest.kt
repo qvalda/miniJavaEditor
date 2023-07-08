@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import tokenizer.TokenType.*
 import tokenizer.Tokenizer
 
-class RecursiveParserTest: BaseTest() {
+class RecursiveParserTest : BaseTest() {
 
     @ParameterizedTest
     @ValueSource(strings = ["binarysearch.javam", "binarytree.javam", "bubblesort.javam", "factorial.javam", "linearsearch.javam", "linkedlist.javam", "quicksort.javam", "treevisitor.javam"])
@@ -134,7 +134,7 @@ class RecursiveParserTest: BaseTest() {
 
     @Test
     fun canParseEmptyMethod() {
-        val ts = createTokenSource(KeyWordPublic, KeyWordInt, NameIdentifier, BracketRoundOpen, BracketRoundClose,  BracketCurlyOpen, KeyWordReturn, LiteralNumber, SymbolSemicolon, BracketCurlyClose)
+        val ts = createTokenSource(KeyWordPublic, KeyWordInt, NameIdentifier, BracketRoundOpen, BracketRoundClose, BracketCurlyOpen, KeyWordReturn, LiteralNumber, SymbolSemicolon, BracketCurlyClose)
         val parserResult = RecursiveParser(ts).parseMethodDeclaration()
         assertEquals("2", parserResult.name)
     }

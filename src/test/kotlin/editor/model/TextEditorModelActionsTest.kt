@@ -2,7 +2,7 @@ package editor.model
 
 import org.junit.jupiter.api.Test
 
-class TextEditorModelActionsTest: TextEditorModelBaseTest() {
+class TextEditorModelActionsTest : TextEditorModelBaseTest() {
 
     @Test
     fun testBackSpaceAction() {

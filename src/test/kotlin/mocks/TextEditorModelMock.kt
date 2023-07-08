@@ -6,7 +6,7 @@ import editor.model.TextEditorCaret
 import editor.model.TextEditorModelBaseTest
 import helpers.Event
 
-class TextEditorModelMock(text: String): ITextEditorModel {
+class TextEditorModelMock(text: String) : ITextEditorModel {
     override val onModified = Event<LineChangeArgs>()
     override val onLineDelete = Event<LineChangeArgs>()
     override val onLineModified = Event<LineChangeArgs>()
@@ -46,17 +46,17 @@ class TextEditorModelMock(text: String): ITextEditorModel {
         return innerLines
     }
 
-    fun addLine(text: String){
+    fun addLine(text: String) {
         innerLines.add(text)
-        onLineAdd(LineChangeArgs(innerLines.size-1))
+        onLineAdd(LineChangeArgs(innerLines.size - 1))
     }
 
-    fun modifyLine(text: String, index: Int){
+    fun modifyLine(text: String, index: Int) {
         innerLines[index] = text
         onLineModified(LineChangeArgs(index))
     }
 
-    fun deleteLine(index: Int){
+    fun deleteLine(index: Int) {
         innerLines.removeAt(index)
         onLineDelete(LineChangeArgs(index))
     }

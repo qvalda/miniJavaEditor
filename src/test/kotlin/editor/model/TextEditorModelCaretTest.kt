@@ -2,7 +2,7 @@ package editor.model
 
 import org.junit.jupiter.api.Test
 
-class TextEditorModelCaretTest: TextEditorModelBaseTest() {
+class TextEditorModelCaretTest : TextEditorModelBaseTest() {
 
     @Test
     fun testCarteMoveLeft() {

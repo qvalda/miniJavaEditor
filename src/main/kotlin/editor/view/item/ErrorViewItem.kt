@@ -5,7 +5,7 @@ import editor.view.Style
 import helpers.DrawStateSaver
 import java.awt.Graphics
 
-class ErrorViewItem(private val message: String, private val start: Int, private val end: Int): IViewItem {
+class ErrorViewItem(private val message: String, private val start: Int, private val end: Int) : IViewItem {
     override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
         DrawStateSaver.usingColor(g, Style.Error.underline!!) {
             DrawStateSaver.usingStroke(g, 2) {

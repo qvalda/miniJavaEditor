@@ -14,7 +14,7 @@ import parser.ProgramParser
 import parser.SignificantTokenSource
 import tokenizer.Tokenizer
 
-class MainModel (private val codeSource: ICodeSource, defaultText: String) {
+class MainModel(private val codeSource: ICodeSource, defaultText: String) {
 
     val onTextModelChanged = Event<Unit>()
 

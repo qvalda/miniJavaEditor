@@ -15,8 +15,8 @@ import tokenizer.TokenType
 
 class ParserViewItemsContainerTest {
 
-    private val error1 = ParseError(1, Token(TokenType.NameIdentifier, 1,2), "error1")
-    private val error2 = ParseError(1, Token(TokenType.NameIdentifier, 3,4), "error2")
+    private val error1 = ParseError(1, Token(TokenType.NameIdentifier, 1, 2), "error1")
+    private val error2 = ParseError(1, Token(TokenType.NameIdentifier, 3, 4), "error2")
     private val resultWithErrors = ParserResult(null, listOf(error1, error2))
     private val resultWithNoErrors = ParserResult(null, emptyList())
 
@@ -26,7 +26,7 @@ class ParserViewItemsContainerTest {
     private lateinit var parsedModel: IParsedModel
 
     @BeforeEach
-    fun recreateModels(){
+    fun recreateModels() {
         tokenizedModel = mock(ITokenizedModel::class.java)
         `when`(tokenizedModel.modified).thenReturn(tokenizedModelModified)
         parsedModel = mock(IParsedModel::class.java)

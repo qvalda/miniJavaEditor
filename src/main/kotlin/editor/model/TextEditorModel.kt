@@ -5,7 +5,7 @@ import helpers.Event
 import kotlin.math.max
 import kotlin.math.min
 
-class TextEditorModel (text: String = "", private val clipboard: IClipboard = SystemClipboard()): ITextEditorModel, ITextEditorController  {
+class TextEditorModel(text: String = "", private val clipboard: IClipboard = SystemClipboard()) : ITextEditorModel, ITextEditorController {
 
     private val lines = mutableListOf<String>()
     private val commands = TextEditorCommandHistory()
@@ -32,7 +32,7 @@ class TextEditorModel (text: String = "", private val clipboard: IClipboard = Sy
         selectionCaret = TextEditorCaret()
     }
 
-    override fun getLine(lineIndex: Int): String{
+    override fun getLine(lineIndex: Int): String {
         return lines[lineIndex]
     }
 
@@ -395,7 +395,7 @@ class TextEditorModel (text: String = "", private val clipboard: IClipboard = Sy
 
     //endregion
 
-    private class ChangeTracker (private val model: TextEditorModel) {
+    private class ChangeTracker(private val model: TextEditorModel) {
         private var hasChanges = false
         private var isTrackingActive = false
 
@@ -423,7 +423,7 @@ class TextEditorModel (text: String = "", private val clipboard: IClipboard = Sy
         }
     }
 
-    private class DeleteSingleSelectionCommand(private val textEditorModel: TextEditorModel): ITextEditorCommand {
+    private class DeleteSingleSelectionCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var minCaret: TextEditorCaret
         private var maxCaret: TextEditorCaret
         private var text: String
@@ -445,7 +445,7 @@ class TextEditorModel (text: String = "", private val clipboard: IClipboard = Sy
         }
     }
 
-    private class DeleteMultiSelectionCommand(private val textEditorModel: TextEditorModel): ITextEditorCommand {
+    private class DeleteMultiSelectionCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var minCaret: TextEditorCaret
         private var maxCaret: TextEditorCaret
         private var lines: List<String>
@@ -467,7 +467,7 @@ class TextEditorModel (text: String = "", private val clipboard: IClipboard = Sy
         }
     }
 
-    private class InsertNewLineCommand(private val textEditorModel: TextEditorModel): ITextEditorCommand {
+    private class InsertNewLineCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var caretState: TextEditorCaret
 
         init {
@@ -486,7 +486,7 @@ class TextEditorModel (text: String = "", private val clipboard: IClipboard = Sy
         }
     }
 
-    private class InsertSingleLineCommand(private val textEditorModel: TextEditorModel, private val text: String): ITextEditorCommand {
+    private class InsertSingleLineCommand(private val textEditorModel: TextEditorModel, private val text: String) : ITextEditorCommand {
         private var caretState: TextEditorCaret
 
         init {
@@ -507,7 +507,7 @@ class TextEditorModel (text: String = "", private val clipboard: IClipboard = Sy
         }
     }
 
-    private class InsertMultiLineCommand(private val textEditorModel: TextEditorModel, private val lines: List<String>): ITextEditorCommand {
+    private class InsertMultiLineCommand(private val textEditorModel: TextEditorModel, private val lines: List<String>) : ITextEditorCommand {
         private var prevCaret: TextEditorCaret
         private lateinit var newCaret: TextEditorCaret
 
@@ -533,7 +533,7 @@ class TextEditorModel (text: String = "", private val clipboard: IClipboard = Sy
         }
     }
 
-    private class BackSpaceCommand(private val textEditorModel: TextEditorModel): ITextEditorCommand {
+    private class BackSpaceCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var prevCaret: TextEditorCaret
         private lateinit var newCaret: TextEditorCaret
         private lateinit var char: String
@@ -584,7 +584,7 @@ class TextEditorModel (text: String = "", private val clipboard: IClipboard = Sy
         }
     }
 
-    private class DeleteCommand(private val textEditorModel: TextEditorModel): ITextEditorCommand {
+    private class DeleteCommand(private val textEditorModel: TextEditorModel) : ITextEditorCommand {
         private var caretState: TextEditorCaret
         private lateinit var result: DeleteResult
         private lateinit var char: String

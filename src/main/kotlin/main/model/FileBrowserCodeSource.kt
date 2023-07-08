@@ -5,7 +5,7 @@ import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.JOptionPane
 
-class FileBrowserCodeSource (private val parent: Component): ICodeSource {
+class FileBrowserCodeSource(private val parent: Component) : ICodeSource {
     override fun openCode(): String? {
         val fileChooser = JFileChooser()
         if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {

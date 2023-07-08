@@ -3,7 +3,7 @@ package parser
 import tokenizer.Token
 import tokenizer.TokenType
 
-class SignificantTokenSource(private val ts: ITokenSource): ITokenSource {
+class SignificantTokenSource(private val ts: ITokenSource) : ITokenSource {
 
     init {
         skipNonSignificant()

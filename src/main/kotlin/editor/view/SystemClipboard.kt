@@ -5,7 +5,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.StringSelection
 
-class SystemClipboard: IClipboard {
+class SystemClipboard : IClipboard {
     override fun getData(): String? {
         return Toolkit.getDefaultToolkit().systemClipboard.getData(DataFlavor.stringFlavor) as String?
     }

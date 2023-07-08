@@ -9,7 +9,7 @@ import editor.view.item.StringRow
 import helpers.Event
 import java.awt.Dimension
 
-class TextViewItemsContainer(private val model: ITextEditorModel): IViewItemsContainer {
+class TextViewItemsContainer(private val model: ITextEditorModel) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
 
@@ -17,7 +17,7 @@ class TextViewItemsContainer(private val model: ITextEditorModel): IViewItemsCon
         model.onModified += ::onModelModified
     }
 
-    private fun onModelModified(args: LineChangeArgs){
+    private fun onModelModified(args: LineChangeArgs) {
         onItemsUpdated(Unit)
     }
 

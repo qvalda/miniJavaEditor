@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import tokenizer.TokenType
 
-class SignificantTokenSourceTest: BaseTest() {
+class SignificantTokenSourceTest : BaseTest() {
 
     @Test
     fun skipsComments() {

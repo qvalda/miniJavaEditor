@@ -8,7 +8,7 @@ import tokenizer.ITokenizer
 import tokenizer.Token
 import kotlin.math.min
 
-class TokenizedModel(private val model: ITextEditorModel, private val tokenizer: ITokenizer): ITokenizedModel {
+class TokenizedModel(private val model: ITextEditorModel, private val tokenizer: ITokenizer) : ITokenizedModel {
     override val modified = Event<Unit>()
     private var lines = model.getLines().map { l -> tokenizer.getTokens(l) }.toMutableList()
 
@@ -61,7 +61,7 @@ class TokenizedModel(private val model: ITextEditorModel, private val tokenizer:
                 yield(Pair(lines[startIndex][index], startIndex))
             }
             for (index in startIndex - 1 downTo 0) {
-                for (t in lines[index].size -1 downTo 0) {
+                for (t in lines[index].size - 1 downTo 0) {
                     yield(Pair(lines[index][t], index))
                 }
             }
@@ -73,7 +73,7 @@ class TokenizedModel(private val model: ITextEditorModel, private val tokenizer:
         return TokenizedTextModelTokenSource(this)
     }
 
-    private class TokenizedTextModelTokenSource(private val tokenizedModel: TokenizedModel): ITokenSource {
+    private class TokenizedTextModelTokenSource(private val tokenizedModel: TokenizedModel) : ITokenSource {
         private class Cursor(val line: Int, val column: Int)
 
         private var cursor = Cursor(0, 0)

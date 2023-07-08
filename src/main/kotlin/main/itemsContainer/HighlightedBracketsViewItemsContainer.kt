@@ -13,7 +13,7 @@ import tokenizer.Token
 import tokenizer.TokenType
 import java.awt.Graphics
 
-class HighlightedBracketsViewItemsContainer(private val textEditorModel: ITextEditorModel, private val tokenizedModel: ITokenizedModel): IViewItemsContainer {
+class HighlightedBracketsViewItemsContainer(private val textEditorModel: ITextEditorModel, private val tokenizedModel: ITokenizedModel) : IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
     private var highlightedBrackets = mutableListOf<Token>()
@@ -93,7 +93,7 @@ class HighlightedBracketsViewItemsContainer(private val textEditorModel: ITextEd
         }
     }
 
-    private class ColoredBracket(private val text: String, private val column: Int): IViewItem {
+    private class ColoredBracket(private val text: String, private val column: Int) : IViewItem {
         override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
             val lineY = measures.letterHeight + lineIndex * measures.letterHeight - measures.letterShift
             DrawStateSaver.usingColor(g, Style.Bracket.background!!) {
