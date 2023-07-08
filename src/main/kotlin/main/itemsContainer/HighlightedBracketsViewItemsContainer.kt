@@ -1,4 +1,4 @@
-package main.view
+package main.itemsContainer
 
 import editor.model.ITextEditorModel
 import editor.model.TextEditorCaret
@@ -6,18 +6,18 @@ import editor.view.*
 import editor.view.item.IViewItem
 import helpers.DrawStateSaver
 import helpers.Event
-import main.model.TokenizedModel
+import main.model.ITokenizedModel
 import tokenizer.Token
 import tokenizer.TokenType
 import java.awt.Graphics
 
-class HighlightedBracketsViewItemsContainer(private val model: ITextEditorModel, private val tokenizedModel: TokenizedModel) : IViewItemsContainer {
+class HighlightedBracketsViewItemsContainer(private val textEditorModel: ITextEditorModel, private val tokenizedModel: ITokenizedModel): IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
     private var highlightedBrackets = mutableListOf<Token>()
 
     init {
-        model.onCaretMove += ::onCaretMove
+        textEditorModel.onCaretMove += ::onCaretMove
     }
 
     private fun onCaretMove(caret: TextEditorCaret) {
@@ -54,27 +54,12 @@ class HighlightedBracketsViewItemsContainer(private val model: ITextEditorModel,
 
         for (token in tokenizedModel.getLine(lineIndex)) {
             if (token in highlightedBrackets) {
-                val text = model.getLine(lineIndex).substring(token.startIndex, token.endIndex)
+                val text = textEditorModel.getLine(lineIndex).substring(token.startIndex, token.endIndex)
                 rules.add(ColoredBracket(text, token.startIndex))
             }
         }
 
         return rules
-    }
-
-    private class ColoredBracket(private val text: String, private val column: Int) : IViewItem {
-        override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
-            val lineY = measures.letterHeight + lineIndex * measures.letterHeight - measures.letterShift
-            DrawStateSaver.usingColor(g, Style.Bracket.background!!) {
-                g.fillRect(
-                    column * measures.letterWidth,
-                    lineIndex * measures.letterHeight,
-                    measures.letterWidth,
-                    measures.letterHeight
-                )
-            }
-            g.drawString(text, column * measures.letterWidth, lineY)
-        }
     }
 
     private enum class LookupDirection {
@@ -103,6 +88,21 @@ class HighlightedBracketsViewItemsContainer(private val model: ITextEditorModel,
             TokenType.BracketCurlyOpen -> LookupDirection.Forward
             TokenType.BracketCurlyClose -> LookupDirection.Backward
             else -> throw IllegalArgumentException()
+        }
+    }
+
+    private class ColoredBracket(private val text: String, private val column: Int): IViewItem {
+        override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
+            val lineY = measures.letterHeight + lineIndex * measures.letterHeight - measures.letterShift
+            DrawStateSaver.usingColor(g, Style.Bracket.background!!) {
+                g.fillRect(
+                    column * measures.letterWidth,
+                    lineIndex * measures.letterHeight,
+                    measures.letterWidth,
+                    measures.letterHeight
+                )
+            }
+            g.drawString(text, column * measures.letterWidth, lineY)
         }
     }
 }

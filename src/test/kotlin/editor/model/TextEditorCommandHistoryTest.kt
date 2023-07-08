@@ -55,7 +55,7 @@ class TextEditorCommandHistoryTest {
         assertTrue(c1.isExecuted)
     }
 
-    class TestCommand : ITextEditorCommand {
+    class TestCommand: ITextEditorCommand {
         var isExecuted = false
         var isUndo = false
 

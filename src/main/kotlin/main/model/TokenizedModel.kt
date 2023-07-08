@@ -6,10 +6,9 @@ import helpers.Event
 import parser.ITokenSource
 import tokenizer.ITokenizer
 import tokenizer.Token
-import kotlin.math.max
 import kotlin.math.min
 
-class TokenizedModel(private val model: ITextEditorModel, private val tokenizer: ITokenizer) : ITokenizedModel {
+class TokenizedModel(private val model: ITextEditorModel, private val tokenizer: ITokenizer): ITokenizedModel {
     override val modified = Event<Unit>()
     private var lines = model.getLines().map { l -> tokenizer.getTokens(l) }.toMutableList()
 
@@ -19,7 +18,7 @@ class TokenizedModel(private val model: ITextEditorModel, private val tokenizer:
         model.onLineAdd += ::onLineAdd
     }
 
-    override fun getLine(index:Int): List<Token> {
+    override fun getLine(index: Int): List<Token> {
         return lines[index]
     }
 
@@ -42,7 +41,7 @@ class TokenizedModel(private val model: ITextEditorModel, private val tokenizer:
         modified(Unit)
     }
 
-    override fun iterateTokens(startIndex: Int, startTokenIndex: Int): Sequence<Pair<Token, Int>> { //todo remove?
+    override fun iterateTokens(startIndex: Int, startTokenIndex: Int): Sequence<Pair<Token, Int>> {
         val sequence = sequence {
             for (index in startTokenIndex + 1 until lines[startIndex].size) {
                 yield(Pair(lines[startIndex][index], startIndex))
@@ -74,7 +73,7 @@ class TokenizedModel(private val model: ITextEditorModel, private val tokenizer:
         return TokenizedTextModelTokenSource(this)
     }
 
-    private class TokenizedTextModelTokenSource(private val tokenizedModel: TokenizedModel) : ITokenSource {
+    private class TokenizedTextModelTokenSource(private val tokenizedModel: TokenizedModel): ITokenSource {
         private class Cursor(val line: Int, val column: Int)
 
         private var cursor = Cursor(0, 0)

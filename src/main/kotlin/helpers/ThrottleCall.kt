@@ -23,4 +23,8 @@ class ThrottleCall(private val delay: Int, private val statement: () -> Unit) {
             }
         }
     }
+
+    suspend fun wait() {
+        job?.join()
+    }
 }

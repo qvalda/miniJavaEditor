@@ -1,8 +1,8 @@
-package main.view
+package main.itemsContainer
 
 import parser.*
 
-open class NodeWithLocationVisitor : IProgramVisitor {
+open class NodeWithLocationVisitor: IProgramVisitor {
     override fun visit(node: ProgramNode) {
         node.mainClass.accept(this)
         node.classes.forEach { it.accept(this) }

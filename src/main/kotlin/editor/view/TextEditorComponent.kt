@@ -1,7 +1,8 @@
 package editor.view
 
 import editor.model.ITextEditorController
-import helpers.DrawStateSaver.Companion.usingColor
+import helpers.DrawStateSaver.usingColor
+import helpers.ThrottleCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,11 +16,13 @@ import javax.swing.JComponent
 import javax.swing.Scrollable
 import kotlin.math.roundToInt
 
-class TextEditorComponent(controller: ITextEditorController, itemsContainer: IViewItemsContainer) : JComponent(), Scrollable {
 
-    private var initialized = false
+class TextEditorComponent(controller: ITextEditorController, itemsContainer: IViewItemsContainer): JComponent(), Scrollable {
+
     private var prevPreferredSize = Dimension(0, 0)
     private var measures = DrawMeasures(0,0,0)
+    private var renderTooltip = false
+    private var tooltipPoint = Point()
 
     var controller = controller
         set(value) {
@@ -41,7 +44,7 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
 
         itemsContainer.onItemsUpdated += ::onRepaintRequest
 
-        val mouseListener = object : MouseAdapter() {
+        val mouseListener = object: MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
                 onMousePressed(e)
             }
@@ -55,7 +58,7 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
             }
         }
 
-        val keyListener = object : KeyAdapter() {
+        val keyListener = object: KeyAdapter() {
             override fun keyPressed(e: KeyEvent) {
                 onKeyPressed(e)
             }
@@ -64,6 +67,9 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
         addMouseListener(mouseListener)
         addMouseMotionListener(mouseListener)
         addKeyListener(keyListener)
+
+        val fontMetrics = Canvas().getFontMetrics(Style.Font)
+        measures = DrawMeasures(fontMetrics.height, fontMetrics.descent, fontMetrics.stringWidth("w"))
     }
 
     public override fun paintComponent(g: Graphics) {
@@ -71,17 +77,28 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
 
         drawBackground(g)
         setDefaultStyle(g)
-        initValues(g)
 
         val visibleLineFrom = (g.clipBounds.y / measures.letterHeight).coerceIn(0, itemsContainer.size.height - 1)
         val visibleLineTo = ((g.clipBounds.y + g.clipBounds.height) / measures.letterHeight).coerceIn(0, itemsContainer.size.height - 1)
 
         for (lineIndex in visibleLineFrom..visibleLineTo) {
             val items = itemsContainer.getItems(lineIndex)
-            for (i  in items) {
+            for (i in items) {
                 i.draw(g, lineIndex, measures)
             }
         }
+
+        if (renderTooltip) {
+            val lineIndex = tooltipPoint.y / measures.letterHeight
+            val columnIndex = (tooltipPoint.x.toFloat() / measures.letterWidth).roundToInt()
+            if (lineIndex < itemsContainer.size.height) {
+                val items = itemsContainer.getItems(lineIndex)
+                for (i in items) {
+                    i.drawTooltip(g, lineIndex, columnIndex, measures)
+                }
+            }
+        }
+
         updatePreferredSize()
     }
 
@@ -194,10 +211,18 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
     private fun hasShiftModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.SHIFT_DOWN_MASK) != 0
     private fun hasCtrlModifier(e: KeyEvent) = (e.modifiersEx and KeyEvent.CTRL_DOWN_MASK) != 0
 
-    private var mousePoint = Point()
+    private val showTooltip = ThrottleCall(1000) {
+        renderTooltip = true
+        repaint()
+    }
 
     private fun onMouseMoved(e: MouseEvent) {
-        mousePoint = Point(e.y / measures.letterHeight, (e.x.toFloat() / measures.letterWidth).roundToInt())
+        tooltipPoint = e.point
+        if(renderTooltip){
+            renderTooltip = false
+            repaint()
+        }
+        showTooltip()
     }
 
     private fun onMouseDragged(e: MouseEvent) {
@@ -225,16 +250,6 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
         g.font = Style.Font
     }
 
-    private fun initValues(g: Graphics) {
-        if (!initialized) {
-            val letterHeight = g.fontMetrics.height
-            val letterShift = g.fontMetrics.descent
-            val letterWidth = g.fontMetrics.stringWidth("w")
-            measures = DrawMeasures(letterHeight, letterShift, letterWidth)
-            initialized = true
-        }
-    }
-
     //region Scrollable
     override fun getPreferredScrollableViewportSize(): Dimension {
         return preferredSize
@@ -257,4 +272,3 @@ class TextEditorComponent(controller: ITextEditorController, itemsContainer: IVi
     }
     //endregion
 }
-

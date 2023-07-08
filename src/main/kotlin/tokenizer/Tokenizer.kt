@@ -1,6 +1,6 @@
 package tokenizer
 
-class Tokenizer : ITokenizer {
+class Tokenizer: ITokenizer {
 
     private val numbers = '0'..'9'
     private val whiteSpaces = arrayOf('\r', '\n', ' ', '\t')
@@ -256,7 +256,7 @@ class Tokenizer : ITokenizer {
         return createInvalidToken(begin, reader)
     }
 
-    private fun createInvalidToken(begin:Int, reader: CharArraySafeReader): Token {
+    private fun createInvalidToken(begin: Int, reader: CharArraySafeReader): Token {
         return Token(TokenType.InvalidSyntax, begin, reader.pointer, reader.substring(begin, reader.pointer))
     }
 

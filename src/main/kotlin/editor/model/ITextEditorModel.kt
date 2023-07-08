@@ -4,10 +4,10 @@ import helpers.Event
 
 interface ITextEditorModel {
     val onModified: Event<LineChangeArgs>
-    val onLineDelete : Event<LineChangeArgs>
-    val onLineModified : Event<LineChangeArgs>
-    val onLineAdd : Event<LineChangeArgs>
-    val onCaretMove : Event<TextEditorCaret>
+    val onLineDelete: Event<LineChangeArgs>
+    val onLineModified: Event<LineChangeArgs>
+    val onLineAdd: Event<LineChangeArgs>
+    val onCaretMove: Event<TextEditorCaret>
 
     fun getLine(lineIndex: Int): String
     fun getLines(): List<String>

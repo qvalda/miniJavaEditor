@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="MainFrame" type="JetRunConfigurationType" nameIsGenerated="true">
-    <option name="MAIN_CLASS_NAME" value="MainFrame" />
+    <option name="MAIN_CLASS_NAME" value="main.view.MainFrame" />
     <module name="test2" />
     <shortenClasspath name="NONE" />
     <method v="2">

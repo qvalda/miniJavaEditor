@@ -1,28 +1,26 @@
-package main.view
+package main.itemsContainer
 
 import editor.model.ITextEditorModel
-import editor.view.DrawMeasures
 import editor.view.IViewItemsContainer
 import editor.view.Style
+import editor.view.item.ColoredString
 import editor.view.item.ErrorViewItem
 import editor.view.item.IViewItem
-import helpers.DrawStateSaver
 import helpers.Event
 import main.model.ITokenizedModel
 import tokenizer.Token
 import tokenizer.TokenType
-import java.awt.Graphics
 
-class TokenizerViewItemsContainer(private val model: ITextEditorModel, private val tokenizedModel: ITokenizedModel) : IViewItemsContainer {
+class TokenizerViewItemsContainer(private val textEditorModel: ITextEditorModel, private val tokenizedModel: ITokenizedModel): IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
 
     override fun getItems(lineIndex: Int): List<IViewItem> {
-        val rules = mutableListOf<IViewItem>()
+        val items = mutableListOf<IViewItem>()
 
         fun addColoredString(token: Token, style: Style) {
-            val text = model.getLine(lineIndex).substring(token.startIndex, token.endIndex)
-            rules.add(ColoredString(text, token.startIndex, style))
+            val text = textEditorModel.getLine(lineIndex).substring(token.startIndex, token.endIndex)
+            items.add(ColoredString(text, token.startIndex, style))
         }
 
         for (token in tokenizedModel.getLine(lineIndex)) {
@@ -31,7 +29,7 @@ class TokenizerViewItemsContainer(private val model: ITextEditorModel, private v
             } else if (token.type == TokenType.Comment) {
                 addColoredString(token, Style.Comment)
             } else if (token.type == TokenType.InvalidSyntax) {
-                rules.add(ErrorViewItem(token.startIndex, token.endIndex, Style.Error))
+                items.add(ErrorViewItem("Invalid Syntax", token.startIndex, token.endIndex))
             } else if (token.type == TokenType.LiteralNumber) {
                 addColoredString(token, Style.Number)
             } else if (token.type == TokenType.LiteralString) {
@@ -40,18 +38,6 @@ class TokenizerViewItemsContainer(private val model: ITextEditorModel, private v
                 addColoredString(token, Style.Char)
             }
         }
-        return rules
-    }
-
-    class ColoredString(private val text: String, private val column: Int, private val style: Style) : IViewItem {
-        override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
-            val lineY = measures.letterHeight + lineIndex * measures.letterHeight - measures.letterShift
-            DrawStateSaver.usingColor(g, style.color!!) {
-                DrawStateSaver.usingBold(g, style.isBold)
-                {
-                    g.drawString(text, column * measures.letterWidth, lineY)
-                }
-            }
-        }
+        return items
     }
 }

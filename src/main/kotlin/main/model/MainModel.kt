@@ -6,14 +6,15 @@ import editor.model.TextEditorModel
 import editor.view.TextViewItemsContainer
 import helpers.Event
 import helpers.ThrottleCall
-import main.view.HighlightedBracketsViewItemsContainer
-import main.view.ParserViewItemsContainer
-import main.view.TokenizerViewItemsContainer
-import main.view.UniqueClassCheckerViewItemsContainer
+import main.itemsContainer.HighlightedBracketsViewItemsContainer
+import main.itemsContainer.ParserViewItemsContainer
+import main.itemsContainer.TokenizerViewItemsContainer
+import main.itemsContainer.UniqueClassCheckerViewItemsContainer
+import parser.ProgramParser
 import parser.SignificantTokenSource
 import tokenizer.Tokenizer
 
-class MainModel (private val codeSource: ICodeSource, defaultText:String) {
+class MainModel (private val codeSource: ICodeSource, defaultText: String) {
 
     val onTextModelChanged = Event<Unit>()
 
@@ -21,7 +22,7 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
     lateinit var visualItemsContainer: IViewItemsContainer
 
     private lateinit var tokenizedModel: TokenizedModel
-    private lateinit var parsedTextModel: ParsedTextModel
+    private lateinit var parsedModel: ParsedModel
 
     init {
         createModels(defaultText)
@@ -66,8 +67,8 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
     private fun createVisualItemsContainer(): IViewItemsContainer {
         val m = TextViewItemsContainer(textModel)
         val t = TokenizerViewItemsContainer(textModel, tokenizedModel)
-        val p = ParserViewItemsContainer(parsedTextModel, tokenizedModel)
-        val u = UniqueClassCheckerViewItemsContainer(parsedTextModel, tokenizedModel)
+        val p = ParserViewItemsContainer(tokenizedModel, parsedModel)
+        val u = UniqueClassCheckerViewItemsContainer(tokenizedModel, parsedModel)
         val b = HighlightedBracketsViewItemsContainer(textModel, tokenizedModel)
         return ComposedViewItemsContainer(m, t, p, u, b)
     }
@@ -79,7 +80,8 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
 
         textModel = TextEditorModel(input)
         tokenizedModel = TokenizedModel(textModel, Tokenizer())
-        parsedTextModel = ParsedTextModel(SignificantTokenSource(tokenizedModel.asTokenSource()))
+        parsedModel = ParsedModel(ProgramParser())
+        parsedModel.rebuild(SignificantTokenSource(tokenizedModel.asTokenSource()))
         visualItemsContainer = createVisualItemsContainer()
         tokenizedModel.modified += ::onTokenizedTextModelModifiedDelayed
 
@@ -93,6 +95,6 @@ class MainModel (private val codeSource: ICodeSource, defaultText:String) {
     }
 
     private fun onTokenizedTextModelModified() {
-        parsedTextModel.update(SignificantTokenSource(tokenizedModel.asTokenSource()))
+        parsedModel.rebuild(SignificantTokenSource(tokenizedModel.asTokenSource()))
     }
 }

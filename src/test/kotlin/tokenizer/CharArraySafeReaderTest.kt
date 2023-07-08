@@ -3,19 +3,19 @@ package tokenizer
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-class CharArraySafeReaderTest{
+class CharArraySafeReaderTest {
 
     @Test
-    fun canReadChars(){
-        val reader = createCharArraySafeReader( "ab")
+    fun canReadChars() {
+        val reader = createCharArraySafeReader("ab")
         assertEquals('a', reader.currentChar)
         reader.moveNext()
         assertEquals('b', reader.currentChar)
     }
 
     @Test
-    fun returnEOFChars(){
-        val reader = createCharArraySafeReader( "ab")
+    fun returnEOFChars() {
+        val reader = createCharArraySafeReader("ab")
         reader.moveNext()
         reader.moveNext()
         assertFalse(reader.moveNext())
@@ -23,8 +23,8 @@ class CharArraySafeReaderTest{
     }
 
     @Test
-    fun doNotThrowAfterAllReads(){
-        val reader = createCharArraySafeReader( "ab")
+    fun doNotThrowAfterAllReads() {
+        val reader = createCharArraySafeReader("ab")
         reader.moveNext()
         reader.moveNext()
         reader.moveNext()
@@ -35,5 +35,4 @@ class CharArraySafeReaderTest{
     private fun createCharArraySafeReader(input: String): CharArraySafeReader {
         return CharArraySafeReader(input)
     }
-
 }

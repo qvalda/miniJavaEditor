@@ -3,7 +3,7 @@ package editor.model
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class TextEditorModelEventsTest : TextEditorModelBaseTest() {
+class TextEditorModelEventsTest: TextEditorModelBaseTest() {
 
     @Test
     fun callsOnLineAdd() {

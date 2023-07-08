@@ -4,7 +4,7 @@ import editor.view.item.IViewItem
 import helpers.Event
 import java.awt.Dimension
 
-class ComposedViewItemsContainer(private vararg val containers: IViewItemsContainer) : IViewItemsContainer {
+class ComposedViewItemsContainer(private vararg val containers: IViewItemsContainer): IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
 

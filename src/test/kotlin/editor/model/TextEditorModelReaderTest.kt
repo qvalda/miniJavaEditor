@@ -4,7 +4,7 @@ import base.BaseTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class TextEditorModelReaderTest : TextEditorModelBaseTest(){
+class TextEditorModelReaderTest: TextEditorModelBaseTest(){
 
     @Test
     fun testLinesCount() {

@@ -1,22 +1,21 @@
-package main.view
+package main.itemsContainer
 
 import editor.view.IViewItemsContainer
-import editor.view.Style
 import editor.view.item.ErrorViewItem
 import editor.view.item.IViewItem
 import helpers.Event
-import main.model.ParsedTextModel
-import main.model.TokenizedModel
+import main.model.IParsedModel
+import main.model.ITokenizedModel
 
-class ParserViewItemsContainer(private val parserModel: ParsedTextModel, tokenizedModel: TokenizedModel) : IViewItemsContainer {
+class ParserViewItemsContainer(tokenizedModel: ITokenizedModel, private val parserModel: IParsedModel): IViewItemsContainer {
 
     override val onItemsUpdated = Event<Unit>()
     private var errors = mapOf<Int, List<ErrorViewItem>>()
 
     init {
         onParserResultChanged(Unit)
-        parserModel.parserResultChanged += ::onParserResultChanged
         tokenizedModel.modified += ::onTokenizedTextModelChanged
+        parserModel.parserResultChanged += ::onParserResultChanged
     }
 
     override fun getItems(lineIndex: Int): List<IViewItem> {
@@ -24,7 +23,7 @@ class ParserViewItemsContainer(private val parserModel: ParsedTextModel, tokeniz
     }
 
     private fun onTokenizedTextModelChanged(unit: Unit) {
-        if(errors.isNotEmpty()){
+        if (errors.isNotEmpty()) {
             errors = emptyMap()
             onItemsUpdated(Unit)
         }
@@ -35,7 +34,7 @@ class ParserViewItemsContainer(private val parserModel: ParsedTextModel, tokeniz
             errors = parserModel.parserResult!!.errors
                 .groupBy { e -> e.lineIndex }
                 .asIterable()
-                .associate { g -> g.key to g.value.map { e -> ErrorViewItem(e.token.startIndex, e.token.endIndex, Style.Error) }.toList() }
+                .associate { g -> g.key to g.value.map { e -> ErrorViewItem(e.message, e.token.startIndex, e.token.endIndex) }.toList() }
             onItemsUpdated(Unit)
         }
     }

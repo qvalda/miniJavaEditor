@@ -45,7 +45,7 @@ expression ::= expression ('&&' | '<' | '+' | '-' | '*') expression
 expression-list ::= expression ( ',' expression-list )?
  */
 
-class RecursiveParser(private val ts: ITokenSource) {
+class RecursiveParser(private val ts: ITokenSource)  {
 
     fun parse(): ParserResult {
         return try {

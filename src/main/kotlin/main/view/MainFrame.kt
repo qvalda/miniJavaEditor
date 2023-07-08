@@ -1,3 +1,5 @@
+package main.view
+
 import editor.view.TextEditorComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -8,7 +10,7 @@ import main.model.MainModel
 import java.awt.BorderLayout
 import javax.swing.*
 
-class MainFrame : JFrame("Mini java editor") {
+class MainFrame: JFrame("Mini java editor") {
 
     init {
         val text = """class Factorial{

@@ -12,7 +12,7 @@ class ThrottleCallTest {
     fun testThrottleCall() {
         runBlocking {
             val callCount = AtomicInteger()
-            val signal = CountDownLatch(1);
+            val signal = CountDownLatch(1)
             val tc = ThrottleCall(100) {
                 callCount.incrementAndGet()
                 signal.countDown()

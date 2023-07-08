@@ -1,7 +1,7 @@
 package editor.model
 
 interface ITextEditorController {
-    val selectionCaret : TextEditorCaret
+    val selectionCaret: TextEditorCaret
 
     fun backSpaceAction()
     fun deleteAction()

@@ -56,7 +56,7 @@ open class TextEditorModelBaseTest {
         assertEquals(args.count, count)
     }
 
-    class MemoryClipboard : IClipboard {
+    class MemoryClipboard: IClipboard {
         private var memoryData: String? = null
         override fun getData(): String? {
             return memoryData

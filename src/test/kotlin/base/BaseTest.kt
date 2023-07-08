@@ -34,14 +34,14 @@ open class BaseTest {
             fail(string)
         }
 
-        fun <T : Any> T.getPrivateProperty(variableName: String): Any? {
+        fun <T: Any> T.getPrivateProperty(variableName: String): Any? {
             return javaClass.getDeclaredField(variableName).let { field ->
                 field.isAccessible = true
                 return@let field.get(this)
             }
         }
 
-        fun <T : Any> T.setAndReturnPrivateProperty(variableName: String, data: Any): Any? {
+        fun <T: Any> T.setAndReturnPrivateProperty(variableName: String, data: Any): Any? {
             return javaClass.getDeclaredField(variableName).let { field ->
                 field.isAccessible = true
                 field.set(this, data)

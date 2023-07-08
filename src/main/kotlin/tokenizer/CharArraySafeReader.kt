@@ -10,7 +10,7 @@ class CharArraySafeReader(private val input: String) {
         get() = if (pointer + 1 < input.length) input[pointer + 1] else Char.MIN_VALUE
 
     fun moveNext(): Boolean {
-        pointer++;
+        pointer++
         return pointer < input.length
     }
 

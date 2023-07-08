@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import base.BaseTest
 import tokenizer.TokenType.*
 
-class TokenizerTest : BaseTest() {
+class TokenizerTest: BaseTest() {
 
     @ParameterizedTest
     @ValueSource(strings = ["binarysearch.javam", "binarytree.javam", "bubblesort.javam", "factorial.javam", "linearsearch.javam", "linkedlist.javam", "quicksort.javam", "treevisitor.javam"])

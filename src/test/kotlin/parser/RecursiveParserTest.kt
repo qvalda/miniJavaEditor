@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import tokenizer.TokenType.*
 import tokenizer.Tokenizer
 
-class RecursiveParserTest : BaseTest() {
+class RecursiveParserTest: BaseTest() {
 
     @ParameterizedTest
     @ValueSource(strings = ["binarysearch.javam", "binarytree.javam", "bubblesort.javam", "factorial.javam", "linearsearch.javam", "linkedlist.javam", "quicksort.javam", "treevisitor.javam"])

@@ -4,10 +4,16 @@ import base.BaseTest.Companion.getPrivateProperty
 import base.BaseTest.Companion.setAndReturnPrivateProperty
 import editor.model.ITextEditorController
 import editor.view.item.IViewItem
+import helpers.ThrottleCall
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import mocks.ViewItemsContainerMock
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.mockito.internal.verification.VerificationModeFactory
+import org.mockito.internal.verification.VerificationModeFactory.noInteractions
 import java.awt.*
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
@@ -70,7 +76,7 @@ class TextEditorComponentTest {
     }
 
     @Test
-    fun testMousePressedActions() {
+    fun testMousePressedHandler() {
         val controller = createController()
         val container = createContainer()
 
@@ -80,13 +86,31 @@ class TextEditorComponentTest {
     }
 
     @Test
-    fun testMouseDraggedActions() {
+    fun testMouseDraggedHandler() {
         val controller = createController()
         val container = createContainer()
 
         val editor = createFormattedTextEditor(controller, container)
         editor.mouseMotionListeners[0].mouseDragged(MouseEvent(editor, 0, 0, 0, 5, 6, 1, false))
         verify(controller, only()).setSelectionCaret(6, 5)
+    }
+
+    @Test
+    fun testMouseMoveHandler() {
+        val controller = createController()
+        val container = createContainer()
+
+        val editor = createFormattedTextEditor(controller, container)
+        editor.mouseMotionListeners[0].mouseMoved(MouseEvent(editor, 0, 0, 0, 5, 6, 1, false))
+
+        assertFalse(editor.getPrivateProperty("renderTooltip") as Boolean)
+        runBlocking {
+            (editor.getPrivateProperty("showTooltip") as ThrottleCall).wait()
+        }
+        assertTrue(editor.getPrivateProperty("renderTooltip") as Boolean)
+
+        editor.mouseMotionListeners[0].mouseMoved(MouseEvent(editor, 0, 0, 0, 6, 6, 1, false))
+        assertFalse(editor.getPrivateProperty("renderTooltip") as Boolean)
     }
 
     @Test
@@ -123,12 +147,56 @@ class TextEditorComponentTest {
         val editor = createFormattedTextEditor(controller, container)
         editor.paintComponent(graphics)
 
-        verify(views[0], VerificationModeFactory.noInteractions()).draw(graphics, 0, DrawMeasures(0, 0, 0))
-        verify(views[1], VerificationModeFactory.noInteractions()).draw(graphics, 0, DrawMeasures(0, 0, 0))
-        verify(views[2], VerificationModeFactory.only()).draw(graphics, 1, editor.getPrivateProperty("measures") as DrawMeasures)
-        verify(views[3], VerificationModeFactory.only()).draw(graphics, 1, editor.getPrivateProperty("measures") as DrawMeasures)
-        verify(views[4], VerificationModeFactory.only()).draw(graphics, 2, editor.getPrivateProperty("measures") as DrawMeasures)
-        verify(views[5], VerificationModeFactory.noInteractions()).draw(graphics, 0, DrawMeasures(0, 0, 0))
+        verify(views[0], noInteractions()).draw(graphics, 0, DrawMeasures(0, 0, 0))
+        verify(views[1], noInteractions()).draw(graphics, 0, DrawMeasures(0, 0, 0))
+        verify(views[2], only()).draw(graphics, 1, editor.getPrivateProperty("measures") as DrawMeasures)
+        verify(views[3], only()).draw(graphics, 1, editor.getPrivateProperty("measures") as DrawMeasures)
+        verify(views[4], only()).draw(graphics, 2, editor.getPrivateProperty("measures") as DrawMeasures)
+        verify(views[5], noInteractions()).draw(graphics, 0, DrawMeasures(0, 0, 0))
+    }
+
+    @Test
+    fun testTooltipPaintComponent() {
+        val controller = createController()
+
+        val views = listOf(
+            mock(IViewItem::class.java),
+            mock(IViewItem::class.java),
+            mock(IViewItem::class.java),
+            mock(IViewItem::class.java),
+            mock(IViewItem::class.java),
+            mock(IViewItem::class.java),
+        )
+
+        val items = mapOf(
+            0 to listOf(views[0], views[1]),
+            1 to listOf(views[2], views[3]),
+            2 to listOf(views[4]),
+            3 to listOf(views[5]),
+        )
+        val container = ViewItemsContainerMock(items)
+        container.size = Dimension(2, items.size)
+
+        val fontMetrics = mock(FontMetrics::class.java)
+        `when`(fontMetrics.height).thenReturn(1)
+        `when`(fontMetrics.descent).thenReturn(1)
+        `when`(fontMetrics.stringWidth("w")).thenReturn(1)
+
+        val graphics = mock(Graphics::class.java)
+        `when`(graphics.clipBounds).thenReturn(Rectangle(1, 1, 1, 1))
+        `when`(graphics.fontMetrics).thenReturn(fontMetrics)
+
+        val editor = createFormattedTextEditor(controller, container)
+        editor.setAndReturnPrivateProperty("renderTooltip", true)
+        editor.setAndReturnPrivateProperty("tooltipPoint", Point(1, 2))
+        editor.paintComponent(graphics)
+
+        verify(views[0], times(0)).drawTooltip(graphics, 0, 0, DrawMeasures(0, 0, 0))
+        verify(views[1], times(0)).drawTooltip(graphics, 0, 0, DrawMeasures(0, 0, 0))
+        verify(views[2], times(0)).drawTooltip(graphics, 0, 0, DrawMeasures(0, 0, 0))
+        verify(views[3], times(0)).drawTooltip(graphics, 0, 0, DrawMeasures(0, 0, 0))
+        verify(views[4], times(1)).drawTooltip(graphics, 2, 1, editor.getPrivateProperty("measures") as DrawMeasures)
+        verify(views[5], times(0)).drawTooltip(graphics, 0, 0, DrawMeasures(0, 0, 0))
     }
 
     private fun createFormattedTextEditor(controller: ITextEditorController, container: ViewItemsContainerMock): TextEditorComponent {

@@ -2,7 +2,7 @@ package editor.model
 
 import org.junit.jupiter.api.Test
 
-class TextEditorModelActionsTest : TextEditorModelBaseTest() {
+class TextEditorModelActionsTest: TextEditorModelBaseTest() {
 
     @Test
     fun testBackSpaceAction() {
@@ -133,6 +133,17 @@ class TextEditorModelActionsTest : TextEditorModelBaseTest() {
         assertTextAndCaret(model, "abc\r\n|")
         model.undo()
         assertTextAndCaret(model, "abc|")
+    }
+
+    @Test
+    fun testEnterActionWithOffset() {
+        val model = creteTextEditorModelWithCaret("  abc|")
+        model.enterAction()
+        assertTextAndCaret(model, "  abc\r\n  |")
+        model.undo()
+        assertTextAndCaret(model, "  abc\r\n|")
+        model.undo()
+        assertTextAndCaret(model, "  abc|")
     }
 
     @Test

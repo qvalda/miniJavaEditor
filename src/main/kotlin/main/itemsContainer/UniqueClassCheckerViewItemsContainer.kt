@@ -1,15 +1,14 @@
-package main.view
+package main.itemsContainer
 
 import editor.view.IViewItemsContainer
-import editor.view.Style
 import editor.view.item.ErrorViewItem
 import editor.view.item.IViewItem
 import helpers.Event
-import main.model.ParsedTextModel
-import main.model.TokenizedModel
+import main.model.IParsedModel
+import main.model.ITokenizedModel
 import parser.*
 
-class UniqueClassCheckerViewItemsContainer(private val parserModel: ParsedTextModel, tokenizedModel: TokenizedModel) : IViewItemsContainer, NodeWithLocationVisitor() {
+class UniqueClassCheckerViewItemsContainer(tokenizedModel: ITokenizedModel, private val parserModel: IParsedModel): IViewItemsContainer, NodeWithLocationVisitor() {
 
     override val onItemsUpdated = Event<Unit>()
 
@@ -17,8 +16,13 @@ class UniqueClassCheckerViewItemsContainer(private val parserModel: ParsedTextMo
 
     init {
         onParserResultChanged(Unit)
-        parserModel.parserResultChanged += ::onParserResultChanged
         tokenizedModel.modified += ::onTokenizedTextModelChanged
+        parserModel.parserResultChanged += ::onParserResultChanged
+    }
+
+
+    override fun getItems(lineIndex: Int): List<IViewItem> {
+        return errors[lineIndex] ?: emptyList()
     }
 
     private fun onTokenizedTextModelChanged(unit: Unit) {
@@ -33,10 +37,6 @@ class UniqueClassCheckerViewItemsContainer(private val parserModel: ParsedTextMo
             parserModel.parserResult?.program?.accept(this)
             onItemsUpdated(Unit)
         }
-    }
-
-    override fun getItems(lineIndex: Int): List<IViewItem> {
-        return errors[lineIndex] ?: emptyList()
     }
 
     private fun mergeErrors(newErrors: Map<Int, MutableList<ErrorViewItem>>){
@@ -79,7 +79,7 @@ class UniqueClassCheckerViewItemsContainer(private val parserModel: ParsedTextMo
             .flatMap { c -> c.value }
             .groupBy { e -> e.location.lineIndex }
             .asIterable()
-            .associate { g -> g.key to g.value.map { e -> ErrorViewItem(e.location.startIndex, e.location.endIndex, Style.Error) }.toMutableList() }
+            .associate { g -> g.key to g.value.map { e -> ErrorViewItem("Duplicated declarations", e.location.startIndex, e.location.endIndex) }.toMutableList() }
     }
 }
 
