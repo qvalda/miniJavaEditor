@@ -39,7 +39,7 @@ class TokenizerTest: BaseTest() {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["\"\"", "\"a\"", "\"abc\"", "\"abc;\""])
+    @ValueSource(strings = ["\"\"", "\"a\"", "\"abc\"", "\"abc;\"", """"abc\"d"""", """"abc\\\"d""""])
     fun canTokenizeLiteralString(input: String) {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
@@ -47,19 +47,19 @@ class TokenizerTest: BaseTest() {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["\"", "\"abc"])
+    @ValueSource(strings = ["\"", "\"abc", """"abc\\\"d\""""])
     fun hasInvalidLiteralString(input: String) {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
         assertEqualsToken(Token(InvalidSyntax, 0, input.length, input), tokens[0])
     }
 
-    @Test
-    fun canTokenizeLiteralChar() {
-        val input = "'a'"
+    @ParameterizedTest
+    @ValueSource(strings = ["'a'", """'\''"""])
+    fun canTokenizeLiteralChar(input: String) {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
-        assertEqualsToken(Token(LiteralChar, 0, 3, "'a'"), tokens[0])
+        assertEqualsToken(Token(LiteralChar, 0, input.length, input), tokens[0])
     }
 
     @Test
@@ -72,11 +72,10 @@ class TokenizerTest: BaseTest() {
 
     @Test
     fun hasInvalidLiteralDoubleChar() {
-        val input = "'ab'"
+        val input = "'abc'"
         val tokens = getTokenizer().getTokens(input)
-        assertEquals(2, tokens.size)
-        assertEqualsToken(Token(InvalidSyntax, 0, 3, "'ab"), tokens[0])
-        assertEquals(InvalidSyntax, tokens[1].type)
+        assertEquals(3, tokens.size)
+        assertEqualsToken(Token(InvalidSyntax, 0, 2, "'a"), tokens[0])
     }
 
     @ParameterizedTest

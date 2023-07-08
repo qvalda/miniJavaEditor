@@ -37,7 +37,7 @@ expression ::= expression ('&&' | '<' | '+' | '-' | '*') expression
              | expression '[' expression ']'
              | expression '.' 'length'
              | expression '.' identifier '(' expression-list? ')'
-             | (integer-literal | 'true' | 'false' | identifier | 'this')
+             | (integer-literal | 'true' | 'false' | identifier | 'this' | string-literal | char-literal)
              | 'new' 'int' '[' expression ']'
              | 'new' identifier '(' ')'
              | '!' expression
@@ -170,7 +170,7 @@ class RecursiveParser(private val ts: ITokenSource)  {
         val vars = mutableListOf<VarDeclarationNode>()
         val statements = mutableListOf<StatementNode>()
         while (true) {
-            if (ts.currentToken.type == TokenType.KeyWordInt || ts.currentToken.type == TokenType.KeyWordBoolean) {
+            if (ts.currentToken.type in arrayOf(TokenType.KeyWordInt, TokenType.KeyWordBoolean, TokenType.KeyWordString, TokenType.KeyWordChar)) {
                 vars.add(parseVarDeclaration())
             } else if (ts.currentToken.type == TokenType.NameIdentifier) {
                 val nameToken = expected(TokenType.NameIdentifier)
@@ -200,6 +200,16 @@ class RecursiveParser(private val ts: ITokenSource)  {
             TokenType.KeyWordBoolean -> {
                 expected(TokenType.KeyWordBoolean)
                 return BooleanTypeNode()
+            }
+            // String
+            TokenType.KeyWordString -> {
+                expected(TokenType.KeyWordString)
+                return StringTypeNode()
+            }
+            // char
+            TokenType.KeyWordChar -> {
+                 expected(TokenType.KeyWordChar)
+                return CharTypeNode()
             }
             //('int' | 'int' '[' ']')
             TokenType.KeyWordInt -> {
@@ -333,10 +343,10 @@ class RecursiveParser(private val ts: ITokenSource)  {
                     else -> throwUnexpectedException("Expression statement")
                 }
             }
-            //(integer-literal | 'true' | 'false' | identifier | 'this')
+            //(integer-literal | 'true' | 'false' | identifier | 'this' | string-literal | char-literal)
             TokenType.LiteralNumber -> {
                 val nameToken = expected(TokenType.LiteralNumber)
-                return LiteralExpressionNode(nameToken.value)
+                return LiteralNumberExpressionNode(nameToken.value)
             }
 
             TokenType.LiteralTrue -> {
@@ -357,6 +367,16 @@ class RecursiveParser(private val ts: ITokenSource)  {
             TokenType.KeyWordThis -> {
                 expected(TokenType.KeyWordThis)
                 return ThisExpressionNode()
+            }
+
+            TokenType.LiteralString -> {
+                val nameToken = expected(TokenType.LiteralString)
+                return LiteralStringExpressionNode(nameToken.value)
+            }
+
+            TokenType.LiteralChar -> {
+                val nameToken = expected(TokenType.LiteralChar)
+                return LiteralCharExpressionNode(nameToken.value)
             }
 
             else -> throwUnexpectedException("Expression statement")

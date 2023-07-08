@@ -30,7 +30,7 @@ class RecursiveParserTest: BaseTest() {
         val ts = createTokenSource(LiteralNumber, OperatorPlus, NameIdentifier)
         val parserResult = RecursiveParser(ts).parseExpression()
         val exp = parserResult as BinaryExpressionNode
-        assertIs<LiteralExpressionNode>(exp.a)
+        assertIs<LiteralNumberExpressionNode>(exp.a)
         assertIs<NameIdentifierExpressionNode>(exp.b)
         assertEquals(exp.tokenType, OperatorPlus)
     }
@@ -41,7 +41,7 @@ class RecursiveParserTest: BaseTest() {
         val parserResult = RecursiveParser(ts).parseExpression()
         val exp = parserResult as MethodCallExpressionNode
         val obj = exp.obj as NameIdentifierExpressionNode
-        val arg = exp.args[0] as LiteralExpressionNode
+        val arg = exp.args[0] as LiteralNumberExpressionNode
 
         assertEquals(obj.name, "0")
         assertEquals(exp.method, "2")
@@ -55,10 +55,10 @@ class RecursiveParserTest: BaseTest() {
         val parserResult = RecursiveParser(ts).parseExpression()
         val exp = parserResult as BracketExpressionNode
         val bin = exp.obj as BinaryExpressionNode
-        val left = bin.a as LiteralExpressionNode
+        val left = bin.a as LiteralNumberExpressionNode
         val right = (bin.b as BracketExpressionNode).obj as BinaryExpressionNode
-        val innerLeft = right.a as LiteralExpressionNode
-        val innerRight = right.b as LiteralExpressionNode
+        val innerLeft = right.a as LiteralNumberExpressionNode
+        val innerRight = right.b as LiteralNumberExpressionNode
 
         assertEquals(bin.tokenType, OperatorPlus)
         assertEquals(left.value, "1")
@@ -72,7 +72,7 @@ class RecursiveParserTest: BaseTest() {
         val ts = createTokenSource(NameIdentifier, OperatorAssign, LiteralNumber, SymbolSemicolon)
         val parserResult = RecursiveParser(ts).parseStatement()
         val st = parserResult as AssignStatementNode
-        val value = st.value as LiteralExpressionNode
+        val value = st.value as LiteralNumberExpressionNode
 
         assertEquals(st.name, "0")
         assertEquals(value.value, "2")
