@@ -16,24 +16,31 @@ import javax.swing.JToolBar
 class MainFrame : JFrame("Mini java editor") {
 
     init {
-        val text = """class Factorial{
+        val text = """class Main{
     public static void main(String[] a){
-	System.out.println(new Fac().ComputeFac(10));
+        System.out.println(new Test().Method1(10));
     }
 }
 
-class Fac {
-
-    public int ComputeFac(int num){
-	int num_aux ;
-	if (num < 1)
-	    num_aux = 1 ;
-	else 
-	    num_aux = num * (this.ComputeFac(num-1)) ;
-	return num_aux ;
+class Test {
+    
+    // comment line
+    public int Method1(int num){
+        int i;
+        char c;
+        double f;
+        String s;		
+        i = 1;
+        if (num < 1)
+            f = 1.2f;
+        else {            
+            c = 'q';
+            s = "aab\r\n\"cdef";
+        }
+        return 0;
     }
-
 }
+
 """
 
         val mainModel = MainModel(FileBrowserCodeSource(this), text)
