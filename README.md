@@ -1,11 +1,16 @@
 # miniJavaEditor
-Ограничения:
+### Ограничения:
   1. Поддерживается синтаксис miniJava https://www.cambridge.org/us/features/052182060X/
 
      Для наглядности в нее добавлены типы double, char, string
   3. Поддерживаются только однострочные токены
 
-Фичи:
+
+### Примеры программ: 
+https://github.com/qvalda/miniJavaEditor/tree/master/src/test/resources
+
+
+### Фичи:
   1. Открытие/сохранение файлов
   2. Ввод текста Delete, Backspace, Cut, Copy, Paste
   3. Сохранение истории изменений Undo, Redo
