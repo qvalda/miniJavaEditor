@@ -27,6 +27,7 @@ class Style(val color: Color? = null, val background: Color? = null, val underli
         val KeyWord = Style(color = PinkColor)
         val Error = Style(underline = RedColor)
         val Number = Style(color = PurpleColor)
+        val Boolean = Style(color = PurpleColor)
         val String = Style(color = YellowColor)
         val Char = Style(color = GreenColor)
         val Bracket = Style(background = OrangeColor)

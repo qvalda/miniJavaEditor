@@ -36,6 +36,8 @@ class TokenizerViewItemsContainer(private val textEditorModel: ITextEditorModel,
                 addColoredString(token, Style.String)
             } else if (token.type == TokenType.LiteralChar) {
                 addColoredString(token, Style.Char)
+            } else if (token.type == TokenType.LiteralTrue || token.type == TokenType.LiteralFalse) {
+                addColoredString(token, Style.Boolean)
             }
         }
         return items
