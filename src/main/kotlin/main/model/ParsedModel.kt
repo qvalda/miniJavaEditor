@@ -11,7 +11,6 @@ class ParsedModel(private val parser: IParser) : IParsedModel {
     override val parserResultChanged = Event<Unit>()
 
     fun rebuild(tokenSource: ITokenSource) {
-        println("rebuild")
         parserResult = parser.parse(tokenSource)
         parserResultChanged(Unit)
     }
