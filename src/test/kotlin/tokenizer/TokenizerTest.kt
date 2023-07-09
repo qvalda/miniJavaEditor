@@ -134,11 +134,31 @@ class TokenizerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["//", "//abc", "//abc;", "//abc //def"])
+    @ValueSource(strings = ["//", "//abc", "//abc;", "//abc //def", "//abc /*de*/f"])
     fun canTokenizeComment(input: String) {
         val tokens = getTokenizer().getTokens(input)
         assertEquals(1, tokens.size)
         assertEqualsToken(Token(Comment, 0, input.length, input), tokens[0])
+    }
+
+    @Test
+    fun canTokenizeMultilineComment() {
+        val input = "abc/*def*/af"
+        val tokens = getTokenizer().getTokens(input)
+        assertEquals(3, tokens.size)
+        assertEquals(NameIdentifier, tokens[0].type)
+        assertEqualsToken(Token(Comment, 3, 10, "/*def*/"), tokens[1])
+        assertEquals(NameIdentifier, tokens[2].type)
+    }
+
+    @Test
+    fun canTokenizeMultilineCommentWithAsterisk() {
+        val input = "abc/*def**/af"
+        val tokens = getTokenizer().getTokens(input)
+        assertEquals(3, tokens.size)
+        assertEquals(NameIdentifier, tokens[0].type)
+        assertEqualsToken(Token(Comment, 3, 11, "/*def**/"), tokens[1])
+        assertEquals(NameIdentifier, tokens[2].type)
     }
 
     @Test

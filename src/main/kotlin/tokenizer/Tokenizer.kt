@@ -219,13 +219,39 @@ class Tokenizer : ITokenizer {
     }
 
     private fun tryReadCommentToken(reader: CharArraySafeReader): Token? {
-        if (reader.currentChar != '/' || reader.nextChar != '/') return null
+        if (!(reader.currentChar == '/' && (reader.nextChar == '/' || reader.nextChar == '*'))) return null
 
         val begin = reader.pointer
+        var state = CommentStringParserState.Start
         while (reader.moveNext()) {
-            when (reader.currentChar) {
-                '\r', '\n' -> break
-                else -> continue
+            when(state){
+                CommentStringParserState.Start -> {
+                    state = when (reader.currentChar) {
+                        '/' -> CommentStringParserState.SingleLineAny
+                        '*' -> CommentStringParserState.MultiLineAny
+                        else -> break
+                    }
+                }
+                CommentStringParserState.SingleLineAny -> {
+                    state = when (reader.currentChar) {
+                        '\r', '\n' -> CommentStringParserState.End
+                        else -> CommentStringParserState.SingleLineAny
+                    }
+                }
+                CommentStringParserState.MultiLineAny -> {
+                    state = when (reader.currentChar) {
+                        '*' -> CommentStringParserState.MultiLineEnding
+                        else -> CommentStringParserState.MultiLineAny
+                    }
+                }
+                CommentStringParserState.MultiLineEnding -> {
+                    state = when (reader.currentChar) {
+                        '/' -> CommentStringParserState.End
+                        '*' -> CommentStringParserState.MultiLineEnding
+                        else -> CommentStringParserState.MultiLineAny
+                    }
+                }
+                CommentStringParserState.End -> break
             }
         }
 
@@ -286,6 +312,14 @@ class Tokenizer : ITokenizer {
     private enum class LiteralStringParserState {
         Any,
         Escaped,
+        End
+    }
+
+    private enum class CommentStringParserState {
+        Start,
+        SingleLineAny,
+        MultiLineAny,
+        MultiLineEnding,
         End
     }
 }
