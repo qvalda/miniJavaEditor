@@ -1,13 +1,15 @@
 package tokenizer
 
-import base.BaseTest
+import base.TestUtils.assertCollectionEquals
+import base.TestUtils.assertEqualsToken
+import base.TestUtils.getFileContent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import tokenizer.TokenType.*
 
-class TokenizerTest : BaseTest() {
+class TokenizerTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["binarysearch.javam", "binarytree.javam", "bubblesort.javam", "factorial.javam", "linearsearch.javam", "linkedlist.javam", "quicksort.javam", "treevisitor.javam"])

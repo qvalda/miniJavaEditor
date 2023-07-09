@@ -1,6 +1,6 @@
 package editor.view
 
-import base.BaseTest.Companion.assertIs
+import base.TestUtils.assertIs
 import editor.view.item.Caret
 import editor.view.item.Selection
 import editor.view.item.StringRow
@@ -12,14 +12,14 @@ import org.junit.jupiter.api.Test
 class TextViewItemsContainerTest {
 
     @Test
-    fun sizeTest() {
+    fun testSize() {
         val ic = createTextViewItemsContainer("ab\r\ndef")
         assertEquals(2, ic.size.height)
         assertEquals(3, ic.size.width)
     }
 
     @Test
-    fun getItemsReturnText() {
+    fun testGetItemsReturnText() {
         val ic = createTextViewItemsContainer("ab\r\ndef\r\ng")
         val items = ic.getItems(1)
         assertEquals(1, items.size)
@@ -27,7 +27,7 @@ class TextViewItemsContainerTest {
     }
 
     @Test
-    fun getItemsWithCaret() {
+    fun testGetItemsWithCaret() {
         val ic = createTextViewItemsContainer("ab\r\nd|ef\r\ng")
         val items = ic.getItems(1)
         assertEquals(2, items.size)
@@ -36,7 +36,7 @@ class TextViewItemsContainerTest {
     }
 
     @Test
-    fun getItemsWithSelection() {
+    fun testGetItemsWithSelection() {
         val ic = createTextViewItemsContainer("ab\r\nd[e]f\r\ng")
         val items = ic.getItems(1)
         assertEquals(4, items.size)
@@ -47,7 +47,7 @@ class TextViewItemsContainerTest {
     }
 
     @Test
-    fun getItemsWithMultilineSelection() {
+    fun testGetItemsWithMultilineSelection() {
         val ic = createTextViewItemsContainer("ab\r\nc[d\r\nef\r\ng]h")
         val itemsOnLine1 = ic.getItems(1)
         assertEquals(3, itemsOnLine1.size)
@@ -66,7 +66,7 @@ class TextViewItemsContainerTest {
     }
 
     @Test
-    fun firesOnItemsUpdated() {
+    fun testOnItemsUpdated() {
         val model = TextEditorModelMock("ab\r\nd[ef\r\ng]h")
         val ic = TextViewItemsContainer(model)
         var called = false

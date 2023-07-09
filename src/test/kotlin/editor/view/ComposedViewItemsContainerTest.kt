@@ -1,6 +1,6 @@
 package editor.view
 
-import base.BaseTest.Companion.assertCollectionEquals
+import base.TestUtils.assertCollectionEquals
 import mocks.ViewItemMock
 import mocks.ViewItemsContainerMock
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -11,7 +11,7 @@ import java.awt.Dimension
 class ComposedViewItemsContainerTest {
 
     @Test
-    fun getOnItemsUpdated() {
+    fun testOnItemsUpdated() {
         val inner1 = ViewItemsContainerMock()
         val inner2 = ViewItemsContainerMock()
         val composed = ComposedViewItemsContainer(inner1, inner2)
@@ -22,7 +22,7 @@ class ComposedViewItemsContainerTest {
     }
 
     @Test
-    fun getSize() {
+    fun testSize() {
         val inner1 = ViewItemsContainerMock()
         inner1.size = Dimension(3, 4)
         val inner2 = ViewItemsContainerMock()
@@ -33,7 +33,7 @@ class ComposedViewItemsContainerTest {
     }
 
     @Test
-    fun getItems() {
+    fun testGetItems() {
         val items1 = mapOf(0 to listOf(ViewItemMock(1), ViewItemMock(2)))
         val inner1 = ViewItemsContainerMock(items1)
         val items2 = mapOf(0 to listOf(ViewItemMock(3)), 1 to listOf(ViewItemMock(4)))

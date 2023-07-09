@@ -1,6 +1,6 @@
 package editor.model
 
-import base.BaseTest
+import base.TestUtils
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -21,6 +21,6 @@ class TextEditorModelReaderTest : TextEditorModelBaseTest() {
     @Test
     fun testGetLines() {
         val model = creteTextEditorModelWithCaret("ab|c\r\nde")
-        BaseTest.assertCollectionEquals(listOf("abc", "de"), model.getLines())
+        TestUtils.assertCollectionEquals(listOf("abc", "de"), model.getLines())
     }
 }

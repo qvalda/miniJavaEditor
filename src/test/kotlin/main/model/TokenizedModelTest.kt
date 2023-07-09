@@ -1,6 +1,6 @@
 package main.model
 
-import base.BaseTest.Companion.assertCollectionEquals
+import base.TestUtils.assertCollectionEquals
 import mocks.TextEditorModelMock
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -18,7 +18,7 @@ class TokenizedModelTest {
     private val token4 = Token(TokenType.NameIdentifier, 0, 0)
 
     @Test
-    fun tokenizeOnInit() {
+    fun testTokenizeOnInit() {
         val textModel = TextEditorModelMock("a")
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)
@@ -29,7 +29,7 @@ class TokenizedModelTest {
     }
 
     @Test
-    fun trackLineAdd() {
+    fun testTrackLineAdd() {
         val textModel = TextEditorModelMock("a")
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)
@@ -45,7 +45,7 @@ class TokenizedModelTest {
     }
 
     @Test
-    fun trackLineModified() {
+    fun testTrackLineModified() {
         val textModel = TextEditorModelMock("a\r\nb")
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)
@@ -65,7 +65,7 @@ class TokenizedModelTest {
     }
 
     @Test
-    fun trackLineDeleted() {
+    fun testTrackLineDeleted() {
         val textModel = TextEditorModelMock("a\r\nb")
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)
@@ -81,7 +81,7 @@ class TokenizedModelTest {
     }
 
     @Test
-    fun iterateTokens() {
+    fun testIterateTokens() {
         val textModel = TextEditorModelMock("a\r\nb\r\nc\r\nd")
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)
@@ -92,7 +92,7 @@ class TokenizedModelTest {
     }
 
     @Test
-    fun iterateTokensBackward() {
+    fun testIterateTokensBackward() {
         val textModel = TextEditorModelMock("a\r\nb\r\nc\r\nd")
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)
@@ -103,7 +103,7 @@ class TokenizedModelTest {
     }
 
     @Test
-    fun asTokenSource() {
+    fun testAsTokenSource() {
         val textModel = TextEditorModelMock("a\r\nb\r\nc\r\nd")
         val tokenizer = createTokenizer()
         val tm = TokenizedModel(textModel, tokenizer)

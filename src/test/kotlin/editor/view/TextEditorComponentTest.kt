@@ -1,7 +1,7 @@
 package editor.view
 
-import base.BaseTest.Companion.getPrivateProperty
-import base.BaseTest.Companion.setAndReturnPrivateProperty
+import base.TestUtils.getPrivateProperty
+import base.TestUtils.setAndReturnPrivateProperty
 import editor.model.ITextEditorController
 import editor.view.item.IViewItem
 import helpers.ThrottleCall

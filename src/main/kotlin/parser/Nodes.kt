@@ -61,6 +61,7 @@ class BooleanTypeNode : TypeNode()
 class IntTypeNode : TypeNode()
 class StringTypeNode : TypeNode()
 class CharTypeNode : TypeNode()
+class DoubleTypeNode : TypeNode()
 class IntArrayTypeNode : TypeNode()
 class NameIdentifierTypeNode(val name: String?) : TypeNode()
 

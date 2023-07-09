@@ -12,7 +12,7 @@ import parser.*
 class UniqueClassCheckerViewItemsContainerTest {
 
     @Test
-    fun findDuplicates() {
+    fun testGetItems() {
         val program = ProgramNode(
             MainClassNode("mainclass", emptyList(), emptyList(), mock(NodeLocation::class.java)),
             listOf(

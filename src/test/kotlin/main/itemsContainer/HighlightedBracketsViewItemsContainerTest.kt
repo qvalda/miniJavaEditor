@@ -49,7 +49,7 @@ class HighlightedBracketsViewItemsContainerTest {
     }
 
     @Test
-    fun findBracketOnOtherLine() {
+    fun testGetItemsOnOtherLines() {
         val container = HighlightedBracketsViewItemsContainer(textModel, tokenizedModel)
 
         textModelOnCaretMove(TextEditorCaret(0, 0))
@@ -68,7 +68,7 @@ class HighlightedBracketsViewItemsContainerTest {
     }
 
     @Test
-    fun findBracketWithSkipAndReverse() {
+    fun testGetItemsReverseWithSkip() {
         val container = HighlightedBracketsViewItemsContainer(textModel, tokenizedModel)
 
         textModelOnCaretMove(TextEditorCaret(0, 5))

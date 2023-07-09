@@ -34,7 +34,7 @@ class ParserViewItemsContainerTest {
     }
 
     @Test
-    fun findErrors() {
+    fun testGetItems() {
         `when`(parsedModel.parserResult).thenReturn(resultWithErrors)
         val model = ParserViewItemsContainer(tokenizedModel, parsedModel)
 
@@ -42,7 +42,7 @@ class ParserViewItemsContainerTest {
     }
 
     @Test
-    fun clearErrorsOnTokenizerModified() {
+    fun testClearErrorsOnTokenizerModified() {
         `when`(parsedModel.parserResult).thenReturn(resultWithErrors)
         val model = ParserViewItemsContainer(tokenizedModel, parsedModel)
 
@@ -52,7 +52,7 @@ class ParserViewItemsContainerTest {
     }
 
     @Test
-    fun trackParserResultChanged() {
+    fun testTrackParserResultChanged() {
         `when`(parsedModel.parserResult).thenReturn(resultWithNoErrors)
         val model = ParserViewItemsContainer(tokenizedModel, parsedModel)
 

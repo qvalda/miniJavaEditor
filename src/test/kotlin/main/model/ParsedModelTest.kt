@@ -19,7 +19,7 @@ class ParsedModelTest {
     }
 
     @Test
-    fun getParserResult() {
+    fun testGetParserResult() {
         val model = ParsedModel(parser)
         model.rebuild(tokenSource)
 
@@ -27,7 +27,7 @@ class ParsedModelTest {
     }
 
     @Test
-    fun callsParserResultChanged() {
+    fun testCallsParserResultChanged() {
         val model = ParsedModel(parser)
         var calls = 0
         model.parserResultChanged += { calls++ }

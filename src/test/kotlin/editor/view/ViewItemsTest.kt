@@ -14,7 +14,7 @@ class ViewItemsTest {
     private val graphics = mock(Graphics::class.java)
 
     @Test
-    fun drawTest() {
+    fun testStringRowDraw() {
         val view = StringRow("abc")
         val line = 3
         view.draw(graphics, line, measures)
@@ -22,7 +22,7 @@ class ViewItemsTest {
     }
 
     @Test
-    fun drawCaret() {
+    fun testCaretDraw() {
         val view = Caret(TextEditorCaret(3, 2))
         val line = 3
         view.draw(graphics, line, measures)
@@ -30,7 +30,7 @@ class ViewItemsTest {
     }
 
     @Test
-    fun drawSelection() {
+    fun testSelectionDraw() {
         val view = Selection(2, 4)
         val line = 3
         view.draw(graphics, line, measures)
@@ -38,16 +38,7 @@ class ViewItemsTest {
     }
 
     @Test
-    fun drawErrorViewItem() {
-        val message = "message"
-        val view = ErrorViewItem(message, 2, 4)
-        val line = 3
-        view.draw(graphics, line, measures)
-        verify(graphics).drawLine(2 * measures.letterWidth, (line + 1) * measures.letterHeight, 4 * measures.letterWidth, (line + 1) * measures.letterHeight)
-    }
-
-    @Test
-    fun drawColoredString() {
+    fun testColoredStringDraw() {
         val view = ColoredString("abc", 1, Style.Comment)
         `when`(graphics.font).thenReturn(Font(null, Font.PLAIN, 10))
         val line = 3
@@ -56,7 +47,16 @@ class ViewItemsTest {
     }
 
     @Test
-    fun drawTooltipErrorViewItem() {
+    fun testErrorViewItemDraw() {
+        val message = "message"
+        val view = ErrorViewItem(message, 2, 4)
+        val line = 3
+        view.draw(graphics, line, measures)
+        verify(graphics).drawLine(2 * measures.letterWidth, (line + 1) * measures.letterHeight, 4 * measures.letterWidth, (line + 1) * measures.letterHeight)
+    }
+
+    @Test
+    fun testErrorViewItemDrawTooltip() {
         val message = "message"
         val view = ErrorViewItem(message, 2, 4)
         val line = 3
@@ -70,7 +70,7 @@ class ViewItemsTest {
     }
 
     @Test
-    fun skipDrawTooltipErrorViewItem() {
+    fun testErrorViewItemNoDrawTooltip() {
         val message = "message"
         val view = ErrorViewItem(message, 20, 40)
         val line = 3

@@ -34,7 +34,7 @@ class TokenizerViewItemsContainerTest {
     }
 
     @Test
-    fun getItems() {
+    fun testGetItems() {
         val model = TokenizerViewItemsContainer(textModel, tokenizedModel)
 
         assertEquals(2, model.getItems(0).size)

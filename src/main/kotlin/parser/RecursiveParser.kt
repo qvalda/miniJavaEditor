@@ -170,7 +170,7 @@ class RecursiveParser(private val ts: ITokenSource) {
         val vars = mutableListOf<VarDeclarationNode>()
         val statements = mutableListOf<StatementNode>()
         while (true) {
-            if (ts.currentToken.type in arrayOf(TokenType.KeyWordInt, TokenType.KeyWordBoolean, TokenType.KeyWordString, TokenType.KeyWordChar)) {
+            if (ts.currentToken.type in arrayOf(TokenType.KeyWordInt, TokenType.KeyWordBoolean, TokenType.KeyWordString, TokenType.KeyWordChar, TokenType.KeyWordDouble)) {
                 vars.add(parseVarDeclaration())
             } else if (ts.currentToken.type == TokenType.NameIdentifier) {
                 val nameToken = expected(TokenType.NameIdentifier)
@@ -210,6 +210,11 @@ class RecursiveParser(private val ts: ITokenSource) {
             TokenType.KeyWordChar -> {
                 expected(TokenType.KeyWordChar)
                 return CharTypeNode()
+            }
+            // double
+            TokenType.KeyWordDouble -> {
+                expected(TokenType.KeyWordDouble)
+                return DoubleTypeNode()
             }
             //('int' | 'int' '[' ']')
             TokenType.KeyWordInt -> {

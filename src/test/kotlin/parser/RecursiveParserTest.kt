@@ -1,6 +1,8 @@
 package parser
 
-import base.BaseTest
+import base.TestUtils.assertIs
+import base.TestUtils.createTokenSource
+import base.TestUtils.getFileContent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -10,11 +12,11 @@ import org.junit.jupiter.params.provider.ValueSource
 import tokenizer.TokenType.*
 import tokenizer.Tokenizer
 
-class RecursiveParserTest : BaseTest() {
+class RecursiveParserTest  {
 
     @ParameterizedTest
     @ValueSource(strings = ["binarysearch.javam", "binarytree.javam", "bubblesort.javam", "factorial.javam", "linearsearch.javam", "linkedlist.javam", "quicksort.javam", "treevisitor.javam"])
-    fun canParseTestSamplesWithoutErrors(file: String) {
+    fun testCanParseTestSamplesWithoutErrors(file: String) {
         val input = getFileContent(file)
         val tokens = Tokenizer().getTokens(input)
         val tokensSource = SignificantTokenSource(ArrayTokensSource(tokens))
@@ -26,7 +28,7 @@ class RecursiveParserTest : BaseTest() {
     }
 
     @Test
-    fun canParseBinaryExpression() {
+    fun testCanParseBinaryExpression() {
         val ts = createTokenSource(LiteralNumber, OperatorPlus, NameIdentifier)
         val parserResult = RecursiveParser(ts).parseExpression()
         val exp = parserResult as BinaryExpressionNode
@@ -36,7 +38,7 @@ class RecursiveParserTest : BaseTest() {
     }
 
     @Test
-    fun canParseMethodCallExpression() {
+    fun testCanParseMethodCallExpression() {
         val ts = createTokenSource(NameIdentifier, SymbolDot, NameIdentifier, BracketRoundOpen, LiteralNumber, BracketRoundClose)
         val parserResult = RecursiveParser(ts).parseExpression()
         val exp = parserResult as MethodCallExpressionNode
@@ -50,7 +52,7 @@ class RecursiveParserTest : BaseTest() {
     }
 
     @Test
-    fun canParseNestedExpression() {
+    fun testCanParseNestedExpression() {
         val ts = createTokenSource(BracketRoundOpen, LiteralNumber, OperatorPlus, BracketRoundOpen, LiteralNumber, OperatorMinus, LiteralNumber, BracketRoundClose, BracketRoundClose)
         val parserResult = RecursiveParser(ts).parseExpression()
         val exp = parserResult as BracketExpressionNode
@@ -68,7 +70,7 @@ class RecursiveParserTest : BaseTest() {
     }
 
     @Test
-    fun canParseAssignStatement() {
+    fun testCanParseAssignStatement() {
         val ts = createTokenSource(NameIdentifier, OperatorAssign, LiteralNumber, SymbolSemicolon)
         val parserResult = RecursiveParser(ts).parseStatement()
         val st = parserResult as AssignStatementNode
@@ -79,13 +81,7 @@ class RecursiveParserTest : BaseTest() {
     }
 
     @Test
-    fun throwParseAssignStatementWithoutSemicolon() {
-        val ts = createTokenSource(NameIdentifier, OperatorAssign, LiteralNumber)
-        assertThrows<ParseException> { RecursiveParser(ts).parseStatement() }
-    }
-
-    @Test
-    fun canParseIfStatement() {
+    fun testCanParseIfStatement() {
         val ts = createTokenSource(
             KeyWordIf, BracketRoundOpen, LiteralTrue, BracketRoundClose, NameIdentifier, OperatorAssign, LiteralNumber, SymbolSemicolon,
             KeyWordElse, NameIdentifier, OperatorAssign, LiteralNumber, SymbolSemicolon
@@ -99,7 +95,7 @@ class RecursiveParserTest : BaseTest() {
     }
 
     @Test
-    fun canParseNestedStatement() {
+    fun testCanParseNestedStatement() {
         val ts = createTokenSource(
             BracketCurlyOpen, BracketCurlyOpen, NameIdentifier, OperatorAssign, LiteralNumber, SymbolSemicolon, NameIdentifier, OperatorAssign, LiteralNumber, SymbolSemicolon,
             BracketCurlyClose, NameIdentifier, OperatorAssign, LiteralNumber, SymbolSemicolon, BracketCurlyClose
@@ -114,7 +110,7 @@ class RecursiveParserTest : BaseTest() {
     }
 
     @Test
-    fun canParseFormalList() {
+    fun testCanParseFormalList() {
         val ts = createTokenSource(KeyWordInt, NameIdentifier, SymbolComma, NameIdentifier, NameIdentifier)
         val parserResult = RecursiveParser(ts).parseFormalListOptional()
 
@@ -126,21 +122,27 @@ class RecursiveParserTest : BaseTest() {
     }
 
     @Test
-    fun canParseEmptyClass() {
+    fun testCanParseEmptyClass() {
         val ts = createTokenSource(KeyWordClass, NameIdentifier, BracketCurlyOpen, BracketCurlyClose)
         val parserResult = RecursiveParser(ts).parseClassDeclaration()
         assertEquals("1", parserResult.name)
     }
 
     @Test
-    fun canParseEmptyMethod() {
+    fun testCanParseEmptyMethod() {
         val ts = createTokenSource(KeyWordPublic, KeyWordInt, NameIdentifier, BracketRoundOpen, BracketRoundClose, BracketCurlyOpen, KeyWordReturn, LiteralNumber, SymbolSemicolon, BracketCurlyClose)
         val parserResult = RecursiveParser(ts).parseMethodDeclaration()
         assertEquals("2", parserResult.name)
     }
 
     @Test
-    fun provideParseErrors() {
+    fun testThrowParseAssignStatementWithoutSemicolon() {
+        val ts = createTokenSource(NameIdentifier, OperatorAssign, LiteralNumber)
+        assertThrows<ParseException> { RecursiveParser(ts).parseStatement() }
+    }
+
+    @Test
+    fun testProvideParseErrors() {
         val ts = createTokenSource(KeyWordClass, NameIdentifier, BracketRoundOpen)
         val parserResult = RecursiveParser(ts).parse()
         assertNull(parserResult.program)

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class TextEditorCommandHistoryTest {
 
     @Test
-    fun executeOnAdd() {
+    fun testExecuteOnAdd() {
         val history = TextEditorCommandHistory()
         val c = TestCommand()
         history.run(c)
@@ -15,7 +15,7 @@ class TextEditorCommandHistoryTest {
     }
 
     @Test
-    fun canUndo() {
+    fun testUndo() {
         val history = TextEditorCommandHistory()
         val c = TestCommand()
         history.run(c)
@@ -24,7 +24,7 @@ class TextEditorCommandHistoryTest {
     }
 
     @Test
-    fun undoRedoDoNotThrow() {
+    fun testUndoRedoDoNotThrow() {
         val history = TextEditorCommandHistory()
         val c = TestCommand()
         history.run(c)
@@ -36,7 +36,7 @@ class TextEditorCommandHistoryTest {
     }
 
     @Test
-    fun trackSeveralCommands() {
+    fun testCanTrackSeveralCommands() {
         val history = TextEditorCommandHistory()
         val c1 = TestCommand()
         val c2 = TestCommand()

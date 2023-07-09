@@ -1,15 +1,15 @@
 package parser
 
-import base.BaseTest
+import base.TestUtils.createTokenSource
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import tokenizer.TokenType
 
-class SignificantTokenSourceTest : BaseTest() {
+class SignificantTokenSourceTest {
 
     @Test
-    fun skipsComments() {
+    fun testSkipsComments() {
         val ts = createTokenSource(TokenType.KeyWordInt, TokenType.Comment, TokenType.NameIdentifier)
         val sts = SignificantTokenSource(ts)
         assertEquals(TokenType.KeyWordInt, sts.currentToken.type)
