@@ -15,21 +15,25 @@ https://github.com/qvalda/miniJavaEditor/tree/master/src/test/resources
   1. Сохранение истории изменений Undo, Redo
   2. Подсветка синтаксиса
      
-     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/1951842d-2a1f-415e-afb6-74b2a0eb45c8)
+     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/3c3fa6e6-2ec7-463c-86cc-8bdd0b0bb1b8)
   3. Подствека парных скобок
 
-     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/303f7555-5b37-4091-a106-3f4f6c014b77)
-     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/c232359f-81ba-4f74-9dd6-a2e491150385)
+     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/d7e954d1-f602-4843-98cc-c6f21f489f18)
+     
+     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/43df5df9-9ad8-4e50-b144-a427f807b42e)
   4. Подсветка некорректных токенов
 
-     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/bbe1901d-3c7d-451a-98d1-b2be855c8681)
+     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/2057bef0-1dd8-428e-a234-a8e93fb54316)
   5. Подсветка синтаксических ошибок
 
-     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/bdb2604c-ea2a-46ce-a2d6-0e24cd3e0a38)
-     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/27b5f175-a770-4073-b975-bdf5e2b700e0)
+     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/5b683d0e-8808-4ced-b6c3-b30af2e2679b)
+     
+     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/44f39914-0658-443d-a3be-17c725673200)
+
   6. Подсветка одинаковых названий деклараций
-      
-      ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/61f034b1-7f5a-41dc-b638-abcff807c526)
+
+      ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/845d4a85-520b-452d-aa56-aa684cf4d43c)
+
 
 
 
