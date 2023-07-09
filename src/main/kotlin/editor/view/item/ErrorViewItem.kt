@@ -2,13 +2,14 @@ package editor.view.item
 
 import editor.view.DrawMeasures
 import editor.view.Style
-import helpers.DrawStateSaver
+import helpers.DrawStateSaver.usingColor
+import helpers.DrawStateSaver.usingStroke
 import java.awt.Graphics
 
 class ErrorViewItem(private val message: String, private val start: Int, private val end: Int) : IViewItem {
     override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
-        DrawStateSaver.usingColor(g, Style.Error.underline!!) {
-            DrawStateSaver.usingStroke(g, 2) {
+        usingColor(g, Style.Error.underline!!) {
+            usingStroke(g, 2) {
                 g.drawLine(
                     start * measures.letterWidth,
                     (lineIndex + 1) * measures.letterHeight,
@@ -26,10 +27,10 @@ class ErrorViewItem(private val message: String, private val start: Int, private
         val x = (columnIndex + 2) * measures.letterWidth
         val y = (lineIndex + 1) * measures.letterHeight
 
-        DrawStateSaver.usingColor(g, Style.ErrorTooltip.background!!) {
+        usingColor(g, Style.ErrorTooltip.background!!) {
             g.fillRect(x, y, message.length * measures.letterWidth, measures.letterHeight)
         }
-        DrawStateSaver.usingColor(g, Style.ErrorTooltip.color!!) {
+        usingColor(g, Style.ErrorTooltip.color!!) {
             g.drawString(message, x, y + measures.letterHeight - measures.letterShift)
         }
     }

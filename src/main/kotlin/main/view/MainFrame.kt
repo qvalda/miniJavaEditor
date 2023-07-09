@@ -44,42 +44,9 @@ class Test {
 """
 
         val mainModel = MainModel(FileBrowserCodeSource(this), text)
-
-        val toolbar = JToolBar()
-        toolbar.isFloatable = false
-
-        val newButton = JButton("new")
-        newButton.addActionListener { mainModel.newFile() }
-        val openButton = JButton("open")
-        openButton.addActionListener { mainModel.openFile() }
-        val saveButton = JButton("save")
-        saveButton.addActionListener { mainModel.saveFile() }
-
-        val cutButton = JButton("cut")
-        cutButton.addActionListener { mainModel.cutAction() }
-        val copyButton = JButton("copy")
-        copyButton.addActionListener { mainModel.copyAction() }
-        val pasteButton = JButton("paste")
-        pasteButton.addActionListener { mainModel.pasteAction() }
-
-        val undoButton = JButton("undo")
-        undoButton.addActionListener { mainModel.undoAction() }
-        val redoButton = JButton("redo")
-        redoButton.addActionListener { mainModel.redoAction() }
-
-        toolbar.add(newButton)
-        toolbar.add(openButton)
-        toolbar.add(saveButton)
-        toolbar.addSeparator()
-        toolbar.add(cutButton)
-        toolbar.add(copyButton)
-        toolbar.add(pasteButton)
-        toolbar.addSeparator()
-        toolbar.add(undoButton)
-        toolbar.add(redoButton)
-
         val editor = TextEditorComponent(mainModel.textModel, mainModel.visualItemsContainer)
         val scrollPane = JScrollPane(editor)
+        val toolbar = createToolbar(mainModel, editor)
 
         contentPane.add(toolbar, BorderLayout.NORTH)
         contentPane.add(scrollPane, BorderLayout.CENTER)
@@ -94,6 +61,47 @@ class Test {
             editor.controller = mainModel.textModel
             editor.itemsContainer = mainModel.visualItemsContainer
         }
+    }
+
+    private fun createToolbar(mainModel: MainModel, editor: TextEditorComponent): JToolBar {
+        val toolbar = JToolBar()
+        toolbar.isFloatable = false
+
+        val newButton = JButton("new")
+        newButton.addActionListener { mainModel.newFile(); editor.requestFocus() }
+        val openButton = JButton("open")
+        openButton.addActionListener { mainModel.openFile(); editor.requestFocus() }
+        val saveButton = JButton("save")
+        saveButton.addActionListener { mainModel.saveFile(); editor.requestFocus() }
+
+        val cutButton = JButton("cut")
+        cutButton.toolTipText = "Ctrl + X"
+        cutButton.addActionListener { mainModel.cutAction(); editor.requestFocus() }
+        val copyButton = JButton("copy")
+        copyButton.toolTipText = "Ctrl + C"
+        copyButton.addActionListener { mainModel.copyAction(); editor.requestFocus() }
+        val pasteButton = JButton("paste")
+        pasteButton.toolTipText = "Ctrl + V"
+        pasteButton.addActionListener { mainModel.pasteAction(); editor.requestFocus() }
+
+        val undoButton = JButton("undo")
+        undoButton.toolTipText = "Ctrl + Z"
+        undoButton.addActionListener { mainModel.undoAction(); editor.requestFocus() }
+        val redoButton = JButton("redo")
+        redoButton.toolTipText = "Ctrl + Y"
+        redoButton.addActionListener { mainModel.redoAction(); editor.requestFocus() }
+
+        toolbar.add(newButton)
+        toolbar.add(openButton)
+        toolbar.add(saveButton)
+        toolbar.addSeparator()
+        toolbar.add(cutButton)
+        toolbar.add(copyButton)
+        toolbar.add(pasteButton)
+        toolbar.addSeparator()
+        toolbar.add(undoButton)
+        toolbar.add(redoButton)
+        return toolbar
     }
 
     companion object {

@@ -6,7 +6,7 @@ import editor.view.DrawMeasures
 import editor.view.IViewItemsContainer
 import editor.view.Style
 import editor.view.item.IViewItem
-import helpers.DrawStateSaver
+import helpers.DrawStateSaver.usingColor
 import helpers.Event
 import main.model.ITokenizedModel
 import tokenizer.Token
@@ -96,7 +96,7 @@ class HighlightedBracketsViewItemsContainer(private val textEditorModel: ITextEd
     private class ColoredBracket(private val text: String, private val column: Int) : IViewItem {
         override fun draw(g: Graphics, lineIndex: Int, measures: DrawMeasures) {
             val lineY = measures.letterHeight + lineIndex * measures.letterHeight - measures.letterShift
-            DrawStateSaver.usingColor(g, Style.Bracket.background!!) {
+            usingColor(g, Style.Bracket.background!!) {
                 g.fillRect(
                     column * measures.letterWidth,
                     lineIndex * measures.letterHeight,
