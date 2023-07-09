@@ -25,8 +25,8 @@
      ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/bdb2604c-ea2a-46ce-a2d6-0e24cd3e0a38)
      ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/27b5f175-a770-4073-b975-bdf5e2b700e0)
   10. Подствека одинаковых названий деклараций
-
-     ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/61f034b1-7f5a-41dc-b638-abcff807c526)
+      
+      ![image](https://github.com/qvalda/miniJavaEditor/assets/2804560/61f034b1-7f5a-41dc-b638-abcff807c526)
 
 
 
